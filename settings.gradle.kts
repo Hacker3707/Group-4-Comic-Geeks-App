@@ -22,6 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SquidityTempPrj"
+rootProject.name = "Comic_Geeks_App"
 include(":app")
- 

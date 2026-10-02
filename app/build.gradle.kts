@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    namespace = "vn.edu.ueh.ngocha.squiditytempprj"
+    namespace = "vn.edu.ueh.anhmai.comic_geeks_app"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "vn.edu.ueh.ngocha.squiditytempprj"
+        applicationId = "vn.edu.ueh.anhmai.comic_geeks_app"
         minSdk = 30
         targetSdk = 37
         versionCode = 1
