@@ -1,21 +1,16 @@
 package vn.edu.ueh.ngocha.squiditytempprj.classes;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Group {
     private String groupId;
     private String groupName;
     private String description;
     private String coverImageUrl;
-    private List<Post> posts;
 
     public Group(String groupId, String groupName, String description, String coverImageUrl) {
         this.groupId = groupId;
         this.groupName = groupName;
         this.description = description;
         this.coverImageUrl = coverImageUrl;
-        this.posts = new ArrayList<>();
     }
 
     // =================================
@@ -29,16 +24,7 @@ public class Group {
     }
 
     public void deleteGroup() {
-        this.posts.clear();
-    }
-
-    // --- XỬ LÝ POST TRONG GROUP ---
-    public void addPost(Post post) {
-        this.posts.add(post);
-    }
-
-    public void removePost(Post post) {
-        this.posts.remove(post);
+        // Việc xoá thật (group, các post có groupId này...) sẽ xử lý ở tầng dữ liệu
     }
 
     // =================================
@@ -61,10 +47,6 @@ public class Group {
         return coverImageUrl;
     }
 
-    public List<Post> getPosts() {
-        return posts;
-    }
-
     // =================================
     // Setter methods for each field
     // =================================
@@ -83,9 +65,5 @@ public class Group {
 
     public void setCoverImageUrl(String coverImageUrl) {
         this.coverImageUrl = coverImageUrl;
-    }
-
-    public void setPosts(List<Post> posts) {
-        this.posts = posts;
     }
 }
