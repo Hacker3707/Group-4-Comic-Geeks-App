@@ -1,8 +1,6 @@
-package vn.edu.ueh.ngocha.squiditytempprj.classes;
+package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class Comment {
     private String commentId;
