@@ -9,8 +9,11 @@ import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.ComicDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.CommentDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.GenreDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.PostDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.ReviewDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.StampDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.ChatRoom;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
@@ -32,6 +35,11 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract ComicDao comicDao();
     public abstract GenreDao genreDao();
     public abstract ReviewDao reviewDao();
+    public abstract PostDao postDao();
+    public abstract CommentDao commentDao();
+    public abstract StampDao stampDao();
+
+
 
     private static volatile AppDatabase INSTANCE;
 

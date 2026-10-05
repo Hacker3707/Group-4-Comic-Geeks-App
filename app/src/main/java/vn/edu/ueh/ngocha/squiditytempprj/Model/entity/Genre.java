@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey;
 @Entity (tableName = "genres")
 public class Genre {
 
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     @NonNull
     private String genreId;
     @ColumnInfo (name = "genre_name")
