@@ -1,11 +1,24 @@
-package vn.edu.ueh.ngocha.squiditytempprj.classes;
+package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity (tableName = "reviews")
 public class Review {
+    @PrimaryKey (autoGenerate = true)
+    @NonNull
     private String reviewId;
+    @ColumnInfo (name = "comic_id")
     private String comicId;
+    @ColumnInfo(name = "user_id")
     private String userId;
+    @ColumnInfo (name = "review_text")
     private String reviewText;
+    @ColumnInfo (name = "review_rating")
     private String reviewRating;
+    @ColumnInfo (name = "review_date")
     private String reviewDate;
 
     public Review(String reviewId, String comicId, String userId,
