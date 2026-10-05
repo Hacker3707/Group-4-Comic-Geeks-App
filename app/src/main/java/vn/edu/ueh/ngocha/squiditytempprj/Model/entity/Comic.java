@@ -1,4 +1,4 @@
-package vn.edu.ueh.ngocha.squiditytempprj.classes;
+package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
 public class Comic {
     String comicId;
