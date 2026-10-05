@@ -1,16 +1,45 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
+
 import java.util.Date;
 
+@Entity(
+        tableName = "group_members",
+        foreignKeys = @ForeignKey(
+                entity = Group.class,
+                parentColumns = "groupId",
+                childColumns = "group_id",
+                onDelete = ForeignKey.CASCADE   // xoá Group thì xoá luôn thành viên của nó
+        ),
+        indices = {@Index("group_id"), @Index("user_id")}
+)
 public class GroupMember {
+    @PrimaryKey
+    @NonNull
     private String membershipId;
+
+    @ColumnInfo(name = "user_id")
     private String userId;      // id của User (không dùng object User)
+
+    @ColumnInfo(name = "group_id")
     private String groupId;     // id của Group (không dùng object Group)
+
+    @ColumnInfo(name = "role")
     private GroupRole role;
-    private Date joinDate;
+
+    @ColumnInfo(name = "join_date")
+    private Date joinDate;      // cần TypeConverter Date <-> Long
+
+    @ColumnInfo(name = "active")
     private boolean active;     // false = đã bị xoá khỏi group (removeMember)
 
-    public GroupMember(String membershipId, String userId, String groupId, GroupRole role) {
+    public GroupMember(@NonNull String membershipId, String userId, String groupId, GroupRole role) {
         this.membershipId = membershipId;
         this.userId = userId;
         this.groupId = groupId;
@@ -35,6 +64,7 @@ public class GroupMember {
     // Getter methods for each field
     // =================================
 
+    @NonNull
     public String getMembershipId() {
         return membershipId;
     }
@@ -63,7 +93,7 @@ public class GroupMember {
     // Setter methods for each field
     // =================================
 
-    public void setMembershipId(String membershipId) {
+    public void setMembershipId(@NonNull String membershipId) {
         this.membershipId = membershipId;
     }
 
