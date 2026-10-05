@@ -1,8 +1,10 @@
-package vn.edu.ueh.ngocha.squiditytempprj;
+package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
 import java.util.List;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.CreatorDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Creator;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 
 public class CreatorRepository {
 
@@ -24,11 +26,11 @@ public class CreatorRepository {
         creatorDao.delete(creator);
     }
 
-    public List<Creator> getAll() {
+    public List<User> getAll() {
         return creatorDao.getAll();
     }
 
-    public Creator getById(String userId) {
+    public User getById(String userId) {
         return creatorDao.getById(userId);
     }
 

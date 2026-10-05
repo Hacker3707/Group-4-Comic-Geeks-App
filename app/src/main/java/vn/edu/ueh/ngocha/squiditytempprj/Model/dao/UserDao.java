@@ -1,4 +1,4 @@
-package vn.edu.ueh.ngocha.squiditytempprj;
+package vn.edu.ueh.ngocha.squiditytempprj.Model.dao;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -27,6 +27,15 @@ public interface UserDao {
 
     @Query("SELECT * FROM users WHERE userId = :userId LIMIT 1")
     User getById(String userId);
+
+    @Query("SELECT * FROM users WHERE role = 'USER'")
+    List<User> getNormalUsers();
+
+    @Query("SELECT * FROM users WHERE role = 'ADMIN'")
+    List<User> getAdmins();
+
+    @Query("SELECT * FROM users WHERE role = 'CREATOR'")
+    List<User> getCreators();
 
     @Query("DELETE FROM users")
     void deleteAll();

@@ -1,20 +1,27 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity(tableName = "users")
 public class User {
 
     // =====================================================
     // ATTRIBUTES
     // =====================================================
 
+    @PrimaryKey
     private String userId;
     private String username;
     private String email;
     private String passwordHash;
     private String avatarUrl;
-
+    private String role;
+    private boolean verified;
+    private String verifiedSource;
     private List<User> followers;
     private List<User> following;
 
@@ -25,6 +32,17 @@ public class User {
     // =====================================================
     // CONSTRUCTOR
     // =====================================================
+
+    public User() {
+        this.followers = new ArrayList<>();
+        this.following = new ArrayList<>();
+        this.favoriteGenres = new ArrayList<>();
+        this.favoriteComics = new ArrayList<>();
+
+        this.role = "USER";
+        this.verified = false;
+        this.verifiedSource = "";
+    }
 
     public User(String userId,
                 String username,
@@ -37,7 +55,9 @@ public class User {
         this.email = email;
         this.passwordHash = passwordHash;
         this.avatarUrl = avatarUrl;
-
+        this.role = "USER";
+        this.verified = false;
+        this.verifiedSource = "";
         this.followers = new ArrayList<>();
         this.following = new ArrayList<>();
 
@@ -342,5 +362,29 @@ public class User {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public boolean isVerified() {
+        return verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
+
+    public String getVerifiedSource() {
+        return verifiedSource;
+    }
+
+    public void setVerifiedSource(String verifiedSource) {
+        this.verifiedSource = verifiedSource;
     }
 }

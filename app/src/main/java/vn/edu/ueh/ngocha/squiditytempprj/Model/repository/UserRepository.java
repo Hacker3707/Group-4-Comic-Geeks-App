@@ -1,7 +1,8 @@
-package vn.edu.ueh.ngocha.squiditytempprj;
+package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
 import java.util.List;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.UserDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 
 public class UserRepository {
@@ -30,6 +31,18 @@ public class UserRepository {
 
     public User getById(String userId) {
         return userDao.getById(userId);
+    }
+
+    public List<User> getNormalUsers() {
+        return userDao.getNormalUsers();
+    }
+
+    public List<User> getAdmins() {
+        return userDao.getAdmins();
+    }
+
+    public List<User> getCreators() {
+        return userDao.getCreators();
     }
 
     public void deleteAll() {

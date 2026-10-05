@@ -1,8 +1,11 @@
-package vn.edu.ueh.ngocha.squiditytempprj;
+package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.AdminDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Admin;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 
 public class AdminRepository {
 
@@ -24,11 +27,11 @@ public class AdminRepository {
         adminDao.delete(admin);
     }
 
-    public List<Admin> getAll() {
+    public List<User> getAll() {
         return adminDao.getAll();
     }
 
-    public Admin getById(String userId) {
+    public User getById(String userId) {
         return adminDao.getById(userId);
     }
 
