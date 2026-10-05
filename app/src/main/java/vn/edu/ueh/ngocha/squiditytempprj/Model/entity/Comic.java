@@ -1,13 +1,29 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity (tableName = "comics")
 public class Comic {
+
+    @PrimaryKey(autoGenerate = true)
+    @NonNull
     String comicId;
+    @ColumnInfo (name = "comic_name")
     String comicName;
+    @ColumnInfo (name = "comic_author")
     String comicAuthor;
+    @ColumnInfo (name = "comic_description")
     String comicDescription;
+    @ColumnInfo (name = "cover_image_url")
     String coverImageurl;
+    @ColumnInfo (name = "comic_status")
     String comicStatus;
+    @ColumnInfo (name = "comic_genres")
     String comicGenres;
+    @ColumnInfo (name = "comic_rating")
     String comicRating;
 
     public Comic(String comicId, String comicName, String comicAuthor, String comicDescription, String coverImageurl,
