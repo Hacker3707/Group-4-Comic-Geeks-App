@@ -1,12 +1,26 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "groups")
 public class Group {
+    @PrimaryKey
+    @NonNull
     private String groupId;
+
+    @ColumnInfo(name = "group_name")
     private String groupName;
+
+    @ColumnInfo(name = "description")
     private String description;
+
+    @ColumnInfo(name = "cover_image_url")
     private String coverImageUrl;
 
-    public Group(String groupId, String groupName, String description, String coverImageUrl) {
+    public Group(@NonNull String groupId, String groupName, String description, String coverImageUrl) {
         this.groupId = groupId;
         this.groupName = groupName;
         this.description = description;
@@ -31,6 +45,7 @@ public class Group {
     // Getter methods for each field
     // =================================
 
+    @NonNull
     public String getGroupId() {
         return groupId;
     }
@@ -51,7 +66,7 @@ public class Group {
     // Setter methods for each field
     // =================================
 
-    public void setGroupId(String groupId) {
+    public void setGroupId(@NonNull String groupId) {
         this.groupId = groupId;
     }
 
