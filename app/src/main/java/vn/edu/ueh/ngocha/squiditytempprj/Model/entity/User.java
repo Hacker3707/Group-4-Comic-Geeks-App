@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
@@ -14,18 +15,46 @@ public class User {
     // =====================================================
 
     @PrimaryKey
+    @ColumnInfo(name = "user_id")
     private String userId;
+
+    @ColumnInfo(name = "username")
     private String username;
+
+    @ColumnInfo(name = "email")
     private String email;
+
+    @ColumnInfo(name = "password_hash")
     private String passwordHash;
+
+    @ColumnInfo(name = "avatar_url")
     private String avatarUrl;
+
+    @ColumnInfo(name = "role")
     private String role;
+
+    @ColumnInfo(name = "verified")
     private boolean verified;
+
+    @ColumnInfo(name = "verified_source")
     private String verifiedSource;
+
+
+    // =====================================================
+    // RELATION / LIST
+    // Room không lưu trực tiếp List<Entity> thành column
+    // =====================================================
+
+    @Ignore
     private List<User> followers;
+
+    @Ignore
     private List<User> following;
 
+    @Ignore
     private List<Genre> favoriteGenres;
+
+    @Ignore
     private List<Comic> favoriteComics;
 
 
@@ -44,6 +73,7 @@ public class User {
         this.verifiedSource = "";
     }
 
+    @Ignore
     public User(String userId,
                 String username,
                 String email,
@@ -58,9 +88,9 @@ public class User {
         this.role = "USER";
         this.verified = false;
         this.verifiedSource = "";
+
         this.followers = new ArrayList<>();
         this.following = new ArrayList<>();
-
         this.favoriteGenres = new ArrayList<>();
         this.favoriteComics = new ArrayList<>();
     }
@@ -70,23 +100,21 @@ public class User {
     // FOLLOW USER
     // =====================================================
 
+    @Ignore
     public void follow(User user) {
 
         if (user == null) {
             return;
         }
 
-        // Không cho follow chính mình
         if (user == this) {
             return;
         }
 
-        // Không follow trùng
         if (!following.contains(user)) {
 
             following.add(user);
 
-            // Đồng thời thêm mình vào follower của user kia
             if (!user.followers.contains(this)) {
                 user.followers.add(this);
             }
@@ -98,6 +126,7 @@ public class User {
     // UNFOLLOW USER
     // =====================================================
 
+    @Ignore
     public void unfollow(User user) {
 
         if (user == null) {
@@ -108,7 +137,6 @@ public class User {
 
             following.remove(user);
 
-            // Xóa mình khỏi follower của user kia
             user.followers.remove(this);
         }
     }
@@ -118,6 +146,7 @@ public class User {
     // EDIT PROFILE
     // =====================================================
 
+    @Ignore
     public void editProfile(String username,
                             String avatarUrl) {
 
@@ -135,6 +164,7 @@ public class User {
     // EDIT PROFILE - FULL
     // =====================================================
 
+    @Ignore
     public void editProfile(String username,
                             String email,
                             String avatarUrl) {
@@ -156,17 +186,8 @@ public class User {
     // =====================================================
     // GET FEED
     // =====================================================
-    //
-    // Dùng generic để hiện tại project chưa cần Post.java
-    // vẫn compile được.
-    //
-    // Khi nhóm tạo Post.java:
-    //
-    // List<Post> posts = user.getFeed();
-    //
-    // vẫn có thể sử dụng.
-    // =====================================================
 
+    @Ignore
     public <T> List<T> getFeed() {
 
         return new ArrayList<>();
@@ -176,17 +197,8 @@ public class User {
     // =====================================================
     // REPORT ITEM
     // =====================================================
-    //
-    // Hiện tại nhận Object để sau này có thể truyền:
-    // Post
-    // Comment
-    // User
-    // Comic
-    // ...
-    //
-    // mà không phải sửa User.java.
-    // =====================================================
 
+    @Ignore
     public void reportItem(Object item) {
 
         if (item == null) {
@@ -194,20 +206,14 @@ public class User {
         }
 
         // Logic report sẽ được module tương ứng xử lý.
-        // User chỉ gửi yêu cầu report.
     }
 
 
     // =====================================================
     // CREATE POST
     // =====================================================
-    //
-    // Theo UML của bạn User có createPost().
-    //
-    // Tuy nhiên Post.java hiện chưa tồn tại nên chưa
-    // phụ thuộc trực tiếp vào class Post.
-    // =====================================================
 
+    @Ignore
     public void createPost(String content) {
 
         if (content == null || content.trim().isEmpty()) {
@@ -222,6 +228,7 @@ public class User {
     // CREATE POST - CÓ THÊM THÔNG TIN
     // =====================================================
 
+    @Ignore
     public void createPost(String content, Object... additionalData) {
 
         if (content == null || content.trim().isEmpty()) {
@@ -233,9 +240,6 @@ public class User {
         // comic
         // group
         // ...
-        //
-        // Khi các class khác được tạo,
-        // có thể truyền dữ liệu vào đây.
     }
 
 
@@ -243,6 +247,7 @@ public class User {
     // ADD FAVORITE GENRE
     // =====================================================
 
+    @Ignore
     public void addGenre(Genre genre) {
 
         if (genre == null) {
@@ -259,6 +264,7 @@ public class User {
     // REMOVE FAVORITE GENRE
     // =====================================================
 
+    @Ignore
     public void removeGenre(Genre genre) {
 
         if (genre == null) {
@@ -273,6 +279,7 @@ public class User {
     // ADD COMIC TO FAVORITE
     // =====================================================
 
+    @Ignore
     public void addComicToFavorite(Comic comic) {
 
         if (comic == null) {
@@ -289,6 +296,7 @@ public class User {
     // REMOVE COMIC FROM FAVORITE
     // =====================================================
 
+    @Ignore
     public void removeComicFromFavorite(Comic comic) {
 
         if (comic == null) {

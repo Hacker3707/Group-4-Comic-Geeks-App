@@ -9,11 +9,7 @@ public class Creator extends User {
     // ATTRIBUTES
     // =====================================================
 
-    private String verifiedSource;
-
     private List<Comic> comicByCreator;
-
-    private boolean verified;
 
 
     // =====================================================
@@ -34,15 +30,15 @@ public class Creator extends User {
                 avatarUrl
         );
 
+        // Xác định đây là tài khoản Creator
         setRole("CREATOR");
 
+        // verified và verifiedSource
+        // được kế thừa từ User
+        setVerified(false);
         setVerifiedSource("");
 
-        setVerified(false);
-
-        this.verifiedSource = "";
         this.comicByCreator = new ArrayList<>();
-        this.verified = false;
     }
 
 
@@ -56,10 +52,8 @@ public class Creator extends User {
             return;
         }
 
-        // Tạo announcement post.
-        //
-        // Class Post sau này sẽ xử lý việc tạo
-        // đối tượng Post thực tế.
+        // Logic tạo Announcement Post
+        // sẽ được xử lý bởi Post module.
     }
 
 
@@ -115,33 +109,7 @@ public class Creator extends User {
 
 
     // =====================================================
-    // VERIFIED
-    // =====================================================
-
-    public boolean isVerified() {
-        return verified;
-    }
-
-    public void setVerified(boolean verified) {
-        this.verified = verified;
-    }
-
-
-    // =====================================================
-    // VERIFIED SOURCE
-    // =====================================================
-
-    public String getVerifiedSource() {
-        return verifiedSource;
-    }
-
-    public void setVerifiedSource(String verifiedSource) {
-        this.verifiedSource = verifiedSource;
-    }
-
-
-    // =====================================================
-    // COMICS
+    // GET COMICS
     // =====================================================
 
     public List<Comic> getComicByCreator() {
