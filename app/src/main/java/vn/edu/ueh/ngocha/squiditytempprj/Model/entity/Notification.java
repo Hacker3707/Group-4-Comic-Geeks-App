@@ -1,17 +1,40 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import vn.edu.ueh.ngocha.squiditytempprj.Model.Converters;
+
 import java.util.Date;
 
+@Entity(tableName = "notifications")
+@TypeConverters(Converters.class)
 public class Notification {
+    @PrimaryKey
+    @NonNull
+    @ColumnInfo(name = "notif_id")
     private String notifId;
+
+    @ColumnInfo(name = "content")
     private String content;
+
+    @ColumnInfo(name = "type")
     private NotificationType type;
+
+    @ColumnInfo(name = "is_read")
     private boolean isRead;
+
+    @ColumnInfo(name = "timestamp")
     private Date timestamp;
 
     public Notification() {
     }
 
+    @Ignore
     public Notification(String notifId, String content, NotificationType type) {
         this.notifId = notifId;
         this.content = content;
@@ -20,6 +43,7 @@ public class Notification {
         this.timestamp = new Date();
     }
 
+    @Ignore
     public Notification(String notifId, String content, NotificationType type,
                         boolean isRead, Date timestamp) {
         this.notifId = notifId;
@@ -34,14 +58,15 @@ public class Notification {
     }
 
     public void deleteNotif() {
-        // TODO: goi database xoa thong bao theo notifId khi nhom noi du lieu
+        // TODO: goi NotificationDao.deleteNotification(this) khi nhom noi du lieu
     }
 
+    @NonNull
     public String getNotifId() {
         return notifId;
     }
 
-    public void setNotifId(String notifId) {
+    public void setNotifId(@NonNull String notifId) {
         this.notifId = notifId;
     }
 
