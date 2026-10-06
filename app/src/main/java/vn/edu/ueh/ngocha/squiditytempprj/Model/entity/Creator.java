@@ -34,10 +34,14 @@ public class Creator extends User {
                 avatarUrl
         );
 
+        setRole("CREATOR");
+
+        setVerifiedSource("");
+
+        setVerified(false);
+
         this.verifiedSource = "";
-
         this.comicByCreator = new ArrayList<>();
-
         this.verified = false;
     }
 
