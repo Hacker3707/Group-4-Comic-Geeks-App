@@ -7,13 +7,16 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.AdminDao;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.CreatorDao;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.UserDao;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.ChatRoomDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.ComicDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.CommentDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.GenreDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.PostDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.MessageDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.NotificationDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.ReviewDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.StampDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.ChatRoom;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
@@ -29,15 +32,21 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Stamp;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 
 @Database(entities = {User.class, Post.class, Comment.class, Stamp.class,
-                        Review.class, Comic.class, Genre.class, Creator.class, Group.class,
-                        GroupMember.class, Message.class, ChatRoom.class, Notification.class}, version = 1)
+        Review.class, Comic.class, Genre.class, Creator.class, Group.class,
+        GroupMember.class, Message.class, ChatRoom.class, Notification.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
-    public abstract UserDao userDao();
-    public abstract AdminDao adminDao();
-    public abstract CreatorDao creatorDao();
     public abstract ComicDao comicDao();
     public abstract GenreDao genreDao();
     public abstract ReviewDao reviewDao();
+    public abstract PostDao postDao();
+    public abstract CommentDao commentDao();
+    public abstract StampDao stampDao();
+
+
+
+    public abstract NotificationDao notificationDao();
+    public abstract MessageDao messageDao();
+    public abstract ChatRoomDao chatRoomDao();
 
     private static volatile AppDatabase INSTANCE;
 
