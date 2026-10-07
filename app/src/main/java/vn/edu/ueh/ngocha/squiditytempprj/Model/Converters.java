@@ -5,6 +5,7 @@ import androidx.room.TypeConverter;
 import java.util.Date;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.NotificationType;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.StampType;
 
 public class Converters {
     @TypeConverter
@@ -25,5 +26,15 @@ public class Converters {
     @TypeConverter
     public static NotificationType toNotificationType(String value) {
         return value == null ? null : NotificationType.valueOf(value);
+    }
+
+    @TypeConverter
+    public static String fromStampType(StampType type) {
+        return type == null ? null : type.name();
+    }
+
+    @TypeConverter
+    public static StampType toStampType(String value) {
+        return value == null ? null : StampType.valueOf(value);
     }
 }

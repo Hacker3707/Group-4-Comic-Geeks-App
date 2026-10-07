@@ -4,12 +4,17 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
 import java.util.Date;
+
+import vn.edu.ueh.ngocha.squiditytempprj.Model.Converters;
 
 @Entity(tableName = "posts")
 public class Post {
     @PrimaryKey
     @NonNull
+    @ColumnInfo (name = "post_id")
     private String postId;
 
     @ColumnInfo(name = "user_id")
@@ -25,6 +30,7 @@ public class Post {
     private String content;
 
     @ColumnInfo(name = "timestamp")
+    @TypeConverters(Converters.class)
     private Date timestamp;
 
     public Post(@NonNull String postId, String userId, String comicId, String content) {

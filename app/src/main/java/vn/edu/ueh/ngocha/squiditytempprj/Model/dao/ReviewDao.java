@@ -18,4 +18,7 @@ public interface ReviewDao {
 
     @Query("SELECT * FROM reviews WHERE comic_id = :comicId")
     List<Review> getReviewsByComicId(String comicId);
+
+    @Query("DELETE FROM reviews")
+    void deleteAll();
 }

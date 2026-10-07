@@ -9,6 +9,7 @@ import androidx.room.PrimaryKey;
 public class Group {
     @PrimaryKey
     @NonNull
+    @ColumnInfo
     private String groupId;
 
     @ColumnInfo(name = "group_name")

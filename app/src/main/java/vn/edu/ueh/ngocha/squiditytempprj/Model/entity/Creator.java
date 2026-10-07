@@ -1,18 +1,21 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity(tableName = "creators")
 public class Creator extends User {
 
     // =====================================================
     // ATTRIBUTES
     // =====================================================
-
+    @ColumnInfo (name = "verified_source")
     private String verifiedSource;
 
-    private List<Comic> comicByCreator;
-
+    @ColumnInfo (name = "verified")
     private boolean verified;
 
 
@@ -41,7 +44,6 @@ public class Creator extends User {
         setVerified(false);
 
         this.verifiedSource = "";
-        this.comicByCreator = new ArrayList<>();
         this.verified = false;
     }
 
@@ -94,9 +96,7 @@ public class Creator extends User {
             return;
         }
 
-        if (!comicByCreator.contains(comic)) {
-            comicByCreator.add(comic);
-        }
+
     }
 
 
@@ -110,7 +110,6 @@ public class Creator extends User {
             return;
         }
 
-        comicByCreator.remove(comic);
     }
 
 
@@ -144,7 +143,4 @@ public class Creator extends User {
     // COMICS
     // =====================================================
 
-    public List<Comic> getComicByCreator() {
-        return comicByCreator;
-    }
 }

@@ -4,12 +4,17 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
 import java.util.Date;
+
+import vn.edu.ueh.ngocha.squiditytempprj.Model.Converters;
 
 @Entity(tableName = "stamps")
 public class Stamp {
     @PrimaryKey
     @NonNull
+    @ColumnInfo(name = "stamp_id")
     private String stampId;
 
     @ColumnInfo(name = "user_id")
@@ -22,9 +27,11 @@ public class Stamp {
     private String commentId;
 
     @ColumnInfo(name = "stamp_type")
+    @TypeConverters(Converters.class)
     private StampType type;
 
     @ColumnInfo(name = "timestamp")
+    @TypeConverters(Converters.class)
     private Date timestamp;
 
     public Stamp(@NonNull String stampId, String userId, StampType type) {
@@ -85,4 +92,6 @@ public class Stamp {
     public void setType(StampType type) {
         this.type = type;
     }
+
+    public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
 }
