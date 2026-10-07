@@ -9,6 +9,7 @@ import androidx.room.PrimaryKey;
 public class Review {
     @PrimaryKey
     @NonNull
+    @ColumnInfo (name = "review_id")
     private String reviewId;
     @ColumnInfo (name = "comic_id")
     private String comicId;

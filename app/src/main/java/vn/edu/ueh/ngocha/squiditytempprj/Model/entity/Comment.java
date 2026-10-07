@@ -4,7 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
 import java.util.Date;
+
+import vn.edu.ueh.ngocha.squiditytempprj.Model.Converters;
 
 @Entity(tableName = "comments")
 public class Comment {
@@ -22,6 +26,7 @@ public class Comment {
     private String content;
 
     @ColumnInfo(name = "timestamp")
+    @TypeConverters(Converters.class)
     private Date timestamp;
 
     public Comment(@NonNull String commentId, String userId, String postId, String content) {

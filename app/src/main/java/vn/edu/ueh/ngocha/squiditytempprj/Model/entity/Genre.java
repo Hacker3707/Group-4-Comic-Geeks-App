@@ -10,6 +10,7 @@ public class Genre {
 
     @PrimaryKey
     @NonNull
+    @ColumnInfo (name = "genre_id")
     private String genreId;
     @ColumnInfo (name = "genre_name")
     private String genreName;

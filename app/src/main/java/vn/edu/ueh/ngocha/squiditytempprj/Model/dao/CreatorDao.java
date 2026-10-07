@@ -25,7 +25,7 @@ public interface CreatorDao {
     @Query("SELECT * FROM users WHERE role = 'CREATOR'")
     List<User> getAll();
 
-    @Query("SELECT * FROM users WHERE userId = :userId AND role = 'CREATOR' LIMIT 1")
+    @Query("SELECT * FROM users WHERE user_id = :userId AND role = 'CREATOR' LIMIT 1")
     User getById(String userId);
 
     @Query("DELETE FROM users WHERE role = 'CREATOR'")

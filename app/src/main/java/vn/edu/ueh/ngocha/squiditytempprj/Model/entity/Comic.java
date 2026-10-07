@@ -5,43 +5,97 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity (tableName = "comics")
+@Entity(tableName = "comics")
 public class Comic {
 
+    // MangaDex manga UUID
     @PrimaryKey
     @NonNull
-    String comicId;
-    @ColumnInfo (name = "comic_name")
-    String comicName;
-    @ColumnInfo (name = "comic_author")
-    String comicAuthor;
-    @ColumnInfo (name = "comic_description")
-    String comicDescription;
-    @ColumnInfo (name = "cover_image_url")
-    String coverImageurl;
-    @ColumnInfo (name = "comic_status")
-    String comicStatus;
-    @ColumnInfo (name = "comic_genres")
-    String comicGenres;
-    @ColumnInfo (name = "comic_rating")
-    String comicRating;
+    @ColumnInfo(name = "comic_id")
+    private String comicId;
 
-    public Comic(String comicId, String comicName, String comicAuthor, String comicDescription, String coverImageurl,
-                 String comicStatus, String comicGenres, String comicRating) {
+    // MangaDex: attributes.title
+    @ColumnInfo(name = "comic_name")
+    private String comicName;
+
+    // MangaDex: relationship type = author
+    @ColumnInfo(name = "comic_author")
+    private String comicAuthor;
+
+    // MangaDex: attributes.description
+    @ColumnInfo(name = "comic_description")
+    private String comicDescription;
+
+    // URL generated from MangaDex cover_art
+    @ColumnInfo(name = "cover_image_url")
+    private String coverImageUrl;
+
+    // MangaDex: attributes.status
+    // Example: ongoing, completed, hiatus
+    @ColumnInfo(name = "comic_status")
+    private String comicStatus;
+
+    // MangaDex: tags where group = genre
+    @ColumnInfo(name = "comic_genres")
+    private String comicGenres;
+
+    // MangaDex: attributes.contentRating
+    // Example: safe, suggestive, erotica, pornographic
+    @ColumnInfo(name = "content_rating")
+    private String contentRating;
+
+    // MangaDex: attributes.originalLanguage
+    // Example: ja, en, ko
+    @ColumnInfo(name = "original_language")
+    private String originalLanguage;
+
+    // MangaDex: attributes.year
+    @ColumnInfo(name = "release_year")
+    private Integer releaseYear;
+
+    // MangaDex: attributes.lastVolume
+    @ColumnInfo(name = "last_volume")
+    private String lastVolume;
+
+    // MangaDex: attributes.lastChapter
+    @ColumnInfo(name = "last_chapter")
+    private String lastChapter;
+
+
+    public Comic(
+            @NonNull String comicId,
+            String comicName,
+            String comicAuthor,
+            String comicDescription,
+            String coverImageUrl,
+            String comicStatus,
+            String comicGenres,
+            String contentRating,
+            String originalLanguage,
+            Integer releaseYear,
+            String lastVolume,
+            String lastChapter
+    ) {
         this.comicId = comicId;
         this.comicName = comicName;
         this.comicAuthor = comicAuthor;
         this.comicDescription = comicDescription;
-        this.coverImageurl = coverImageurl;
+        this.coverImageUrl = coverImageUrl;
         this.comicStatus = comicStatus;
         this.comicGenres = comicGenres;
-        this.comicRating = comicRating;
+        this.contentRating = contentRating;
+        this.originalLanguage = originalLanguage;
+        this.releaseYear = releaseYear;
+        this.lastVolume = lastVolume;
+        this.lastChapter = lastChapter;
     }
 
+
     // =================================
-    // Getter methods for each field
+    // Getter methods
     // =================================
 
+    @NonNull
     public String getComicId() {
         return comicId;
     }
@@ -58,8 +112,8 @@ public class Comic {
         return comicDescription;
     }
 
-    public String getCoverImageurl() {
-        return coverImageurl;
+    public String getCoverImageUrl() {
+        return coverImageUrl;
     }
 
     public String getComicStatus() {
@@ -70,15 +124,32 @@ public class Comic {
         return comicGenres;
     }
 
-    public String getComicRating() {
-        return comicRating;
+    public String getContentRating() {
+        return contentRating;
     }
 
+    public String getOriginalLanguage() {
+        return originalLanguage;
+    }
+
+    public Integer getReleaseYear() {
+        return releaseYear;
+    }
+
+    public String getLastVolume() {
+        return lastVolume;
+    }
+
+    public String getLastChapter() {
+        return lastChapter;
+    }
+
+
     // =================================
-    // Setter methods for each field
+    // Setter methods
     // =================================
 
-    public void setComicId(String comicId) {
+    public void setComicId(@NonNull String comicId) {
         this.comicId = comicId;
     }
 
@@ -94,8 +165,8 @@ public class Comic {
         this.comicDescription = comicDescription;
     }
 
-    public void setCoverImageurl(String coverImageurl) {
-        this.coverImageurl = coverImageurl;
+    public void setCoverImageUrl(String coverImageUrl) {
+        this.coverImageUrl = coverImageUrl;
     }
 
     public void setComicStatus(String comicStatus) {
@@ -106,8 +177,23 @@ public class Comic {
         this.comicGenres = comicGenres;
     }
 
-    public void setComicRating(String comicRating) {
-        this.comicRating = comicRating;
+    public void setContentRating(String contentRating) {
+        this.contentRating = contentRating;
     }
 
+    public void setOriginalLanguage(String originalLanguage) {
+        this.originalLanguage = originalLanguage;
+    }
+
+    public void setReleaseYear(Integer releaseYear) {
+        this.releaseYear = releaseYear;
+    }
+
+    public void setLastVolume(String lastVolume) {
+        this.lastVolume = lastVolume;
+    }
+
+    public void setLastChapter(String lastChapter) {
+        this.lastChapter = lastChapter;
+    }
 }
