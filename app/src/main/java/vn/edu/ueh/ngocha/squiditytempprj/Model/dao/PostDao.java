@@ -22,4 +22,7 @@ public interface PostDao {
 
     @Query("SELECT * FROM posts ORDER BY timestamp DESC")
     LiveData<List<Post>> getAllPosts();
+
+    @Query("SELECT * FROM posts WHERE comic_id = :comicId ORDER BY timestamp DESC")
+    LiveData<List<Post>> getPostsByComic(String comicId);
 }
