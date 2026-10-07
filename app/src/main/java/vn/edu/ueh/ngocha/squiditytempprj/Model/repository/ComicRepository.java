@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
+import java.util.List;
+
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.ComicDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 
@@ -14,8 +16,8 @@ public class ComicRepository {
         comicDao.insertComic(comic);
     }
 
-    public void getAll() {
-        comicDao.getAllComics();
+    public List<Comic> getAllComics() {
+        return comicDao.getAllComics();
     }
 
     public void deleteAll() {
