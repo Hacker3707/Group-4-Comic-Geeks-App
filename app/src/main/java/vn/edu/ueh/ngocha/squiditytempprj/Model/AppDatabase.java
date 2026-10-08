@@ -11,6 +11,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.ChatRoomDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.ComicDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.CommentDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.FollowDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.GroupDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.GroupMemberDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.GenreDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.PostDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.MessageDao;
@@ -24,6 +27,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Creator;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Group;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupMember;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Follow;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Message;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Notification;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
@@ -32,7 +36,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Stamp;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 
 @Database(entities = {User.class, Post.class, Comment.class, Stamp.class,
-        Review.class, Comic.class, Genre.class, Creator.class, Group.class,
+        Review.class, Comic.class, Genre.class, Creator.class, Follow.class, Group.class,
         GroupMember.class, Message.class, ChatRoom.class, Notification.class}, version = 1,
         exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
@@ -48,6 +52,9 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract NotificationDao notificationDao();
     public abstract MessageDao messageDao();
     public abstract ChatRoomDao chatRoomDao();
+    public abstract FollowDao FollowDao();
+    public abstract GroupDao GroupDao();
+    public abstract GroupMemberDao GroupMemberDao();
 
     private static volatile AppDatabase INSTANCE;
 
