@@ -31,7 +31,7 @@ public interface GroupMemberDao {
     @Query("SELECT * FROM group_members")
     List<GroupMember> getAll();
 
-    @Query("SELECT * FROM group_members WHERE membershipId = :membershipId LIMIT 1")
+    @Query("SELECT * FROM group_members WHERE membership_id = :membershipId LIMIT 1")
     GroupMember getById(String membershipId);
 
     // Thành viên còn hoạt động của một group
@@ -47,11 +47,11 @@ public interface GroupMemberDao {
     GroupMember getMembership(String userId, String groupId);
 
     // changeRole()
-    @Query("UPDATE group_members SET role = :newRole WHERE membershipId = :membershipId")
+    @Query("UPDATE group_members SET role = :newRole WHERE membership_id = :membershipId")
     void updateRole(String membershipId, GroupRole newRole);
 
     // removeMember(): đánh dấu active = false, không xoá hẳn khỏi DB
-    @Query("UPDATE group_members SET active = 0 WHERE membershipId = :membershipId")
+    @Query("UPDATE group_members SET active = 0 WHERE membership_id = :membershipId")
     void deactivate(String membershipId);
 
     @Query("SELECT EXISTS(SELECT 1 FROM group_members " +
