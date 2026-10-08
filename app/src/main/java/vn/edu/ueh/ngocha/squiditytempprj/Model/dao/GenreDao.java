@@ -16,16 +16,19 @@ public interface GenreDao {
     void insertGenre(Genre genre);
 
     @Update
-    void updateGenreName(String genreId, String name);
+    void updateGenreName(Genre genre);
 
-    @Query("DELETE FROM genres WHERE genreId = :genreId")
+    @Query("DELETE FROM genres WHERE genre_id = :genreId")
     void deleteGenreById(String genreId);
 
-    @Query("SELECT * FROM genres WHERE genreId = :genreId")
+    @Query("SELECT * FROM genres WHERE genre_id = :genreId")
     Genre getGenreById(String genreId);
 
     @Query("SELECT * FROM genres")
     List<Genre> getAllGenres();
+
+    @Query("DELETE FROM genres")
+    void deleteAll();
 
 
 }

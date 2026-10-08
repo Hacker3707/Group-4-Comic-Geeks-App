@@ -19,6 +19,7 @@ public class Admin extends User {
                 passwordHash,
                 avatarUrl
         );
+        setRole("ADMIN");
     }
 
 

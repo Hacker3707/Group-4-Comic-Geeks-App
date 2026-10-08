@@ -1,18 +1,43 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import vn.edu.ueh.ngocha.squiditytempprj.Model.Converters;
+
 import java.util.Date;
 
+@Entity(tableName = "messages")
+@TypeConverters(Converters.class)
 public class Message {
+    @PrimaryKey
+    @NonNull
+    @ColumnInfo(name = "message_id")
     private String messageId;
+
+    @ColumnInfo(name = "content")
     private String content;
+
+    @ColumnInfo(name = "timestamp")
     private Date timestamp;
+
+    @ColumnInfo(name = "is_read")
     private boolean isRead;
+
+    @ColumnInfo(name = "sender_id")
     private String senderId;
+
+    @ColumnInfo(name = "chat_room_id")
     private String chatRoomId;
 
     public Message() {
     }
 
+    @Ignore
     public Message(String messageId, String content, String senderId, String chatRoomId) {
         this.messageId = messageId;
         this.content = content;
@@ -22,6 +47,7 @@ public class Message {
         this.timestamp = new Date();
     }
 
+    @Ignore
     public Message(String messageId, String content, Date timestamp, boolean isRead,
                    String senderId, String chatRoomId) {
         this.messageId = messageId;
@@ -35,22 +61,23 @@ public class Message {
     public void send() {
         this.timestamp = new Date();
         this.isRead = false;
-        // TODO: day tin nhan len database khi nhom noi du lieu
+        // TODO: goi MessageDao.insertMessage(this) khi nhom noi du lieu
     }
 
     public void deleteMessage() {
-        // TODO: goi database xoa tin nhan theo messageId khi nhom noi du lieu
+        // TODO: goi MessageDao.deleteMessage(this) khi nhom noi du lieu
     }
 
     public void markAsRead() {
         this.isRead = true;
     }
 
+    @NonNull
     public String getMessageId() {
         return messageId;
     }
 
-    public void setMessageId(String messageId) {
+    public void setMessageId(@NonNull String messageId) {
         this.messageId = messageId;
     }
 

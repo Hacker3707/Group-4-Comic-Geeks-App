@@ -7,8 +7,9 @@ import androidx.room.PrimaryKey;
 
 @Entity (tableName = "reviews")
 public class Review {
-    @PrimaryKey (autoGenerate = true)
+    @PrimaryKey
     @NonNull
+    @ColumnInfo (name = "review_id")
     private String reviewId;
     @ColumnInfo (name = "comic_id")
     private String comicId;

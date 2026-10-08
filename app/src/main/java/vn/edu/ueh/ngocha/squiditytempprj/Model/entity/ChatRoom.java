@@ -1,25 +1,41 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+@Entity(tableName = "chat_rooms")
 public class ChatRoom {
+    @PrimaryKey
+    @NonNull
+    @ColumnInfo(name = "chat_room_id")
     private String chatRoomId;
+
+    @ColumnInfo(name = "user1_id")
     private String user1Id;
+
+    @ColumnInfo(name = "user2_id")
     private String user2Id;
-    private List<Message> messages;
+
+    // Room khong luu List vao cot, tin nhan nam o messages (truy van theo chat_room_id)
+    @Ignore
+    private List<Message> messages = new ArrayList<>();
 
     public ChatRoom() {
-        this.messages = new ArrayList<>();
     }
 
+    @Ignore
     public ChatRoom(String chatRoomId, String user1Id, String user2Id) {
         this.chatRoomId = chatRoomId;
         this.user1Id = user1Id;
         this.user2Id = user2Id;
-        this.messages = new ArrayList<>();
     }
 
     public void addMessage(Message message) {
@@ -42,14 +58,15 @@ public class ChatRoom {
 
     public void deleteConversation() {
         messages.clear();
-        // TODO: goi database xoa toan bo tin nhan cua phong khi nhom noi du lieu
+        // TODO: goi MessageDao.deleteMessagesByChatRoomId(chatRoomId) khi nhom noi du lieu
     }
 
+    @NonNull
     public String getChatRoomId() {
         return chatRoomId;
     }
 
-    public void setChatRoomId(String chatRoomId) {
+    public void setChatRoomId(@NonNull String chatRoomId) {
         this.chatRoomId = chatRoomId;
     }
 
