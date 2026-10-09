@@ -1,15 +1,22 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity(tableName = "creators")
 public class Creator extends User {
 
     // =====================================================
     // ATTRIBUTES
     // =====================================================
+    @ColumnInfo (name = "verified_source")
+    private String verifiedSource;
 
-    private List<Comic> comicByCreator;
+    @ColumnInfo (name = "verified")
+    private boolean verified;
 
 
     // =====================================================
@@ -30,15 +37,14 @@ public class Creator extends User {
                 avatarUrl
         );
 
-        // Xác định đây là tài khoản Creator
         setRole("CREATOR");
 
-        // verified và verifiedSource
-        // được kế thừa từ User
-        setVerified(false);
         setVerifiedSource("");
 
-        this.comicByCreator = new ArrayList<>();
+        setVerified(false);
+
+        this.verifiedSource = "";
+        this.verified = false;
     }
 
 
@@ -52,8 +58,10 @@ public class Creator extends User {
             return;
         }
 
-        // Logic tạo Announcement Post
-        // sẽ được xử lý bởi Post module.
+        // Tạo announcement post.
+        //
+        // Class Post sau này sẽ xử lý việc tạo
+        // đối tượng Post thực tế.
     }
 
 
@@ -88,9 +96,7 @@ public class Creator extends User {
             return;
         }
 
-        if (!comicByCreator.contains(comic)) {
-            comicByCreator.add(comic);
-        }
+
     }
 
 
@@ -104,15 +110,37 @@ public class Creator extends User {
             return;
         }
 
-        comicByCreator.remove(comic);
     }
 
 
     // =====================================================
-    // GET COMICS
+    // VERIFIED
     // =====================================================
 
-    public List<Comic> getComicByCreator() {
-        return comicByCreator;
+    public boolean isVerified() {
+        return verified;
     }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
+
+
+    // =====================================================
+    // VERIFIED SOURCE
+    // =====================================================
+
+    public String getVerifiedSource() {
+        return verifiedSource;
+    }
+
+    public void setVerifiedSource(String verifiedSource) {
+        this.verifiedSource = verifiedSource;
+    }
+
+
+    // =====================================================
+    // COMICS
+    // =====================================================
+
 }

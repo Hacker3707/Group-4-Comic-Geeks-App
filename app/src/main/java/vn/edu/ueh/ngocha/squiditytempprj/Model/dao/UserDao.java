@@ -25,7 +25,7 @@ public interface UserDao {
     @Query("SELECT * FROM users")
     List<User> getAll();
 
-    @Query("SELECT * FROM users WHERE userId = :userId LIMIT 1")
+    @Query("SELECT * FROM users WHERE user_id = :userId LIMIT 1")
     User getById(String userId);
 
     @Query("SELECT * FROM users WHERE role = 'USER'")

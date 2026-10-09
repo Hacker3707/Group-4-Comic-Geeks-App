@@ -6,8 +6,11 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
 import java.util.Date;
+
+import vn.edu.ueh.ngocha.squiditytempprj.Model.Converters;
 
 @Entity(
         tableName = "group_members",
@@ -22,6 +25,7 @@ import java.util.Date;
 public class GroupMember {
     @PrimaryKey
     @NonNull
+    @ColumnInfo(name = "membership_id")
     private String membershipId;
 
     @ColumnInfo(name = "user_id")
@@ -34,6 +38,7 @@ public class GroupMember {
     private GroupRole role;
 
     @ColumnInfo(name = "join_date")
+    @TypeConverters(Converters.class)
     private Date joinDate;      // cần TypeConverter Date <-> Long
 
     @ColumnInfo(name = "active")
