@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -23,19 +24,19 @@ public interface UserDao {
     void delete(User user);
 
     @Query("SELECT * FROM users")
-    List<User> getAll();
+    LiveData<List<User>> getAll();
 
     @Query("SELECT * FROM users WHERE user_id = :userId LIMIT 1")
     User getById(String userId);
 
     @Query("SELECT * FROM users WHERE role = 'USER'")
-    List<User> getNormalUsers();
+    LiveData<List<User>> getNormalUsers();
 
     @Query("SELECT * FROM users WHERE role = 'ADMIN'")
-    List<User> getAdmins();
+    LiveData<List<User>> getAdmins();
 
     @Query("SELECT * FROM users WHERE role = 'CREATOR'")
-    List<User> getCreators();
+    LiveData<List<User>> getCreators();
 
     @Query("DELETE FROM users")
     void deleteAll();
