@@ -1,8 +1,11 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
+import android.app.Application;
+
 import java.util.List;
 import java.util.UUID;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.AppDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.FollowDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Follow;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
@@ -11,8 +14,9 @@ public class FollowRepository {
 
     private final FollowDao followDao;
 
-    public FollowRepository(FollowDao followDao) {
-        this.followDao = followDao;
+    public FollowRepository(Application application) {
+        AppDatabase db = AppDatabase.getDatabase(application);
+        followDao = db.followDao();
     }
 
     /**
