@@ -11,7 +11,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.ChatRoomDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.ComicDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.CommentDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.FollowDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.GenreDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.GroupDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.GroupMemberDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.PostDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.MessageDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.NotificationDao;
@@ -42,7 +45,9 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract PostDao postDao();
     public abstract CommentDao commentDao();
     public abstract StampDao stampDao();
-
+    public abstract GroupDao groupDao();
+    public abstract GroupMemberDao groupMemberDao();
+    public abstract FollowDao followDao();
 
 
     public abstract NotificationDao notificationDao();
