@@ -54,9 +54,6 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract NotificationDao notificationDao();
     public abstract MessageDao messageDao();
     public abstract ChatRoomDao chatRoomDao();
-    public abstract FollowDao FollowDao();
-    public abstract GroupDao GroupDao();
-    public abstract GroupMemberDao GroupMemberDao();
 
     private static volatile AppDatabase INSTANCE;
 
