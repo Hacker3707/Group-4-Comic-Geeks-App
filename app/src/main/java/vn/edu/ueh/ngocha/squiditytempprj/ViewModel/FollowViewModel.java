@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import vn.edu.ueh.ngocha.squiditytempprj.Model.AppDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.FollowRepository;
 
@@ -38,8 +37,7 @@ public class FollowViewModel extends AndroidViewModel {
 
     public FollowViewModel(@NonNull Application application) {
         super(application);
-        AppDatabase db = AppDatabase.getDatabase(application);
-        followRepository = new FollowRepository(db.FollowDao());
+        followRepository = new FollowRepository(application);
     }
 
     // =================================

@@ -1,7 +1,10 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
+import android.app.Application;
+
 import java.util.List;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.AppDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.GroupMemberDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupMember;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupRole;
@@ -10,8 +13,8 @@ public class GroupMemberRepository {
 
     private final GroupMemberDao groupMemberDao;
 
-    public GroupMemberRepository(GroupMemberDao groupMemberDao) {
-        this.groupMemberDao = groupMemberDao;
+    public GroupMemberRepository(Application application) {
+        this.groupMemberDao = AppDatabase.getDatabase(application).groupMemberDao();
     }
 
     public void insert(GroupMember member) {

@@ -52,9 +52,9 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract NotificationDao notificationDao();
     public abstract MessageDao messageDao();
     public abstract ChatRoomDao chatRoomDao();
-    public abstract FollowDao FollowDao();
-    public abstract GroupDao GroupDao();
-    public abstract GroupMemberDao GroupMemberDao();
+    public abstract FollowDao followDao();
+    public abstract GroupDao groupDao();
+    public abstract GroupMemberDao groupMemberDao();
 
     private static volatile AppDatabase INSTANCE;
 
@@ -63,7 +63,7 @@ public abstract class AppDatabase extends RoomDatabase {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            AppDatabase.class, "squidity_database")
+                                    AppDatabase.class, "squidity_database")
                             .addCallback(oncreateCallback)
                             .fallbackToDestructiveMigration()
                             .build();
