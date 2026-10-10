@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SquidityTempPrj" >
         <activity
-            android:name=".View.MainActivity"
+            android:name=".View.activity.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize" >
             <intent-filter>
@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".View.TestAPIActivity"
+            android:name=".View.activity.ComicListActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>

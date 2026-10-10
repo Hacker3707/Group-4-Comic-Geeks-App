@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -14,7 +15,7 @@ public interface ReviewDao {
     void insertReview(Review review);
 
     @Query("SELECT * FROM reviews")
-    List<Review> getAllReviews();
+    LiveData<List<Review>> getAllReviews();
 
     @Query("SELECT * FROM reviews WHERE comic_id = :comicId")
     List<Review> getReviewsByComicId(String comicId);

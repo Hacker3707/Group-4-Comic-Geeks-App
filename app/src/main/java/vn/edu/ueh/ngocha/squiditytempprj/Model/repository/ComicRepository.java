@@ -33,4 +33,8 @@ public class ComicRepository {
     }
 
     public void delete(Comic comic) { comicDao.deleteComic(comic); }
+
+    public Comic getComicbyName(String name) {
+        return comicDao.getComicbyName(name);
+    }
 }
