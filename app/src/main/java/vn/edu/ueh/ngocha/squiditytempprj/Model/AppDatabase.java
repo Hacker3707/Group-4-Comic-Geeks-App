@@ -20,6 +20,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.MessageDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.NotificationDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.ReviewDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.StampDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.UserDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.ChatRoom;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
@@ -43,6 +44,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract ComicDao comicDao();
     public abstract GenreDao genreDao();
     public abstract ReviewDao reviewDao();
+    public abstract UserDao userDao();
     public abstract PostDao postDao();
     public abstract CommentDao commentDao();
     public abstract StampDao stampDao();
