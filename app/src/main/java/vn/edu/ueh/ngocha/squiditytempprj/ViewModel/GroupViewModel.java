@@ -45,8 +45,8 @@ public class GroupViewModel extends AndroidViewModel {
     public GroupViewModel(@NonNull Application application) {
         super(application);
         db = AppDatabase.getDatabase(application);
-        groupRepository = new GroupRepository(db.GroupDao());
-        groupMemberRepository = new GroupMemberRepository(db.GroupMemberDao());
+        groupRepository = new GroupRepository(application);
+        groupMemberRepository = new GroupMemberRepository(application);
     }
 
     // =================================

@@ -38,8 +38,7 @@ public class FollowViewModel extends AndroidViewModel {
 
     public FollowViewModel(@NonNull Application application) {
         super(application);
-        AppDatabase db = AppDatabase.getDatabase(application);
-        followRepository = new FollowRepository(db.FollowDao());
+        followRepository = new FollowRepository(application);
     }
 
     // =================================
