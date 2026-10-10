@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -18,7 +19,7 @@ public interface MessageDao {
     void deleteMessage(Message message);
 
     @Query("SELECT * FROM messages WHERE chat_room_id = :chatRoomId ORDER BY timestamp ASC")
-    List<Message> getMessagesByChatRoomId(String chatRoomId);
+    LiveData<List<Message>> getMessagesByChatRoomId(String chatRoomId);
 
     @Query("UPDATE messages SET is_read = 1 WHERE message_id = :messageId")
     void markAsRead(String messageId);
