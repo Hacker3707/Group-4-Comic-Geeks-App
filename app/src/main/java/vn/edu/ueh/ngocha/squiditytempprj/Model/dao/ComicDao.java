@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -15,7 +16,7 @@ public interface ComicDao {
     void insertComic(Comic comic);
 
     @Query("SELECT * FROM comics")
-    List<Comic> getAllComics();
+    LiveData<List<Comic>> getAllComics();
 
     @Delete
     void deleteComic(Comic comic);
@@ -25,5 +26,8 @@ public interface ComicDao {
 
     @Query("SELECT * FROM comics WHERE comic_id = :comicId")
     Comic getComicById(String comicId);
+
+    @Query("SELECT * FROM comics WHERE comic_name = :name")
+    Comic getComicbyName(String name);
 
 }

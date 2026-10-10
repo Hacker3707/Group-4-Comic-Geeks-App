@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -25,7 +26,7 @@ public interface GenreDao {
     Genre getGenreById(String genreId);
 
     @Query("SELECT * FROM genres")
-    List<Genre> getAllGenres();
+    LiveData<List<Genre>> getAllGenres();
 
     @Query("DELETE FROM genres")
     void deleteAll();
