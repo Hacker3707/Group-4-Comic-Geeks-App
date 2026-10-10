@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.AppDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Group;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupMember;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupRole;
@@ -30,6 +31,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.GroupRepository;
  */
 public class GroupViewModel extends AndroidViewModel {
 
+    private final AppDatabase db;
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -42,8 +44,9 @@ public class GroupViewModel extends AndroidViewModel {
 
     public GroupViewModel(@NonNull Application application) {
         super(application);
-        groupRepository = new GroupRepository(application);
-        groupMemberRepository = new GroupMemberRepository(application);
+        db = AppDatabase.getDatabase(application);
+        groupRepository = new GroupRepository(db.GroupDao());
+        groupMemberRepository = new GroupMemberRepository(db.GroupMemberDao());
     }
 
     // =================================
@@ -104,7 +107,11 @@ public class GroupViewModel extends AndroidViewModel {
             GroupMember admin = new GroupMember(
                     UUID.randomUUID().toString(), creatorUserId, groupId, GroupRole.ADMIN);
 
-            groupRepository.createGroupWithAdmin(group, admin);
+            // Insert group trước vì GroupMember có foreign key tới group
+            db.runInTransaction(() -> {
+                groupRepository.insert(group);
+                groupMemberRepository.insert(admin);
+            });
             groups.postValue(groupRepository.getGroupsOfUser(creatorUserId));
         });
     }
@@ -121,7 +128,10 @@ public class GroupViewModel extends AndroidViewModel {
     // Xoá group và toàn bộ thành viên của nó
     public void deleteGroup(Group group) {
         executor.execute(() -> {
-            groupRepository.deleteGroupWithMembers(group);
+            db.runInTransaction(() -> {
+                groupMemberRepository.deleteByGroupId(group.getGroupId());
+                groupRepository.delete(group);
+            });
             groups.postValue(groupRepository.getAll());
         });
     }
