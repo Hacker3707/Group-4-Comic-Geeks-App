@@ -51,20 +51,40 @@ public class UserRepository {
         return creators;
     }
 
-    public void insert(User user) {
-        executor.execute(() -> userDao.insert(user));
+    public void insert(final User user) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                userDao.insert(user);
+            }
+        });
     }
 
-    public void update(User user) {
-        executor.execute(() -> userDao.update(user));
+    public void update(final User user) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                userDao.update(user);
+            }
+        });
     }
 
-    public void delete(User user) {
-        executor.execute(() -> userDao.delete(user));
+    public void delete(final User user) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                userDao.delete(user);
+            }
+        });
     }
 
     public void deleteAll() {
-        executor.execute(() -> userDao.deleteAll());
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                userDao.deleteAll();
+            }
+        });
     }
 
     public void shutdown() {
