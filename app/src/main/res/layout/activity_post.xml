@@ -17,7 +17,6 @@
         android:background="#FFFFFF">
 
         <!-- HEADER CỦA BÀI VIẾT (Màu tím) -->
-        <!-- Thay @color/purple_500 bằng file background gợn sóng SVG của bạn nếu có -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/headerLayout"
             android:layout_width="match_parent"

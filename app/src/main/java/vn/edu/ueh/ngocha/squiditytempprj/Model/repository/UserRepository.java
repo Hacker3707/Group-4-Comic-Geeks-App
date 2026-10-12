@@ -51,6 +51,7 @@ public class UserRepository {
         return creators;
     }
 
+    // Thêm tài khoản
     public void insert(final User user) {
         executor.execute(new Runnable() {
             @Override
@@ -60,6 +61,7 @@ public class UserRepository {
         });
     }
 
+    // Cập nhật tài khoản
     public void update(final User user) {
         executor.execute(new Runnable() {
             @Override
@@ -69,6 +71,7 @@ public class UserRepository {
         });
     }
 
+    // Xóa một tài khoản
     public void delete(final User user) {
         executor.execute(new Runnable() {
             @Override
@@ -78,6 +81,7 @@ public class UserRepository {
         });
     }
 
+    // Xóa toàn bộ tài khoản
     public void deleteAll() {
         executor.execute(new Runnable() {
             @Override
