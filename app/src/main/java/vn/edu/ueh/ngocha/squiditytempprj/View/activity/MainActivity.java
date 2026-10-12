@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
     ImageView imageView;
     Button btnTemp;
+    Button btnProfile;
 
     private View.OnClickListener onComicClickListener = new View.OnClickListener() {
         public void onClick(View v) {
@@ -56,6 +57,16 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.imageView);
         btnTemp = findViewById(R.id.btnTemp);
         btnTemp.setOnClickListener(onComicClickListener);
+        // 2. Ánh xạ nút Profile và thiết lập sự kiện chuyển trang (Intent)
+        btnProfile = findViewById(R.id.btnProfile);
+        btnProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Lệnh chuyển từ MainActivity sang ProfileActivity
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
 
     }
 }
