@@ -56,18 +56,24 @@ public class GroupRepository {
 
     // Tạo group và thêm người tạo làm ADMIN trong cùng 1 transaction
     // (insert group trước vì GroupMember có foreign key tới Group)
-    public void createGroupWithAdmin(Group group, GroupMember admin) {
-        db.runInTransaction(() -> {
-            groupDao.insert(group);
-            groupMemberDao.insert(admin);
+    public void createGroupWithAdmin(final Group group, final GroupMember admin) {
+        db.runInTransaction(new Runnable() {
+            @Override
+            public void run() {
+                groupDao.insert(group);
+                groupMemberDao.insert(admin);
+            }
         });
     }
 
     // Xoá toàn bộ thành viên rồi xoá group trong cùng 1 transaction
-    public void deleteGroupWithMembers(Group group) {
-        db.runInTransaction(() -> {
-            groupMemberDao.deleteByGroupId(group.getGroupId());
-            groupDao.delete(group);
+    public void deleteGroupWithMembers(final Group group) {
+        db.runInTransaction(new Runnable() {
+            @Override
+            public void run() {
+                groupMemberDao.deleteByGroupId(group.getGroupId());
+                groupDao.delete(group);
+            }
         });
     }
 }

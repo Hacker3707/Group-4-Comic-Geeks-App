@@ -12,7 +12,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import vn.edu.ueh.ngocha.squiditytempprj.Model.AppDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Group;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupMember;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupRole;
@@ -25,13 +24,14 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.GroupRepository;
  * kết quả đẩy ra View qua LiveData (postValue).
  *
  * Cách dùng trong Activity/Fragment:
- *   GroupViewModel vm = new ViewModelProvider(this).get(GroupViewModel.class);
- *   vm.getGroups().observe(this, list -> { ... });
- *   vm.loadAllGroups();
+ *   GroupViewModel viewModel = new ViewModelProvider(this).get(GroupViewModel.class);
+ *   viewModel.getGroups().observe(this, new Observer<List<Group>>() {
+ *       public void onChanged(List<Group> groupList) { ... }
+ *   });
+ *   viewModel.loadAllGroups();
  */
 public class GroupViewModel extends AndroidViewModel {
 
-    private final AppDatabase db;
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -44,7 +44,6 @@ public class GroupViewModel extends AndroidViewModel {
 
     public GroupViewModel(@NonNull Application application) {
         super(application);
-        db = AppDatabase.getDatabase(application);
         groupRepository = new GroupRepository(application);
         groupMemberRepository = new GroupMemberRepository(application);
     }
@@ -78,20 +77,44 @@ public class GroupViewModel extends AndroidViewModel {
     // =================================
 
     public void loadAllGroups() {
-        executor.execute(() -> groups.postValue(groupRepository.getAll()));
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Group> result = groupRepository.getAll();
+                groups.postValue(result);
+            }
+        });
     }
 
-    public void searchGroups(String keyword) {
-        executor.execute(() -> groups.postValue(groupRepository.searchByName(keyword)));
+    public void searchGroups(final String keyword) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Group> result = groupRepository.searchByName(keyword);
+                groups.postValue(result);
+            }
+        });
     }
 
     // Các group mà user đang tham gia (chỉ tính thành viên còn active)
-    public void loadGroupsOfUser(String userId) {
-        executor.execute(() -> groups.postValue(groupRepository.getGroupsOfUser(userId)));
+    public void loadGroupsOfUser(final String userId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Group> result = groupRepository.getGroupsOfUser(userId);
+                groups.postValue(result);
+            }
+        });
     }
 
-    public void loadGroup(String groupId) {
-        executor.execute(() -> selectedGroup.postValue(groupRepository.getById(groupId)));
+    public void loadGroup(final String groupId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Group result = groupRepository.getById(groupId);
+                selectedGroup.postValue(result);
+            }
+        });
     }
 
     // =================================
@@ -99,40 +122,43 @@ public class GroupViewModel extends AndroidViewModel {
     // =================================
 
     // Tạo group mới, người tạo tự động là ADMIN của group
-    public void createGroup(String groupName, String description, String coverImageUrl,
-                            String creatorUserId) {
-        executor.execute(() -> {
-            String groupId = UUID.randomUUID().toString();
-            Group group = new Group(groupId, groupName, description, coverImageUrl);
-            GroupMember admin = new GroupMember(
-                    UUID.randomUUID().toString(), creatorUserId, groupId, GroupRole.ADMIN);
+    public void createGroup(final String groupName, final String description,
+                            final String coverImageUrl, final String creatorUserId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                String groupId = UUID.randomUUID().toString();
+                Group group = new Group(groupId, groupName, description, coverImageUrl);
+                GroupMember admin = new GroupMember(
+                        UUID.randomUUID().toString(), creatorUserId, groupId, GroupRole.ADMIN);
 
-            // Insert group trước vì GroupMember có foreign key tới group
-            db.runInTransaction(() -> {
-                groupRepository.insert(group);
-                groupMemberRepository.insert(admin);
-            });
-            groups.postValue(groupRepository.getGroupsOfUser(creatorUserId));
+                // Insert group + admin trong cùng 1 transaction (xử lý trong repository)
+                groupRepository.createGroupWithAdmin(group, admin);
+                groups.postValue(groupRepository.getGroupsOfUser(creatorUserId));
+            }
         });
     }
 
-    public void updateGroupInfo(Group group, String groupName, String description,
-                                String coverImageUrl) {
-        executor.execute(() -> {
-            group.updateGroupInfo(groupName, description, coverImageUrl);
-            groupRepository.update(group);
-            selectedGroup.postValue(group);
+    public void updateGroupInfo(final Group group, final String groupName,
+                                final String description, final String coverImageUrl) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                group.updateGroupInfo(groupName, description, coverImageUrl);
+                groupRepository.update(group);
+                selectedGroup.postValue(group);
+            }
         });
     }
 
     // Xoá group và toàn bộ thành viên của nó
-    public void deleteGroup(Group group) {
-        executor.execute(() -> {
-            db.runInTransaction(() -> {
-                groupMemberRepository.deleteByGroupId(group.getGroupId());
-                groupRepository.delete(group);
-            });
-            groups.postValue(groupRepository.getAll());
+    public void deleteGroup(final Group group) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                groupRepository.deleteGroupWithMembers(group);
+                groups.postValue(groupRepository.getAll());
+            }
         });
     }
 
@@ -140,48 +166,69 @@ public class GroupViewModel extends AndroidViewModel {
     // GroupMember: thành viên
     // =================================
 
-    public void loadMembers(String groupId) {
-        executor.execute(() -> {
-            members.postValue(groupMemberRepository.getActiveMembersByGroup(groupId));
-            memberCount.postValue(groupMemberRepository.countActiveMembers(groupId));
+    public void loadMembers(final String groupId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<GroupMember> memberList = groupMemberRepository.getActiveMembersByGroup(groupId);
+                int total = groupMemberRepository.countActiveMembers(groupId);
+                members.postValue(memberList);
+                memberCount.postValue(total);
+            }
         });
     }
 
     // Tham gia group. Nếu trước đó đã rời group thì kích hoạt lại bản ghi cũ.
-    public void joinGroup(String userId, String groupId) {
-        executor.execute(() -> {
-            GroupMember existing = groupMemberRepository.getMembership(userId, groupId);
-            if (existing == null) {
-                groupMemberRepository.insert(new GroupMember(
-                        UUID.randomUUID().toString(), userId, groupId, GroupRole.MEMBER));
-            } else if (!existing.isActive()) {
-                existing.setActive(true);
-                existing.setRole(GroupRole.MEMBER);
-                groupMemberRepository.update(existing);
+    public void joinGroup(final String userId, final String groupId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                GroupMember existing = groupMemberRepository.getMembership(userId, groupId);
+                if (existing == null) {
+                    groupMemberRepository.insert(new GroupMember(
+                            UUID.randomUUID().toString(), userId, groupId, GroupRole.MEMBER));
+                } else if (!existing.isActive()) {
+                    existing.setActive(true);
+                    existing.setRole(GroupRole.MEMBER);
+                    groupMemberRepository.update(existing);
+                }
+                // Đã là thành viên active thì không làm gì
+                loadMembers(groupId);
             }
-            // Đã là thành viên active thì không làm gì
-            loadMembers(groupId);
         });
     }
 
     // Rời group hoặc admin xoá thành viên (đánh dấu active = false, không xoá hẳn)
-    public void removeMember(String membershipId, String groupId) {
-        executor.execute(() -> {
-            groupMemberRepository.removeMember(membershipId);
-            loadMembers(groupId);
+    public void removeMember(final String membershipId, final String groupId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                groupMemberRepository.removeMember(membershipId);
+                loadMembers(groupId);
+            }
         });
     }
 
-    public void changeRole(String membershipId, GroupRole newRole, String groupId) {
-        executor.execute(() -> {
-            groupMemberRepository.changeRole(membershipId, newRole);
-            loadMembers(groupId);
+    public void changeRole(final String membershipId, final GroupRole newRole,
+                           final String groupId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                groupMemberRepository.changeRole(membershipId, newRole);
+                loadMembers(groupId);
+            }
         });
     }
 
     // Kiểm tra user có phải admin của group không (để ẩn/hiện nút quản lý)
-    public void checkAdmin(String userId, String groupId) {
-        executor.execute(() -> isAdmin.postValue(groupMemberRepository.isAdmin(userId, groupId)));
+    public void checkAdmin(final String userId, final String groupId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                boolean result = groupMemberRepository.isAdmin(userId, groupId);
+                isAdmin.postValue(result);
+            }
+        });
     }
 
     @Override

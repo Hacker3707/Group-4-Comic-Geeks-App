@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import vn.edu.ueh.ngocha.squiditytempprj.Model.AppDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.FollowRepository;
 
@@ -21,9 +20,11 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.FollowRepository;
  * kết quả đẩy ra View qua LiveData (postValue).
  *
  * Cách dùng trong Activity/Fragment:
- *   FollowViewModel vm = new ViewModelProvider(this).get(FollowViewModel.class);
- *   vm.getFollowers().observe(this, list -> { ... });
- *   vm.loadFollowers(userId);
+ *   FollowViewModel viewModel = new ViewModelProvider(this).get(FollowViewModel.class);
+ *   viewModel.getFollowers().observe(this, new Observer<List<User>>() {
+ *       public void onChanged(List<User> users) { ... }
+ *   });
+ *   viewModel.loadFollowers(userId);
  */
 public class FollowViewModel extends AndroidViewModel {
 
@@ -69,42 +70,70 @@ public class FollowViewModel extends AndroidViewModel {
     // Load dữ liệu
     // =================================
 
-    public void loadFollowers(String userId) {
-        executor.execute(() -> followers.postValue(followRepository.getFollowers(userId)));
+    public void loadFollowers(final String userId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<User> result = followRepository.getFollowers(userId);
+                followers.postValue(result);
+            }
+        });
     }
 
-    public void loadFollowing(String userId) {
-        executor.execute(() -> following.postValue(followRepository.getFollowing(userId)));
+    public void loadFollowing(final String userId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<User> result = followRepository.getFollowing(userId);
+                following.postValue(result);
+            }
+        });
     }
 
-    public void loadCounts(String userId) {
-        executor.execute(() -> {
-            followerCount.postValue(followRepository.countFollowers(userId));
-            followingCount.postValue(followRepository.countFollowing(userId));
+    public void loadCounts(final String userId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                int totalFollowers = followRepository.countFollowers(userId);
+                int totalFollowing = followRepository.countFollowing(userId);
+                followerCount.postValue(totalFollowers);
+                followingCount.postValue(totalFollowing);
+            }
         });
     }
 
     // Kiểm tra currentUserId có đang follow targetUserId không (để đổi nút Follow/Unfollow)
-    public void checkFollowing(String currentUserId, String targetUserId) {
-        executor.execute(() ->
-                isFollowing.postValue(followRepository.isFollowing(currentUserId, targetUserId)));
+    public void checkFollowing(final String currentUserId, final String targetUserId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                boolean result = followRepository.isFollowing(currentUserId, targetUserId);
+                isFollowing.postValue(result);
+            }
+        });
     }
 
     // =================================
     // Hành động
     // =================================
 
-    public void follow(String currentUserId, String targetUserId) {
-        executor.execute(() -> {
-            followRepository.follow(currentUserId, targetUserId);
-            refresh(currentUserId, targetUserId);
+    public void follow(final String currentUserId, final String targetUserId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                followRepository.follow(currentUserId, targetUserId);
+                refresh(currentUserId, targetUserId);
+            }
         });
     }
 
-    public void unfollow(String currentUserId, String targetUserId) {
-        executor.execute(() -> {
-            followRepository.unfollow(currentUserId, targetUserId);
-            refresh(currentUserId, targetUserId);
+    public void unfollow(final String currentUserId, final String targetUserId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                followRepository.unfollow(currentUserId, targetUserId);
+                refresh(currentUserId, targetUserId);
+            }
         });
     }
 
