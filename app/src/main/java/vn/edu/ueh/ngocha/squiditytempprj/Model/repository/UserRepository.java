@@ -51,20 +51,44 @@ public class UserRepository {
         return creators;
     }
 
-    public void insert(User user) {
-        executor.execute(() -> userDao.insert(user));
+    // Thêm tài khoản
+    public void insert(final User user) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                userDao.insert(user);
+            }
+        });
     }
 
-    public void update(User user) {
-        executor.execute(() -> userDao.update(user));
+    // Cập nhật tài khoản
+    public void update(final User user) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                userDao.update(user);
+            }
+        });
     }
 
-    public void delete(User user) {
-        executor.execute(() -> userDao.delete(user));
+    // Xóa một tài khoản
+    public void delete(final User user) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                userDao.delete(user);
+            }
+        });
     }
 
+    // Xóa toàn bộ tài khoản
     public void deleteAll() {
-        executor.execute(() -> userDao.deleteAll());
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                userDao.deleteAll();
+            }
+        });
     }
 
     public void shutdown() {
