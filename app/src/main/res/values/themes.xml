@@ -6,4 +6,19 @@
     </style>
 
     <style name="Theme.SquidityTempPrj" parent="Base.Theme.SquidityTempPrj" />
+
+    <style name="Theme.SquidityTempPrj.Starting"
+        parent="Theme.SplashScreen">
+
+        <item name="windowSplashScreenBackground">#302060</item>
+
+        <item name="windowSplashScreenAnimatedIcon">
+            @drawable/splash_transparent
+        </item>
+
+        <item name="postSplashScreenTheme">
+            @style/Theme.SquidityTempPrj
+        </item>
+    </style>
+
 </resources>

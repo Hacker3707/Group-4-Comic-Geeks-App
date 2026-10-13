@@ -18,7 +18,8 @@
 
         <activity
             android:name=".View.activity.WelcomeActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.SquidityTempPrj.Starting">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,10 +31,8 @@
             android:name=".View.activity.ComicListActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
         <activity
-            android:name=".View.activity.GroupActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
             android:name=".View.activity.ProfileActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

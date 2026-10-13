@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="407dp"
+        android:layout_height="241dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imgvAvatar"
+            android:layout_width="match_parent"
+            android:layout_height="241dp"
+            android:src="@drawable/ic_launcher_background"
+            android:contentDescription="Drawer header background"
+            android:scaleType="centerCrop" />
+
+        <!-- Avatar nằm chính giữa hình nền -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageView4"
+            android:layout_width="132dp"
+            android:layout_height="133dp"
+            android:layout_gravity="center"
+            android:contentDescription="User avatar"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+            app:strokeColor="#FFFFFF"
+            app:strokeWidth="3dp"
+            tools:src="@tools:sample/avatars" />
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
