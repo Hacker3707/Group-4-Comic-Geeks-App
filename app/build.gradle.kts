@@ -46,5 +46,7 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.glide)
     implementation(libs.lottie)
+    implementation(libs.core.splashscreen)
     annotationProcessor(libs.compiler)
+
 }

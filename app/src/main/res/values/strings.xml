@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Squidity</string>
+    <string name="base_url">https://api.mangadex.org</string>
+    <array name="nav_actions">
+        <item>My Profile</item>
+        <item>Collections</item>
+        <item>Chats</item>
+        <item>Groups</item>
+        <item>Settings</item>
+    </array>
 </resources>

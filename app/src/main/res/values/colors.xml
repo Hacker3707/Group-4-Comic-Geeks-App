@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="grey">#FF808080</color>
+    <color name="red">#FFFF0000</color>
+    <color name="squidity_ahhlightpurple">#e2c9ff</color>
+    <color name="squidity_lightpurple">#dec5fa</color>
+    <color name="squidity_purple">#9f6fd6</color>
 </resources>
