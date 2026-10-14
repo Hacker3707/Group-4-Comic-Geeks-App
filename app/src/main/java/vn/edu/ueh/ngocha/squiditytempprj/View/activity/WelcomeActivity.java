@@ -15,6 +15,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.MainActivity;
@@ -51,6 +53,11 @@ public class WelcomeActivity extends AppCompatActivity {
         inkAnimation = findViewById(R.id.inkAnimation);
         inkAnimation.setAnimation(R.raw.splash_circle);
 
+        // Khởi tạo FirebaseFirestore
+        FirebaseFirestore db;
+        FirebaseApp.initializeApp(this);
+
+        // Chuyển đến Home sau 2.5s
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -78,6 +85,11 @@ public class WelcomeActivity extends AppCompatActivity {
                 startActivity(intent);
 
                 // Không cho quay lại WelcomeActivity bằng nút Back
+                overridePendingTransition(
+                        R.anim.fade_in,
+                        R.anim.fade_out
+                );
+
                 finish();
             }
 

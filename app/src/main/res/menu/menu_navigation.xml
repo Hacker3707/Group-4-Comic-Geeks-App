@@ -33,13 +33,23 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/action_comic"
+        android:fontFamily="@font/jersey25_regular"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:layout_gravity="center"
+        android:layout_margin="15dp"
+        android:orderInCategory="30"
+        android:title="Comics"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_setting"
         android:fontFamily="@font/jersey25_regular"
         android:icon="@android:drawable/ic_menu_manage"
         android:layout_gravity="center"
         android:layout_margin="15dp"
         android:orderInCategory="30"
-        android:title="Settings"
+        android:title="@string/settings"
         app:showAsAction="ifRoom" />
 
 </menu>
