@@ -23,6 +23,24 @@
         app:strokeColor="#FFFFFF"
         app:strokeWidth="2dp" />
 
+
+    <TextView
+        android:id="@+id/tvHeaderUsername"
+        android:layout_width="82dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text=""
+        android:textColor="@color/white"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/imgvAvatar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+
     <TextView
         android:id="@+id/tvAppBarTitle"
         android:layout_width="116dp"

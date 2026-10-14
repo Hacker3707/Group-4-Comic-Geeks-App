@@ -40,4 +40,10 @@ public interface UserDao {
 
     @Query("DELETE FROM users")
     void deleteAll();
+
+    @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
+    User getByEmail(String email);
+
+    @Query("SELECT COUNT(*) FROM users WHERE email = :email")
+    int countByEmail(String email);
 }
