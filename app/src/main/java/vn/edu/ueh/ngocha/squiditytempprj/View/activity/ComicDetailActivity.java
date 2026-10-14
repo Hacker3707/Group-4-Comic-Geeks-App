@@ -2,6 +2,7 @@ package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -17,12 +18,16 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.google.android.flexbox.FlexboxLayout;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaAttributes;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Relationship;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Tag;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.MangaDexRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
@@ -43,6 +48,7 @@ public class ComicDetailActivity extends AppCompatActivity {
     ImageButton btnBack;
 
     ComicDetailViewModel viewModel;
+    FlexboxLayout layoutComicGenres;
 
     View.OnClickListener onBackClickListener = new View.OnClickListener() {
         @Override
@@ -77,6 +83,7 @@ public class ComicDetailActivity extends AppCompatActivity {
         txtLastVolume = findViewById(R.id.txtComicLastVolume);
         txtLastChapter = findViewById(R.id.txtComicLastChapter);
         btnBack = findViewById(R.id.imgbtnBack);
+        layoutComicGenres = findViewById(R.id.layoutComicGenres);
 
         btnBack.setOnClickListener(onBackClickListener);
 
@@ -127,10 +134,36 @@ public class ComicDetailActivity extends AppCompatActivity {
 
         MangaAttributes attributes = mangaData.getAttributes();
 
+
+        List<String> genres = new ArrayList<>();
+
+        if (attributes.getTags() != null) {
+            for (Tag tag : attributes.getTags()) {
+                if (tag.getAttributes() != null
+                        && "genre".equals(tag.getAttributes().getGroup())) {
+
+                    Map<String, String> names =
+                            tag.getAttributes().getName();
+
+                    if (names != null) {
+                        String genreName = names.get("en");
+
+                        if (genreName != null && !genreName.isEmpty()) {
+                            genres.add(genreName);
+                        }
+                    }
+                }
+            }
+        }
+
+        displayGenres(genres);
+
         txtName.setText(getLocalizedText(attributes.getTitle()));
         txtDescription.setText(
                 getLocalizedText(attributes.getDescription())
         );
+
+
 
 
         txtStatus.setText(
@@ -198,6 +231,8 @@ public class ComicDetailActivity extends AppCompatActivity {
                     hasAuthor = true;
                 }
 
+
+
             }
         }
 
@@ -247,4 +282,26 @@ public class ComicDetailActivity extends AppCompatActivity {
                 "Last chapter: " + valueOrDefault(comic.getLastChapter())
         );
     }
+
+    private void displayGenres(List<String> genres) {
+        layoutComicGenres.removeAllViews();
+
+        if (genres == null || genres.isEmpty()) {
+            return;
+        }
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+
+        for (String genre : genres) {
+            TextView genreView = (TextView) inflater.inflate(
+                    R.layout.comic_genre_item,
+                    layoutComicGenres,
+                    false
+            );
+
+            genreView.setText(genre);
+            layoutComicGenres.addView(genreView);
+        }
+    }
+
 }

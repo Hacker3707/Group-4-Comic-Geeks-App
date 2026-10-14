@@ -140,6 +140,15 @@
                         android:textSize="15sp" />
 
                     <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="@font/jersey25_regular"
+                        android:text="Status"
+                        android:textColor="#49316B"
+                        android:textSize="20sp" />
+
+                    <TextView
                         android:id="@+id/txtComicStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -187,29 +196,6 @@
                         app:alignItems="center"
                         app:justifyContent="flex_start">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginBottom="8dp"
-                            android:background="@drawable/bg_comic_chip"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="7dp"
-                            android:text="Action"
-                            android:textColor="#49316B"
-                            android:textSize="13sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginBottom="8dp"
-                            android:background="@drawable/bg_comic_chip"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="7dp"
-                            android:text="Fantasy"
-                            android:textColor="#49316B"
-                            android:textSize="13sp" />
 
                     </com.google.android.flexbox.FlexboxLayout>
 
