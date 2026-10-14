@@ -27,7 +27,7 @@ public interface ComicDao {
     @Query("SELECT * FROM comics WHERE comic_id = :comicId")
     Comic getComicById(String comicId);
 
-    @Query("SELECT * FROM comics WHERE comic_name = :name")
-    Comic getComicbyName(String name);
+    @Query("SELECT * FROM comics WHERE comic_name = :name LIMIT 1")
+    LiveData<Comic> getComicbyName(String name);
 
 }

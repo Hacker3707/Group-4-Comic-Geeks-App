@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.holder;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -9,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ComicDetailActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicAdapter;
 
 public class ComicViewHolder extends RecyclerView.ViewHolder
@@ -18,7 +21,7 @@ implements View.OnClickListener {
     private Comic comic;
     public ImageView imgcomiccover;
     public TextView txtcomicname;
-
+    private Context context;
 
     public ComicViewHolder(@NonNull View itemView, ComicAdapter adapter) {
         super(itemView);
