@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -28,7 +29,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.api.MangaDexApi;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.api.RetrofitClient;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaResponse;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Relationship;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicAdapter;
 
@@ -40,6 +43,7 @@ public class ComicListActivity extends AppCompatActivity {
     private EditText etSearch;
     private ImageView btnSearch;
     private TextView tvSearchResult;
+    private Spinner spnSearchOpt;
 
     NavigationView navigationView;
     ImageView imgvAvatar;
@@ -77,6 +81,7 @@ public class ComicListActivity extends AppCompatActivity {
         imgvAvatar = findViewById(R.id.imgvAvatar);
         btnSearch = findViewById(R.id.btnSearch);
         tvSearchResult = findViewById(R.id.tvSearchResult);
+        spnSearchOpt = findViewById(R.id.spn_searchopt);
 
         btnSearch.setOnClickListener(onSearchClickListener);
 
@@ -90,6 +95,7 @@ public class ComicListActivity extends AppCompatActivity {
                         );
 
                         intent.putExtra("comic_id", comicId);
+                        intent.putExtra("search_option", "MangaDex");
 
                         startActivity(intent);
                     }
