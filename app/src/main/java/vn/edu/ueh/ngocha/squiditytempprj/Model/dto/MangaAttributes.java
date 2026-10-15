@@ -10,7 +10,6 @@ public class MangaAttributes {
     private Map<String, String> title;
     private List<Map<String, String>> altTitles;
     private Map<String, String> description;
-
     private String originalLanguage;
     private String lastVolume;
     private String lastChapter;

@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -17,20 +18,28 @@ import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
 
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.api.MangaDexApi;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.api.RetrofitClient;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaResponse;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Relationship;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ComicViewModel;
 
 public class ComicListActivity extends AppCompatActivity {
 
@@ -40,9 +49,43 @@ public class ComicListActivity extends AppCompatActivity {
     private EditText etSearch;
     private ImageView btnSearch;
     private TextView tvSearchResult;
+    private Spinner spnSearchOpt;
 
     NavigationView navigationView;
     ImageView imgvAvatar;
+
+    private ComicViewModel comicViewModel;
+
+    private int currentOffset = 0;
+    private final int PAGE_SIZE = 20;
+    private boolean isLoading = false;
+    private boolean isLastPage = false;
+
+    private RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+            if (dy <= 0 || isLoading || isLastPage) {
+                return;
+            }
+
+            LinearLayoutManager layoutManager =
+                    (LinearLayoutManager) recyclerView.getLayoutManager();
+
+            if (layoutManager == null) {
+                return;
+            }
+
+            int lastVisible =
+                    layoutManager.findLastVisibleItemPosition();
+
+            int totalItems = layoutManager.getItemCount();
+
+            if (lastVisible >= totalItems - 5) {
+                loadMoreManga();
+            }
+        }
+    };
 
     private View.OnClickListener onProfileClickListener = new View.OnClickListener() {
         public void onClick(View v) {
@@ -77,8 +120,24 @@ public class ComicListActivity extends AppCompatActivity {
         imgvAvatar = findViewById(R.id.imgvAvatar);
         btnSearch = findViewById(R.id.btnSearch);
         tvSearchResult = findViewById(R.id.tvSearchResult);
+        spnSearchOpt = findViewById(R.id.spn_searchopt);
 
         btnSearch.setOnClickListener(onSearchClickListener);
+        imgvAvatar.setOnClickListener(onProfileClickListener);
+        rcvcomic.addOnScrollListener(scrollListener);
+
+        comicViewModel = new ViewModelProvider(this)
+                .get(ComicViewModel.class);
+
+        comicViewModel.getMangaList().observe(this,
+                new Observer<List<MangaData>>() {
+                    @Override
+                    public void onChanged(List<MangaData> mangaDataList) {
+                        if (mangaDataList != null) {
+                            comicAdapter.setMangaList(mangaDataList);
+                        }
+                    }
+                });
 
         comicAdapter = new ComicAdapter(
                 new ComicAdapter.OnComicClickListener() {
@@ -90,6 +149,7 @@ public class ComicListActivity extends AppCompatActivity {
                         );
 
                         intent.putExtra("comic_id", comicId);
+                        intent.putExtra("search_option", "MangaDex");
 
                         startActivity(intent);
                     }
@@ -104,38 +164,15 @@ public class ComicListActivity extends AppCompatActivity {
     }
 
     public void loadComicwithMangaDex(String searchQuery) {
-        MangaDexApi api = RetrofitClient.getMangaDexApi();
+        currentOffset = 0;
+        isLoading = false;
+        isLastPage = false;
 
-        Call<MangaResponse> call =
-                api.searchManga(searchQuery, 5, 0, "cover_art");
-        call.enqueue(new Callback<MangaResponse>() {
+        comicViewModel.searchComicswithMangaDex(searchQuery);
+    }
 
-            @Override
-            public void onResponse(
-                    Call<MangaResponse> call,
-                    Response<MangaResponse> response) {
-
-                if (response.isSuccessful() && response.body() != null) {
-                    MangaResponse mangaResponse = response.body();
-
-                    if (mangaResponse != null && mangaResponse.getData() != null) {
-                        comicAdapter.setMangaList(mangaResponse.getData());
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(
-                    Call<MangaResponse> call,
-                    Throwable t) {
-
-                Log.e(
-                        "MANGADEX",
-                        "API ERROR",
-                        t
-                );
-            }
-        });
+    public void loadMoreManga() {
+        comicViewModel.loadNextPage();
     }
 
 }
