@@ -22,6 +22,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
     public TextView tvCommentCount;
     public ImageView btnStamp;
     public EditText edtQuickComment;
+    public ImageView btnSendComment;
 
     public PostViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -44,5 +45,6 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
 
         // 4. Ánh xạ Comment
         edtQuickComment = itemView.findViewById(R.id.edtQuickComment);
+        btnSendComment = itemView.findViewById(R.id.btnSendComment);
     }
 }
