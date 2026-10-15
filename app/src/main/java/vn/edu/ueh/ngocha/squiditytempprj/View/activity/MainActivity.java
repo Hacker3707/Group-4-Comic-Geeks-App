@@ -102,7 +102,12 @@ public class MainActivity extends AppCompatActivity {
                             // Xử lý mở Chat
 
                         } else if (id == R.id.action_group) {
-                            // Xử lý mở Groups
+                            // Mở màn hình Groups
+                            Intent intent = new Intent(
+                                    MainActivity.this,
+                                    GroupActivity.class
+                            );
+                            startActivity(intent);
 
                         } else if (id == R.id.action_setting) {
                             // Xử lý mở Settings
