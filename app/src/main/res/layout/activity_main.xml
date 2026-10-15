@@ -13,9 +13,29 @@
     android:id="@+id/main"
     tools:context=".View.activity.MainActivity">
 
-        <include
-            android:id="@+id/appBar"
-            layout="@layout/layout_app_bar" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+                <include
+                    android:id="@+id/appBar"
+                    layout="@layout/layout_app_bar" />
+
+                <ImageButton
+                    android:id="@+id/btnSearch"
+                    android:layout_width="51dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="62dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/bookmark_bg"
+                    android:contentDescription="Search"
+                    android:padding="8dp"
+                    android:src="@android:drawable/ic_menu_search"
+                    app:tint="@color/white" />
+        </FrameLayout>
 
         <!-- Nội dung màn hình chính -->
         <FrameLayout
@@ -27,7 +47,8 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rcv_postlist"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_squidity"/>
         </FrameLayout>
 
 
