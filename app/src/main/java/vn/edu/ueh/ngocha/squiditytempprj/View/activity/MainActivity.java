@@ -78,6 +78,8 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
 
             } else if (id == R.id.action_chat) {
+                startActivity(new Intent(MainActivity.this, ChatListActivity.class));
+
                 // Xử lý mở Chat
 
             } else if (id == R.id.action_group) {

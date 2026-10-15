@@ -35,6 +35,13 @@
             android:name=".View.activity.ComicDetailActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".View.activity.ChatListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".View.activity.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
