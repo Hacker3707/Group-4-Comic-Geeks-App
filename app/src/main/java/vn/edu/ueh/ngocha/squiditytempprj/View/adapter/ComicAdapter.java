@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +19,20 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Relationship;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ComicDetailActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.holder.ComicViewHolder;
 
 public class ComicAdapter extends RecyclerView.Adapter<ComicViewHolder>{
     private List<MangaData> mangaList = new ArrayList<>();
+    public interface OnComicClickListener {
+        void onComicClick(String comicId);
+    }
 
+    private OnComicClickListener listener;
+
+    public ComicAdapter(OnComicClickListener listener) {
+        this.listener = listener;
+    }
     public void setMangaList(List<MangaData> mangaList) {
         this.mangaList = mangaList;
         notifyDataSetChanged();
@@ -88,6 +99,17 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicViewHolder>{
                 .error(R.drawable.comic_background)
                 .centerCrop()
                 .into(holder.imgcomiccover);
+
+        holder.itemView.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (listener != null) {
+                            listener.onComicClick(manga.getId());
+                        }
+                    }
+                }
+        );
 
     }
 
