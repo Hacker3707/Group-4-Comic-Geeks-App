@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Màu riêng cho popup thông báo, đặt tên ntf_* để không đụng colors.xml của nhóm -->
+    <color name="ntf_unread_bg">#F0E4FF</color>
+    <color name="ntf_dot">#9F6FD6</color>
+    <color name="ntf_text">#2B2150</color>
+    <color name="ntf_text_hint">#8E84AD</color>
+</resources>
