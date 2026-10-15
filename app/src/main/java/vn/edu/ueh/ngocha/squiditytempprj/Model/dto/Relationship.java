@@ -1,12 +1,15 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Relationship {
 
     private String id;
     private String type;
     private String related;
-    private CoverAttributes attributes;
 
+    @SerializedName("attributes")
+    private RelationshipAttributes attributes;
 
     public String getId() {
         return id;
@@ -20,7 +23,7 @@ public class Relationship {
         return related;
     }
 
-    public CoverAttributes getAttributes() {
+    public RelationshipAttributes getAttributes() {
         return attributes;
     }
 }

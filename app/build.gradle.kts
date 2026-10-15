@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -35,6 +36,7 @@ dependencies {
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
+    implementation(libs.firebase.firestore)
     implementation(libs.material)
     implementation(libs.recyclerview)
     implementation(libs.room.runtime)
@@ -48,5 +50,6 @@ dependencies {
     implementation(libs.lottie)
     implementation(libs.core.splashscreen)
     annotationProcessor(libs.compiler)
+    implementation(libs.flexbox)
 
 }
