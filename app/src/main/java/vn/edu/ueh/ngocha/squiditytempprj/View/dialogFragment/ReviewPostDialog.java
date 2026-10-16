@@ -73,9 +73,6 @@ public class ReviewPostDialog extends DialogFragment {
             Review review = new Review(comicId, userId, content, rating);
             reviewViewModel.insert(review);
 
-            // TODO: Gửi rating và content đến ViewModel/Repository
-            // để lưu review vào database.
-
             Toast.makeText(
                     requireContext(),
                     "Review information is ready!",
