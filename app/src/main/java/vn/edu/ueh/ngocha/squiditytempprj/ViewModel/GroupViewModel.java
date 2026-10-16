@@ -124,11 +124,20 @@ public class GroupViewModel extends AndroidViewModel {
     // Tạo group mới, người tạo tự động là ADMIN của group
     public void createGroup(final String groupName, final String description,
                             final String coverImageUrl, final String creatorUserId) {
+        createGroup(groupName, description, coverImageUrl, "", creatorUserId);
+    }
+
+    // Bản có thêm ảnh đại diện. Lưu luôn người tạo để biết ai là "admin nhỏ" của nhóm
+    public void createGroup(final String groupName, final String description,
+                            final String coverImageUrl, final String avatarUrl,
+                            final String creatorUserId) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 String groupId = UUID.randomUUID().toString();
                 Group group = new Group(groupId, groupName, description, coverImageUrl);
+                group.setAvatarUrl(avatarUrl);
+                group.setCreatorId(creatorUserId);
                 GroupMember admin = new GroupMember(
                         UUID.randomUUID().toString(), creatorUserId, groupId, GroupRole.ADMIN);
 
@@ -145,6 +154,20 @@ public class GroupViewModel extends AndroidViewModel {
             @Override
             public void run() {
                 group.updateGroupInfo(groupName, description, coverImageUrl);
+                groupRepository.update(group);
+                selectedGroup.postValue(group);
+            }
+        });
+    }
+
+    // Bản có thêm ảnh đại diện (dùng ở trang cài đặt nhóm)
+    public void updateGroupInfo(final Group group, final String groupName,
+                                final String description, final String coverImageUrl,
+                                final String avatarUrl) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                group.updateGroupInfo(groupName, description, coverImageUrl, avatarUrl);
                 groupRepository.update(group);
                 selectedGroup.postValue(group);
             }

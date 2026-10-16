@@ -21,6 +21,14 @@ public class Group {
     @ColumnInfo(name = "cover_image_url")
     private String coverImageUrl;
 
+    // Ảnh đại diện của nhóm (link ảnh)
+    @ColumnInfo(name = "avatar_url")
+    private String avatarUrl;
+
+    // userId của người tạo nhóm ("admin nhỏ"), dùng để kiểm tra quyền cài đặt nhóm
+    @ColumnInfo(name = "creator_id")
+    private String creatorId;
+
     public Group(@NonNull String groupId, String groupName, String description, String coverImageUrl) {
         this.groupId = groupId;
         this.groupName = groupName;
@@ -36,6 +44,13 @@ public class Group {
         this.groupName = groupName;
         this.description = description;
         this.coverImageUrl = coverImageUrl;
+    }
+
+    // Bản có thêm ảnh đại diện
+    public void updateGroupInfo(String groupName, String description, String coverImageUrl,
+                                String avatarUrl) {
+        updateGroupInfo(groupName, description, coverImageUrl);
+        this.avatarUrl = avatarUrl;
     }
 
     public void deleteGroup() {
@@ -63,6 +78,14 @@ public class Group {
         return coverImageUrl;
     }
 
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public String getCreatorId() {
+        return creatorId;
+    }
+
     // =================================
     // Setter methods for each field
     // =================================
@@ -81,5 +104,13 @@ public class Group {
 
     public void setCoverImageUrl(String coverImageUrl) {
         this.coverImageUrl = coverImageUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
     }
 }
