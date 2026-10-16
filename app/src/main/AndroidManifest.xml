@@ -32,6 +32,9 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".View.activity.CreatePostActivity"
+            android:exported="false" />
+
             android:name=".View.activity.ComicDetailActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

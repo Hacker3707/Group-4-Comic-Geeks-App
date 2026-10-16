@@ -38,6 +38,9 @@ public class PostViewModel extends AndroidViewModel {
     public void addComment(Comment comment) {
         commentRepository.insert(comment);
     }
+    public LiveData<List<Comment>> getCommentsByPostId(String postId) {
+        return commentRepository.getCommentsByPostId(postId);
+    }
     public void addStamp(Stamp stamp) {
         stampRepository.insert(stamp);
     }

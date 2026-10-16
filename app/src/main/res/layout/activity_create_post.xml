@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <!-- THANH TOOLBAR (Có nút Đăng bài) -->
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#2F2148"
+        app:contentInsetStart="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/btnCancelPost"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="#FFFFFF"
+                android:layout_centerVertical="true"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tạo bài viết"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_centerInParent="true"/>
+
+            <Button
+                android:id="@+id/btnPublish"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="ĐĂNG"
+                android:textColor="#493373"
+                android:backgroundTint="#FFB3C6"
+                app:cornerRadius="18dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="16dp"/>
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <!-- THÔNG TIN NGƯỜI ĐĂNG -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imgCreatorAvatar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="#D1C4E9"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Meringoc_17"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            android:layout_marginStart="12dp"/>
+    </LinearLayout>
+
+    <!-- VÙNG NHẬP NỘI DUNG (EditText) -->
+    <EditText
+        android:id="@+id/edtPostContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="150dp"
+        android:gravity="top|start"
+        android:paddingHorizontal="16dp"
+        android:hint="Bạn đang nghĩ gì về bộ truyện này?"
+        android:background="@android:color/transparent"
+        android:textSize="16sp"
+        android:textColor="#333333" />
+
+    <!-- KHUNG XEM TRƯỚC ẢNH (Mặc định ẩn, hiện ra khi chọn ảnh) -->
+    <ImageView
+        android:id="@+id/imgPreview"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_margin="16dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:background="#EEEEEE" />
+
+    <!-- Đẩy thanh công cụ xuống đáy màn hình -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"/>
+
+    <!-- THANH CÔNG CỤ (Thêm ảnh, thêm thẻ) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="#F9F9F9"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/btnAddImage"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_camera"
+            app:tint="#493373"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thêm ảnh vào bài viết"
+            android:textColor="#493373"
+            android:layout_marginStart="12dp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+</LinearLayout>

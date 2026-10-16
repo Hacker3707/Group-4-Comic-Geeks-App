@@ -62,4 +62,8 @@ public class CommentRepository {
             return null;
         }
     }
+    public LiveData<List<Comment>> getCommentsByPostId(String postId) {
+        // Lưu ý: 'commentDao' là tên biến DAO bạn đã khởi tạo sẵn trong file này
+        return mCommentDao.getCommentsByPostId(postId);
+    }
 }

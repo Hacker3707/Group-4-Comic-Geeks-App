@@ -320,5 +320,18 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+    <!-- Nút Tạo bài viết lơ lửng (FAB) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabCreatePost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="#493373"
+        app:tint="#FFFFFF"
+        app:elevation="6dp"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
+        android:contentDescription="Tạo bài viết mới" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

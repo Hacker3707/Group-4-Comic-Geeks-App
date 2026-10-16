@@ -22,4 +22,6 @@ public interface CommentDao {
 
     @Query("SELECT * FROM comments WHERE post_id = :postId ORDER BY timestamp ASC")
     LiveData<List<Comment>> getCommentsByPost(String postId);
+    @Query("SELECT * FROM comments WHERE post_id = :postId")
+    LiveData<List<Comment>> getCommentsByPostId(String postId);
 }
