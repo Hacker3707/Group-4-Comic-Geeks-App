@@ -1,31 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="70dp"
     android:background="@drawable/bg_app_bar_gradient"
-    android:paddingHorizontal="12dp"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent">>
+    android:paddingHorizontal="12dp">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imgvAvatar"
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:layout_margin="10dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="10dp"
             android:background="#FFFFFF"
             android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.011"
+            android:contentDescription="Ảnh đại diện"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
             app:strokeColor="#FFFFFF"
             app:strokeWidth="2dp" />
+
+        <TextView
+            android:id="@+id/tvMainUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:maxWidth="110dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Khách"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/imgvAvatar"
+            app:layout_constraintTop_toTopOf="@id/imgvAvatar"
+            app:layout_constraintBottom_toBottomOf="@id/imgvAvatar" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="92dp"
+            android:layout_height="46dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintStart_toEndOf="@id/tvMainUsername"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:srcCompat="@drawable/scribble" />
 
         <TextView
             android:id="@+id/tvAppBarTitle"
@@ -39,7 +62,7 @@
             android:textSize="30sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/btnNotification"
+            app:layout_constraintEnd_toStartOf="@id/btnNotification"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.518" />
 
@@ -49,7 +72,7 @@
             android:layout_height="40dp"
             android:layout_marginEnd="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Notification"
+            android:contentDescription="Thông báo"
             android:scaleType="centerInside"
             android:src="@android:drawable/ic_popup_reminder"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -57,15 +80,4 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.466" />
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="92dp"
-            android:layout_height="46dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imgvAvatar"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/scribble" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
-
