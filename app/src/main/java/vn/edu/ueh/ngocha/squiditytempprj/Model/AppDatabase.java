@@ -38,7 +38,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 
 @Database(entities = {User.class, Post.class, Comment.class, Stamp.class,
         Review.class, Comic.class, Genre.class, Creator.class, Follow.class, Group.class,
-        GroupMember.class, Message.class, ChatRoom.class, Notification.class}, version = 1,
+        GroupMember.class, Message.class, ChatRoom.class, Notification.class}, version = 2,
         exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract ComicDao comicDao();
