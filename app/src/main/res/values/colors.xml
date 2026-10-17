@@ -8,4 +8,6 @@
     <color name="squidity_lightpurple">#dec5fa</color>
     <color name="squidity_purple">#9f6fd6</color>
     <color name="squidity_lightaqua">#c9feff</color>
+    <color name="squidity_darkpurple">#54136b</color>
+    <color name="squidity_magenta">#fa055f</color>
 </resources>

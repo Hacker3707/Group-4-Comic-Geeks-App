@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 
 @Entity(tableName = "users")
 public class User {
@@ -54,7 +55,7 @@ public class User {
         this.verifiedSource = "";
     }
 
-
+    @Ignore
     public User(
             @NonNull String userId,
             String username,

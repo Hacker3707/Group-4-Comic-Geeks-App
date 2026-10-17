@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -46,14 +48,30 @@ public class ComicDetailActivity extends AppCompatActivity {
     TextView txtLastChapter;
     ImageView imgCover;
     ImageButton btnBack;
+    CardView cardRatings;
 
     ComicDetailViewModel viewModel;
     FlexboxLayout layoutComicGenres;
+
+    String comicId;
+    String comic_name;
+    String comic_cover;
 
     View.OnClickListener onBackClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             finish();
+        }
+    };
+
+    View.OnClickListener onReviewClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(ComicDetailActivity.this, ComicReviewActivity.class);
+            intent.putExtra("comic_id", comicId);
+            intent.putExtra("comic_name", comic_name);
+            intent.putExtra("comic_cover", comic_cover);
+            startActivity(intent);
         }
     };
 
@@ -68,7 +86,7 @@ public class ComicDetailActivity extends AppCompatActivity {
             return insets;
         });
 
-        String comicid = getIntent().getStringExtra("comic_id");
+        comicId = getIntent().getStringExtra("comic_id");
         String searchOption = getIntent().getStringExtra("search_option");
         viewModel = new ViewModelProvider(this).get(ComicDetailViewModel.class);
 
@@ -84,11 +102,14 @@ public class ComicDetailActivity extends AppCompatActivity {
         txtLastChapter = findViewById(R.id.txtComicLastChapter);
         btnBack = findViewById(R.id.imgbtnBack);
         layoutComicGenres = findViewById(R.id.layoutComicGenres);
+        cardRatings = findViewById(R.id.cardRatings);
 
         btnBack.setOnClickListener(onBackClickListener);
+        cardRatings.setOnClickListener(onReviewClickListener);
 
-        if ("MangaDex".equals(searchOption) && comicid != null) {
-            viewModel.getMangaById(comicid).observe(this,
+
+        if ("MangaDex".equals(searchOption) && comicId != null) {
+            viewModel.getMangaById(comicId).observe(this,
                     new Observer<MangaData>() {
                         @Override
                         public void onChanged(MangaData mangaData) {
@@ -159,6 +180,9 @@ public class ComicDetailActivity extends AppCompatActivity {
         displayGenres(genres);
 
         txtName.setText(getLocalizedText(attributes.getTitle()));
+
+        comic_name = getLocalizedText(attributes.getTitle());
+
         txtDescription.setText(
                 getLocalizedText(attributes.getDescription())
         );
@@ -215,6 +239,8 @@ public class ComicDetailActivity extends AppCompatActivity {
                             + mangaData.getId()
                             + "/"
                             + relationship.getAttributes().getFileName();
+
+                    comic_cover = coverUrl;
 
                     hasCover = true;
                 }
@@ -303,5 +329,7 @@ public class ComicDetailActivity extends AppCompatActivity {
             layoutComicGenres.addView(genreView);
         }
     }
+
+
 
 }

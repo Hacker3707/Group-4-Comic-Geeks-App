@@ -32,12 +32,20 @@ public class Post {
     @ColumnInfo(name = "timestamp")
     @TypeConverters(Converters.class)
     private Date timestamp;
+    @ColumnInfo(name = "comment_count")
+    private int commentCount = 0;
+    @ColumnInfo(name = "image_uri")
+    private String imageUri;
 
-    public Post(@NonNull String postId, String userId, String comicId, String content) {
+    public int getCommentCount() { return commentCount; }
+    public void setCommentCount(int count) { this.commentCount = count; }
+
+    public Post(@NonNull String postId, String userId, String comicId, String content, String imageUri) {
         this.postId = postId;
         this.userId = userId;
         this.comicId = comicId;
         this.content = content;
+        this.imageUri = imageUri;
         this.timestamp = new Date();
     }
 
@@ -57,7 +65,8 @@ public class Post {
     public void setContent(String content) { this.content = content; }
     public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
 
-
+    public String getImageUri() { return imageUri; }
+    public void setImageUri(String imageUri) { this.imageUri = imageUri; }
     public void editContent(String newContent) {
         this.content = newContent;
     }

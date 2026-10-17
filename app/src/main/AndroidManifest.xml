@@ -15,6 +15,11 @@
         android:theme="@style/Theme.SquidityTempPrj">
         <activity android:name=".View.activity.MainActivity" />
         <activity
+            android:name=".View.activity.AuthActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".View.activity.WelcomeActivity"
             android:exported="true">
             <intent-filter>
@@ -32,6 +37,9 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".View.activity.CreatePostActivity"
+            android:exported="false" />
+        <activity
             android:name=".View.activity.ComicDetailActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -40,6 +48,9 @@
             android:exported="false" />
         <activity
             android:name=".View.activity.ChatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".View.activity.ComicReviewActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>
