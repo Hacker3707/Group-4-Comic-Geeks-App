@@ -1,6 +1,5 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,10 +12,8 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.AuthActivity;
-import com.google.firebase.auth.FirebaseAuth;
 import android.widget.Toast;
 import android.widget.TextView;
 import com.google.firebase.auth.FirebaseUser;
@@ -52,6 +49,10 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaAttributes;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
 
+import androidx.lifecycle.ViewModelProvider;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -69,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
 
     private MaterialButton btnAuthAction;
 
-    private FirebaseAuth firebaseAuth;
-    private FirebaseFirestore firestore;
+    private AuthViewModel authViewModel;
+    private UserProfileViewModel profileViewModel;
 
 
     private View.OnClickListener onComicClickListener = new View.OnClickListener() {
@@ -93,22 +94,30 @@ public class MainActivity extends AppCompatActivity {
                     int id = item.getItemId();
 
                     if (id == R.id.action_profile) {
-                        startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+                        if (authViewModel.getCurrentUser() == null) {
 
-                    } else if (id == R.id.action_chat) {
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle("Yêu cầu đăng nhập")
+                                    .setMessage("Bạn cần đăng nhập để xem profile.")
+                                    .setNegativeButton("Hủy", (dialog, which) -> {
+                                        dialog.dismiss();
+                                    })
+                                    .setPositiveButton("Đăng nhập", (dialog, which) -> {
+                                        Intent intent = new Intent(
+                                                MainActivity.this,
+                                                AuthActivity.class
+                                        );
+                                        startActivity(intent);
+                                    })
+                                    .show();
 
-                    } else if (id == R.id.action_group) {
-
-                    } else if (id == R.id.action_setting) {
-
-                    } else if (id == R.id.action_comic) {
-                        startActivity(new Intent(MainActivity.this, ComicListActivity.class));
-
-                    } else if (item.getTitle().toString().toLowerCase().contains("đăng nhập")
-                            || item.getTitle().toString().toLowerCase().contains("đăng ký")
-                            || item.getTitle().toString().toLowerCase().contains("login")
-                            || item.getTitle().toString().toLowerCase().contains("sign in")) {
-                        startActivity(new Intent(MainActivity.this, AuthActivity.class));
+                        } else {
+                            Intent intent = new Intent(
+                                    MainActivity.this,
+                                    ProfileActivity.class
+                            );
+                            startActivity(intent);
+                        }
                     }
 
                     drawerLayout.closeDrawer(GravityCompat.START);
@@ -121,20 +130,35 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        authViewModel = new ViewModelProvider(this)
+                .get(AuthViewModel.class);
+
+        profileViewModel = new ViewModelProvider(this)
+                .get(UserProfileViewModel.class);
+
         tvMainUsername = findViewById(R.id.tvMainUsername);
-        updateMainUsername();
-        firebaseAuth = FirebaseAuth.getInstance();
-        firestore = FirebaseFirestore.getInstance();
+
+        drawerLayout = findViewById(R.id.drawerLayout);
+        imgvAvatar = findViewById(R.id.imgvAvatar);
+        navigationView = findViewById(R.id.navigationView);
+        rcvpostlist = findViewById(R.id.rcv_postlist);
 
         View appBar = findViewById(R.id.appBar);
         tvMainUsername = appBar.findViewById(R.id.tvMainUsername);
         imgMainAvatar = appBar.findViewById(R.id.imgvAvatar);
 
-        drawerLayout = findViewById(R.id.drawerLayout);
-        navigationView = findViewById(R.id.navigationView);
-        rcvpostlist = findViewById(R.id.rcv_postlist);
+        if (navigationView == null || navigationView.getHeaderCount() == 0) {
+            Toast.makeText(
+                    this,
+                    "Không tìm thấy phần header của menu",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
 
         View header = navigationView.getHeaderView(0);
+
         tvDrawerUsername = header.findViewById(R.id.tvDrawerUsername);
         tvDrawerEmail = header.findViewById(R.id.tvDrawerEmail);
         imgDrawerAvatar = header.findViewById(R.id.imageView4);
@@ -142,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         btnAuthAction = findViewById(R.id.btnAuthAction);
 
         btnAuthAction.setOnClickListener(v -> {
-            FirebaseUser user = firebaseAuth.getCurrentUser();
+            FirebaseUser user = authViewModel.getCurrentUser();
 
             if (user == null) {
                 openAuthActivity();
@@ -152,8 +176,8 @@ public class MainActivity extends AppCompatActivity {
                         .setMessage("Bạn có chắc muốn đăng xuất không?")
                         .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
                         .setPositiveButton("Đăng xuất", (dialog, which) -> {
-                            firebaseAuth.signOut();
-                            updateUserInfo();
+                            authViewModel.logout();
+                            profileViewModel.loadCurrentProfile();
                             Toast.makeText(
                                     MainActivity.this,
                                     "Đã đăng xuất",
@@ -164,12 +188,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        updateUserInfo();
 
-        drawerLayout = findViewById(R.id.drawerLayout);
-        imgvAvatar = findViewById(R.id.imgvAvatar);
-        navigationView = findViewById(R.id.navigationView);
-        rcvpostlist = findViewById(R.id.rcv_postlist);
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
@@ -208,6 +227,42 @@ public class MainActivity extends AppCompatActivity {
         rcvpostlist.setLayoutManager(new LinearLayoutManager(this));
 
 
+        profileViewModel.getProfile().observe(this, state -> {
+            if (state == null) {
+                return;
+            }
+
+            tvMainUsername.setText(state.username);
+            tvDrawerUsername.setText(state.username);
+            tvDrawerEmail.setText(state.email);
+
+            btnAuthAction.setText(
+                    state.loggedIn ? "Đăng xuất" : "Đăng nhập / Đăng ký"
+            );
+
+            if (state.avatarUrl == null || state.avatarUrl.isEmpty()) {
+                imgMainAvatar.setImageResource(R.drawable.ic_launcher_background);
+                imgDrawerAvatar.setImageResource(R.drawable.ic_launcher_background);
+            } else {
+                Glide.with(this)
+                        .load(state.avatarUrl)
+                        .placeholder(R.drawable.ic_launcher_background)
+                        .error(R.drawable.ic_launcher_background)
+                        .circleCrop()
+                        .into(imgMainAvatar);
+
+                Glide.with(this)
+                        .load(state.avatarUrl)
+                        .placeholder(R.drawable.ic_launcher_background)
+                        .error(R.drawable.ic_launcher_background)
+                        .circleCrop()
+                        .into(imgDrawerAvatar);
+            }
+        });
+
+        profileViewModel.loadCurrentProfile();
+
+
     }
     private void openAuthActivity() {
         try {
@@ -219,127 +274,13 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
         }
     }
-    private void updateMainUsername() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        if (user == null) {
-            tvMainUsername.setText("Khách");
-            return;
-        }
-
-        String username = user.getDisplayName();
-        String email = user.getEmail();
-
-        if (username == null || username.trim().isEmpty()) {
-            if (email != null && email.contains("@")) {
-                username = email.substring(0, email.indexOf("@"));
-            } else {
-                username = "Người dùng";
-            }
-        }
-
-        tvMainUsername.setText(username);
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        if (firebaseAuth != null
-                && tvMainUsername != null
-                && tvDrawerUsername != null) {
-            updateUserInfo();
+        if (profileViewModel != null) {
+            profileViewModel.loadCurrentProfile();
         }
-    }
-    private void updateUserInfo() {
-        FirebaseUser user = firebaseAuth.getCurrentUser();
-
-        if (user == null) {
-            tvMainUsername.setText("Khách");
-            tvDrawerUsername.setText("Khách");
-            tvDrawerEmail.setText("");
-
-            btnAuthAction.setText("Đăng nhập / Đăng ký");
-
-            imgMainAvatar.setImageResource(R.drawable.ic_launcher_background);
-            imgDrawerAvatar.setImageResource(R.drawable.ic_launcher_background);
-            return;
-        }
-
-        String email = user.getEmail() == null ? "" : user.getEmail();
-        String username = user.getDisplayName();
-
-        if (username == null || username.trim().isEmpty()) {
-            username = email.contains("@")
-                    ? email.substring(0, email.indexOf("@"))
-                    : "Người dùng";
-        }
-
-        tvMainUsername.setText(username);
-        tvDrawerUsername.setText(username);
-        tvDrawerEmail.setText(email);
-        btnAuthAction.setText("Đăng xuất");
-
-        // Dùng ảnh hồ sơ Google/Firebase nếu có.
-        if (user.getPhotoUrl() != null) {
-            Glide.with(this)
-                    .load(user.getPhotoUrl())
-                    .placeholder(R.drawable.ic_launcher_background)
-                    .error(R.drawable.ic_launcher_background)
-                    .circleCrop()
-                    .into(imgMainAvatar);
-
-            Glide.with(this)
-                    .load(user.getPhotoUrl())
-                    .placeholder(R.drawable.ic_launcher_background)
-                    .error(R.drawable.ic_launcher_background)
-                    .circleCrop()
-                    .into(imgDrawerAvatar);
-        } else {
-            imgMainAvatar.setImageResource(R.drawable.ic_launcher_background);
-            imgDrawerAvatar.setImageResource(R.drawable.ic_launcher_background);
-        }
-
-        // Cập nhật tên/avatar tùy chỉnh đã lưu trong Firestore nếu có.
-        firestore.collection("users")
-                .document(user.getUid())
-                .get()
-                .addOnSuccessListener(document -> {
-                    FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-
-                    // Không để kết quả cũ ghi đè giao diện sau khi đổi tài khoản.
-                    if (currentUser == null
-                            || !currentUser.getUid().equals(user.getUid())) {
-                        return;
-                    }
-
-                    if (document.exists()) {
-                        String savedName = document.getString("username");
-                        String savedAvatar = document.getString("avatarUrl");
-
-                        if (savedName != null && !savedName.trim().isEmpty()) {
-                            tvMainUsername.setText(savedName);
-                            tvDrawerUsername.setText(savedName);
-                        }
-
-                        if (savedAvatar != null && !savedAvatar.trim().isEmpty()) {
-                            Glide.with(MainActivity.this)
-                                    .load(savedAvatar)
-                                    .placeholder(R.drawable.ic_launcher_background)
-                                    .error(R.drawable.ic_launcher_background)
-                                    .circleCrop()
-                                    .into(imgMainAvatar);
-
-                            Glide.with(MainActivity.this)
-                                    .load(savedAvatar)
-                                    .placeholder(R.drawable.ic_launcher_background)
-                                    .error(R.drawable.ic_launcher_background)
-                                    .circleCrop()
-                                    .into(imgDrawerAvatar);
-                        }
-                    }
-                })
-                .addOnFailureListener(e ->
-                        Log.e("MainActivity", "Không tải được hồ sơ người dùng", e));
     }
 }
