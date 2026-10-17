@@ -119,6 +119,13 @@ public class MainActivity extends AppCompatActivity {
                             startActivity(intent);
                         }
                     }
+                    else if (id == R.id.action_comic) {
+                        Intent intent = new Intent(
+                                MainActivity.this,
+                                ComicListActivity.class
+                        );
+                        startActivity(intent);
+                    }
 
                     drawerLayout.closeDrawer(GravityCompat.START);
                     return true;
