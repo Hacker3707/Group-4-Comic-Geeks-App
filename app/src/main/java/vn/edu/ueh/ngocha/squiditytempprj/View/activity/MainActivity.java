@@ -50,9 +50,10 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.api.MangaDexApi;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.api.RetrofitClient;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaAttributes;
-import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.View.adapter
 
-
+import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
+import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
 public class MainActivity extends AppCompatActivity {
 
     DrawerLayout drawerLayout;
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(new Intent(MainActivity.this, ProfileActivity.class));
 
                     } else if (id == R.id.action_chat) {
-
+                         startActivity(new Intent(MainActivity.this, ChatListActivity.class));
                     } else if (id == R.id.action_group) {
 
                     } else if (id == R.id.action_setting) {
@@ -118,7 +119,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); NtfChannel.setup(this);
+        NotificationPopup.attach(this, findViewById(R.id.btnNotification));
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         tvMainUsername = findViewById(R.id.tvMainUsername);
