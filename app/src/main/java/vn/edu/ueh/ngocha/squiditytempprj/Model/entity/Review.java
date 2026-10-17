@@ -2,8 +2,15 @@ package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
+import androidx.room.Dao;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import java.util.Date;
+
+import vn.edu.ueh.ngocha.squiditytempprj.Model.Converters;
 
 @Entity (tableName = "reviews")
 public class Review {
@@ -18,12 +25,13 @@ public class Review {
     @ColumnInfo (name = "review_text")
     private String reviewText;
     @ColumnInfo (name = "review_rating")
-    private String reviewRating;
+    private float reviewRating;
     @ColumnInfo (name = "review_date")
-    private String reviewDate;
+    @TypeConverters(Converters.class)
+    private Date reviewDate;
 
-    public Review(String reviewId, String comicId, String userId,
-                  String reviewText, String reviewRating, String reviewDate) {
+    public Review(@NonNull String reviewId, @NonNull String comicId,@NonNull String userId,
+                  String reviewText, float reviewRating, Date reviewDate) {
         this.reviewId = reviewId;
         this.comicId = comicId;
         this.userId = userId;
@@ -32,18 +40,35 @@ public class Review {
         this.reviewDate = reviewDate;
     }
 
+    @Ignore
+    public Review(String comicId, String userId, String reviewText, float reviewRating) {
+        this.comicId = comicId;
+        this.userId = userId;
+        this.reviewText = reviewText;
+        this.reviewRating = reviewRating;
+    }
+
+    @Ignore
+    public Review(String comicId, String userId, String reviewText) {
+        this.comicId = comicId;
+        this.userId = userId;
+        this.reviewText = reviewText;
+    }
+
+
     // =================================
     // Getter methods for each field
     // =================================
 
+    @NonNull
     public String getReviewId() {
         return reviewId;
     }
-
+    @NonNull
     public String getComicId() {
         return comicId;
     }
-
+    @NonNull
     public String getUserId() {
         return userId;
     }
@@ -52,11 +77,11 @@ public class Review {
         return reviewText;
     }
 
-    public String getReviewRating() {
+    public float getReviewRating() {
         return reviewRating;
     }
 
-    public String getReviewDate() {
+    public Date getReviewDate() {
         return reviewDate;
     }
 
@@ -64,15 +89,15 @@ public class Review {
     // Setter methods for each field
     // =================================
 
-    public void setReviewId(String reviewId) {
+    public void setReviewId(@NonNull String reviewId) {
         this.reviewId = reviewId;
     }
 
-    public void setComicId(String comicId) {
+    public void setComicId(@NonNull String comicId) {
         this.comicId = comicId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(@NonNull String userId) {
         this.userId = userId;
     }
 
@@ -80,11 +105,11 @@ public class Review {
         this.reviewText = reviewText;
     }
 
-    public void setReviewRating(String reviewRating) {
+    public void setReviewRating(float reviewRating) {
         this.reviewRating = reviewRating;
     }
 
-    public void setReviewDate(String reviewDate) {
+    public void setReviewDate(Date reviewDate) {
         this.reviewDate = reviewDate;
     }
 
