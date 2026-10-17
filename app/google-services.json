@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "436811870504",
+    "project_id": "squidity-database",
+    "storage_bucket": "squidity-database.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:436811870504:android:4baf044d1613b42185a01d",
+        "android_client_info": {
+          "package_name": "vn.edu.ueh.ngocha.squiditytempprj"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXsRURScMaw3GvWF3VaA0chm1XRFT2mkA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
