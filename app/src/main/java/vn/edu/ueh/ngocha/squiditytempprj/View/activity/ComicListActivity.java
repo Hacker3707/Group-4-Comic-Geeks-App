@@ -1,7 +1,5 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,25 +16,16 @@ import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.api.MangaDexApi;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.api.RetrofitClient;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaResponse;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Relationship;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ComicViewModel;
@@ -60,32 +49,6 @@ public class ComicListActivity extends AppCompatActivity {
     private final int PAGE_SIZE = 20;
     private boolean isLoading = false;
     private boolean isLastPage = false;
-
-    private RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-            if (dy <= 0 || isLoading || isLastPage) {
-                return;
-            }
-
-            LinearLayoutManager layoutManager =
-                    (LinearLayoutManager) recyclerView.getLayoutManager();
-
-            if (layoutManager == null) {
-                return;
-            }
-
-            int lastVisible =
-                    layoutManager.findLastVisibleItemPosition();
-
-            int totalItems = layoutManager.getItemCount();
-
-            if (lastVisible >= totalItems - 5) {
-                loadMoreManga();
-            }
-        }
-    };
 
     private View.OnClickListener onProfileClickListener = new View.OnClickListener() {
         public void onClick(View v) {
@@ -124,55 +87,48 @@ public class ComicListActivity extends AppCompatActivity {
 
         btnSearch.setOnClickListener(onSearchClickListener);
         imgvAvatar.setOnClickListener(onProfileClickListener);
-        rcvcomic.addOnScrollListener(scrollListener);
 
-        comicViewModel = new ViewModelProvider(this)
-                .get(ComicViewModel.class);
+        // 1. KHỞI TẠO ADAPTER VÀ SETUP CHO RECYCLERVIEW TRƯỚC TIÊN
+        comicAdapter = new ComicAdapter(new ComicAdapter.OnComicClickListener() {
+            @Override
+            public void onComicClick(String comicId) {
+                Log.d("DEBUG_CLICK", "Đã bấm vào truyện có ID: " + comicId);
 
-        comicViewModel.getMangaList().observe(this,
-                new Observer<List<MangaData>>() {
-                    @Override
-                    public void onChanged(List<MangaData> mangaDataList) {
-                        if (mangaDataList != null) {
-                            comicAdapter.setMangaList(mangaDataList);
-                        }
-                    }
-                });
-
-        comicAdapter = new ComicAdapter(
-                new ComicAdapter.OnComicClickListener() {
-                    @Override
-                    public void onComicClick(String comicId) {
-                        Intent intent = new Intent(
-                                ComicListActivity.this,
-                                ComicDetailActivity.class
-                        );
-
-                        intent.putExtra("comic_id", comicId);
-                        intent.putExtra("search_option", "MangaDex");
-
-                        startActivity(intent);
-                    }
-                }
-        );
+                Intent intent = new Intent(ComicListActivity.this, ComicDetailActivity.class);
+                intent.putExtra("comic_id", comicId);
+                intent.putExtra("search_option", "MangaDex");
+                startActivity(intent);
+            }
+        });
 
         rcvcomic.setAdapter(comicAdapter);
-        rcvcomic.setLayoutManager(
-                new GridLayoutManager(this, 2)
-        );
+        rcvcomic.setLayoutManager(new GridLayoutManager(this, 2));
 
+        // 2. KHỞI TẠO VIEWMODEL VÀ LẮNG NGHE LIVEDATA SAU CÙNG
+        comicViewModel = new ViewModelProvider(this).get(ComicViewModel.class);
+
+        comicViewModel.getMangaList().observe(this, new Observer<List<MangaData>>() {
+            @Override
+            public void onChanged(List<MangaData> mangaDataList) {
+                if (mangaDataList != null) {
+                    comicAdapter.setMangaList(mangaDataList);
+                }
+            }
+        });
+
+        // 3. Kiểm tra nếu có truyền từ khóa từ màn hình khác sang (ví dụ từ bài post)
+        String searchQuery = getIntent().getStringExtra("SEARCH_QUERY");
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            etSearch.setText(searchQuery);
+            tvSearchResult.setText("Searched for: " + searchQuery);
+            loadComicwithMangaDex(searchQuery);
+        }
     }
 
     public void loadComicwithMangaDex(String searchQuery) {
         currentOffset = 0;
         isLoading = false;
         isLastPage = false;
-
         comicViewModel.searchComicswithMangaDex(searchQuery);
     }
-
-    public void loadMoreManga() {
-        comicViewModel.loadNextPage();
-    }
-
 }

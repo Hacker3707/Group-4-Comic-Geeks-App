@@ -51,5 +51,7 @@ dependencies {
     implementation(libs.core.splashscreen)
     annotationProcessor(libs.compiler)
     implementation(libs.flexbox)
-
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+    implementation(libs.glide)
 }

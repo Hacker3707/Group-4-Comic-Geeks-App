@@ -132,17 +132,7 @@ public class MainActivity extends AppCompatActivity {
         imgvAvatar.setOnClickListener(onProfileClickListener);
         navigationView.setNavigationItemSelectedListener(onAvatarsClickListener);
 
-        List<Post> dummyPosts = new ArrayList<>();
 
-
-        Post baiSo1 = new Post("P01", "Meilin Zhang", "C01", "Trời ơi truyện này hay xỉu luôn! Nam chính ngầu bá cháy.");
-        Post baiSo2 = new Post("P02", "Meilin Zhang", "C02", "Hóng chap mới quá đi mất 😭");
-
-
-        dummyPosts.add(baiSo1);
-        dummyPosts.add(baiSo2);
-
-        postAdapter = new PostAdapter(this, dummyPosts);
         rcvpostlist.setAdapter(postAdapter);
         rcvpostlist.setLayoutManager(new LinearLayoutManager(this));
 

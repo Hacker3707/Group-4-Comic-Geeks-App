@@ -3,15 +3,21 @@ package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 import android.app.Application;
 import android.os.AsyncTask;
 import androidx.lifecycle.LiveData;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.List;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.AppDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.PostDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PostRepository {
     private PostDao mPostDao;
     private LiveData<List<Post>> mAllPosts;
+    private FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
     public PostRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
@@ -64,5 +70,45 @@ public class PostRepository {
             mAsyncTaskDao.deletePost(params[0]);
             return null;
         }
+    }
+    // Hàm đẩy Post lên Firestore 1 lần duy nhất khi bấm Đăng
+    public void uploadPostToFirestore(Post post, OnFirestoreUploadListener listener) {
+        Map<String, Object> postMap = new HashMap<>();
+        postMap.put("postId", post.getPostId());
+        postMap.put("userId", post.getUserId());
+        postMap.put("groupId", post.getGroupId());
+        postMap.put("comicId", post.getComicId());
+        postMap.put("content", post.getContent());
+        postMap.put("imageUri", post.getImageUri());
+        postMap.put("timestamp", post.getTimestamp());
+        postMap.put("commentCount", post.getCommentCount());
+
+        firestore.collection("posts").document(post.getPostId())
+                .set(postMap)
+                .addOnSuccessListener(aVoid -> {
+                    insert(post);
+                    if (listener != null) listener.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    if (listener != null) listener.onFailure(e.getMessage());
+                });
+    }
+    public void deletePost(Post post, String postId) {
+        firestore.collection("posts").document(postId).delete();
+        delete(post); // Xóa cục bộ
+    }
+    public void updatePostInFirestore(Post post) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("content", post.getContent());
+        updates.put("comicId", post.getComicId());
+        updates.put("imageUri", post.getImageUri());
+
+        firestore.collection("posts").document(post.getPostId()).update(updates);
+        update(post); // Cập nhật cục bộ
+    }
+
+    public interface OnFirestoreUploadListener {
+        void onSuccess();
+        void onFailure(String error);
     }
 }

@@ -172,13 +172,13 @@
                 android:drawablePadding="4dp"
                 android:text="1" />
 
-            <!-- Nút thả Stamp -->
+            <!-- Nút thả Stamp hình vết mực -->
             <ImageView
                 android:id="@+id/btnStamp"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@android:drawable/btn_star_big_on"
-                app:tint="#493373" />
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_ink_stamp"/>
+              <!-- Màu mặc định khi chưa bấm (tím nhạt) -->
         </LinearLayout>
 
         <View

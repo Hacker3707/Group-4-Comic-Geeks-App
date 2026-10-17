@@ -16,9 +16,8 @@ public class CommentRepository {
         AppDatabase db = AppDatabase.getDatabase(application);
         mCommentDao = db.commentDao();
     }
-
-    public LiveData<List<Comment>> getCommentsByPost(String postId) {
-        return mCommentDao.getCommentsByPost(postId);
+    public LiveData<List<Comment>> getCommentsByPostId(String postId) {
+        return mCommentDao.getCommentsByPostId(postId);
     }
 
     public void insert(Comment comment) {
@@ -61,9 +60,5 @@ public class CommentRepository {
             mAsyncTaskDao.deleteComment(params[0]);
             return null;
         }
-    }
-    public LiveData<List<Comment>> getCommentsByPostId(String postId) {
-        // Lưu ý: 'commentDao' là tên biến DAO bạn đã khởi tạo sẵn trong file này
-        return mCommentDao.getCommentsByPostId(postId);
     }
 }

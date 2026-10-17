@@ -1,12 +1,12 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -15,49 +15,48 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.PostRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
 public class CreatePostActivity extends AppCompatActivity {
 
-    private EditText edtPostContent;
-    private Button btnPublish;
-    private ImageView btnCancelPost;
+    private EditText edtPostContent, edtComicSearch;
+    private MaterialButton btnPublish;
+    private ImageButton btnCancelPost;
     private PostViewModel postViewModel;
 
-    // --- 1. KHAI BÁO BIẾN CHO PHẦN CHỌN ẢNH ---
-    private ImageView btnAddImage;
+    private View btnAddImage;
     private ImageView imgPreview;
-    private Uri selectedImageUri = null; // Biến lưu đường dẫn ảnh được chọn
+    private Uri selectedImageUri = null;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
-
-
         edtPostContent = findViewById(R.id.edtPostContent);
+        edtComicSearch = findViewById(R.id.edtComicSearch);
         btnPublish = findViewById(R.id.btnPublish);
         btnCancelPost = findViewById(R.id.btnCancelPost);
-
-
         btnAddImage = findViewById(R.id.btnAddImage);
         imgPreview = findViewById(R.id.imgPreview);
 
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
-
-
+        // Cài đặt bộ chọn ảnh
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         selectedImageUri = result.getData().getData();
-
 
                         try {
                             getContentResolver().takePersistableUriPermission(selectedImageUri,
@@ -68,12 +67,12 @@ public class CreatePostActivity extends AppCompatActivity {
 
                         imgPreview.setImageURI(selectedImageUri);
                         imgPreview.setVisibility(View.VISIBLE);
+                        Toast.makeText(this, "Đã chọn ảnh thành công!", Toast.LENGTH_SHORT).show();
                     }
                 }
         );
 
         btnAddImage.setOnClickListener(v -> {
-            // DÙNG
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("image/*");
@@ -81,52 +80,81 @@ public class CreatePostActivity extends AppCompatActivity {
         });
 
 
+        btnCancelPost.setOnClickListener(v -> finish());
+
         btnPublish.setOnClickListener(v -> {
-            String content = edtPostContent.getText().toString().trim();
+            try {
+                String content = edtPostContent.getText().toString().trim();
+                String comicNameInput = edtComicSearch.getText().toString().trim();
 
-            if (content.isEmpty() && selectedImageUri == null) {
-                Toast.makeText(CreatePostActivity.this, "Vui lòng nhập nội dung hoặc chọn ảnh!", Toast.LENGTH_SHORT).show();
-                return;
+                // Bạn có thể dùng comicNameInput làm comicId hoặc kết nối id từ API nhóm trưởng tại đây
+                String comicIdToSave = comicNameInput.isEmpty() ? "C01" : comicNameInput;
+
+                if (content.isEmpty() && selectedImageUri == null) {
+                    Toast.makeText(CreatePostActivity.this, "Vui lòng nhập nội dung hoặc chọn ảnh!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String randomPostId = UUID.randomUUID().toString();
+                ProgressDialog progressDialog = new ProgressDialog(CreatePostActivity.this);
+                progressDialog.setCancelable(false);
+
+                // TRƯỜNG HỢP 1: CÓ CHỌN ẢNH -> Tải ảnh lên Firebase Storage trước
+                if (selectedImageUri != null) {
+                    progressDialog.setMessage("Đang tải ảnh lên mây...");
+                    progressDialog.show();
+
+                    StorageReference storageRef = FirebaseStorage.getInstance().getReference()
+                            .child("post_images/" + randomPostId + ".jpg");
+
+                    storageRef.putFile(selectedImageUri)
+                            .addOnSuccessListener(taskSnapshot -> {
+                                storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                                    String imageUrl = uri.toString();
+
+                                    Post newPost = new Post(randomPostId, "Meringoc_17", comicIdToSave, content, imageUrl);
+                                    uploadPostToCloud(newPost, progressDialog);
+                                });
+                            })
+                            .addOnFailureListener(e -> {
+                                progressDialog.dismiss();
+                                Toast.makeText(CreatePostActivity.this, "Lỗi tải ảnh: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            });
+
+                } else {
+                    // TRƯỜNG HỢP 2: KHÔNG CÓ ẢNH (Chỉ có chữ & tên truyện)
+                    progressDialog.setMessage("Đang đăng bài viết...");
+                    progressDialog.show();
+
+                    Post newPost = new Post(randomPostId, "Meringoc_17", comicIdToSave, content, null);
+                    uploadPostToCloud(newPost, progressDialog);
+                }
+
+            } catch (Exception e) {
+                Toast.makeText(CreatePostActivity.this, "Lỗi ngoại lệ: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                e.printStackTrace();
             }
-
-            String randomPostId = UUID.randomUUID().toString();
-
-            String imageUriString = null;
-            if (selectedImageUri != null) {
-
-                imageUriString = copyImageToAppCache(selectedImageUri);
-            }
-
-
-            Post newPost = new Post(randomPostId, "Meringoc_17", "C01", content, imageUriString);
-
-            postViewModel.insertPost(newPost);
-
-            Toast.makeText(CreatePostActivity.this, "Đã đăng bài thành công!", Toast.LENGTH_SHORT).show();
-            finish();
         });
     }
 
-    private String copyImageToAppCache(Uri originalUri) {
-        try {
-            java.io.InputStream inputStream = getContentResolver().openInputStream(originalUri);
-            java.io.File cacheFile = new java.io.File(getCacheDir(), "post_image_" + System.currentTimeMillis() + ".jpg");
-            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(cacheFile);
+    private void uploadPostToCloud(Post post, ProgressDialog progressDialog) {
+        if (postViewModel != null) {
+            postViewModel.uploadPostToFirestore(post, new PostRepository.OnFirestoreUploadListener() {
+                @Override
+                public void onSuccess() {
+                    progressDialog.dismiss();
+                    Toast.makeText(CreatePostActivity.this, "Đăng bài thành công!", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
 
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
-            }
-            outputStream.close();
-            inputStream.close();
-
-
-            return android.net.Uri.fromFile(cacheFile).toString();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+                @Override
+                public void onFailure(String error) {
+                    progressDialog.dismiss();
+                    Toast.makeText(CreatePostActivity.this, "Lỗi Firestore: " + error, Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            progressDialog.dismiss();
         }
     }
 }
