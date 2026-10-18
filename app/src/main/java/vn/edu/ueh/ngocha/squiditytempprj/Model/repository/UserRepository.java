@@ -1,18 +1,32 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
 import android.app.Application;
+import android.util.Log;
+
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
+
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.AppDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.UserDao;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Review;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 
 public class UserRepository {
 
     private final UserDao userDao;
+    private FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
     private final LiveData<List<User>> allUsers;
     private final LiveData<List<User>> normalUsers;
@@ -38,6 +52,67 @@ public class UserRepository {
     public LiveData<List<User>> getAllUsers() {
         return allUsers;
     }
+
+    public LiveData<List<User>> getUsersByIds(List<String> userIds) {
+        return new LiveData<List<User>>() {
+
+            private ListenerRegistration userListener;
+
+            @Override
+            protected void onActive() {
+                super.onActive();
+
+                if (userListener == null) {
+                    if (userIds == null || userIds.isEmpty()) {
+                        postValue(new ArrayList<User>());
+                        return;
+                    }
+
+                    userListener = firestore.collection("users")
+                            .whereIn("userId", userIds)
+                            .addSnapshotListener(
+                                    new EventListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onEvent(
+                                                @Nullable QuerySnapshot snapshots,
+                                                @Nullable FirebaseFirestoreException error) {
+
+                                            if (error != null) {
+                                                Log.e("UserRepository",
+                                                        "Error getting users", error);
+                                                return;
+                                            }
+
+                                            if (snapshots == null) {
+                                                return;
+                                            }
+
+                                            List<User> users = new ArrayList<>();
+
+                                            for (QueryDocumentSnapshot document : snapshots) {
+                                                User user = document.toObject(User.class);
+                                                users.add(user);
+                                            }
+
+                                            postValue(users);
+                                        }
+                                    }
+                            );
+                }
+            }
+
+            @Override
+            protected void onInactive() {
+                super.onInactive();
+
+                if (userListener != null) {
+                    userListener.remove();
+                    userListener = null;
+                }
+            }
+        };
+    }
+
 
     public LiveData<List<User>> getNormalUsersLive() {
         return normalUsers;

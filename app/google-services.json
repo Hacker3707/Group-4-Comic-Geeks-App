@@ -12,7 +12,20 @@
           "package_name": "vn.edu.ueh.ngocha.squiditytempprj"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "436811870504-pfn9bnun2h85nbak6j740rt9frcbfu1o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.edu.ueh.ngocha.squiditytempprj",
+            "certificate_hash": "898fd7f66c25b3656059582e162162a4f0b0231c"
+          }
+        },
+        {
+          "client_id": "436811870504-9k9ageflu62akaki10hrua3b21jj879i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCXsRURScMaw3GvWF3VaA0chm1XRFT2mkA"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "436811870504-9k9ageflu62akaki10hrua3b21jj879i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

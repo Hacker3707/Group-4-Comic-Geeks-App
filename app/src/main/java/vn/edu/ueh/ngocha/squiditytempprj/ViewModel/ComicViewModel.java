@@ -83,7 +83,6 @@ public class ComicViewModel extends AndroidViewModel {
         comicRepository.getComicbyName(name);
     }
 
-
     public void searchComicswithMangaDex(String searchQuery) {
         currentQuery = searchQuery;
         currentOffset = 0;

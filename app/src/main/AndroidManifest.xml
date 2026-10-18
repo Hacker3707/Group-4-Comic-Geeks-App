@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -16,22 +16,26 @@
         <activity
             android:name=".View.activity.MainActivity" />
 
+        android:theme="@style/Theme.SquidityTempPrj">
+        <activity android:name=".View.activity.MainActivity" />
+        <activity
+            android:name=".View.activity.AuthActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".View.activity.WelcomeActivity"
-            android:exported="true"
-            android:theme="@style/Theme.SquidityTempPrj.Starting">
-
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".View.activity.ComicListActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
             android:name=".View.activity.ProfileActivity"
             android:exported="false"
@@ -43,6 +47,12 @@
             android:name=".View.activity.ComicDetailActivity"
             android:exported="false" />
 
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".View.activity.ComicReviewActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

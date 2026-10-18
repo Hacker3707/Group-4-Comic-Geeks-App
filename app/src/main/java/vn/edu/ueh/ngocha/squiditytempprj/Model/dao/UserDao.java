@@ -9,6 +9,7 @@ import androidx.room.Update;
 
 import java.util.List;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Review;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 
 @Dao
@@ -38,6 +39,23 @@ public interface UserDao {
     @Query("SELECT * FROM users WHERE role = 'CREATOR'")
     LiveData<List<User>> getCreators();
 
+    @Query("SELECT * FROM users WHERE user_id IN (:userIds)")
+    LiveData<List<User>> getUsersByIds(List<String> userIds);
+
+    @Query("SELECT DISTINCT u.* " +
+            "FROM users AS u " +
+            "INNER JOIN reviews AS r " +
+            "ON u.user_id = r.user_id " +
+            "WHERE r.comic_id = :comicId")
+    LiveData<List<User>> getUsersByComicId(String comicId);
+
+
     @Query("DELETE FROM users")
     void deleteAll();
+
+    @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
+    User getByEmail(String email);
+
+    @Query("SELECT COUNT(*) FROM users WHERE email = :email")
+    int countByEmail(String email);
 }
