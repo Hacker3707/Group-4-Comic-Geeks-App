@@ -160,4 +160,13 @@ public class AuthViewModel extends ViewModel {
         repository.logout();
         logoutResult.setValue(true);
     }
+
+    public String getCurrentUserId() {
+        String userId = repository.getCurrentUserId();
+
+        if (userId != null) {
+            return repository.getCurrentUserId();
+        }
+        return null;
+    }
 }

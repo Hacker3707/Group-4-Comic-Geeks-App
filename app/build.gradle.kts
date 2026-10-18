@@ -38,7 +38,6 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
-    implementation("com.google.firebase:firebase-storage")
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
@@ -48,16 +47,16 @@ dependencies {
     implementation(libs.core.splashscreen)
 
     // FIREBASE
-    implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.android.gms:play-services-auth:21.4.0")
+    implementation(platform(libs.firebase.bom.v3502))
+    implementation(libs.google.firebase.auth)
+    implementation(libs.google.firebase.firestore)
+    implementation(libs.google.firebase.storage)
+    implementation(libs.play.services.auth.v2200)
 
     //LIFECYCLE & VIEWMODEL
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime:2.7.0")
+    implementation(libs.androidx.lifecycle.viewmodel.v270)
+    implementation(libs.androidx.lifecycle.livedata.v270)
+    implementation(libs.androidx.lifecycle.runtime.v270)
 
     //ROOM DATABASE
     implementation(libs.room.runtime)

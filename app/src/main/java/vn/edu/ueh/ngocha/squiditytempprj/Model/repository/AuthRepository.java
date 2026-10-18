@@ -51,4 +51,14 @@ public class AuthRepository {
     public void logout() {
         firebaseAuth.signOut();
     }
+
+    public String getCurrentUserId() {
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+
+        if (user == null) {
+            return null;
+        }
+
+        return user.getUid();
+    }
 }

@@ -2,7 +2,6 @@ package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -17,7 +16,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
@@ -32,8 +30,6 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Relationship;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Tag;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Review;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.MangaDexRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ComicDetailViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ComicViewModel;
