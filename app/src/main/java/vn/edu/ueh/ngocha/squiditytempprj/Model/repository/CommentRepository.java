@@ -16,9 +16,8 @@ public class CommentRepository {
         AppDatabase db = AppDatabase.getDatabase(application);
         mCommentDao = db.commentDao();
     }
-
-    public LiveData<List<Comment>> getCommentsByPost(String postId) {
-        return mCommentDao.getCommentsByPost(postId);
+    public LiveData<List<Comment>> getCommentsByPostId(String postId) {
+        return mCommentDao.getCommentsByPostId(postId);
     }
 
     public void insert(Comment comment) {
