@@ -9,6 +9,7 @@ import retrofit2.http.Query;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaResponse;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaSingleResponse;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaTagResponse;
 
 public interface MangaDexApi {
 
@@ -24,6 +25,16 @@ public interface MangaDexApi {
     Call<MangaSingleResponse> getMangaById(
             @Path("id") String mangaId,
             @Query("includes[]") List<String> include
+    );
+
+    @GET("manga/tag")
+    Call<MangaTagResponse> getMangaTags();
+
+    @GET("manga")
+    Call<MangaResponse> getMangaByGenre(
+            @Query("includedTags[]") String tagId,
+            @Query("limit") int limit,
+            @Query("includes[]") List<String> includes
     );
 
 }

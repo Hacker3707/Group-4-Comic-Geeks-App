@@ -30,11 +30,19 @@ import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicReviewAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicReviewHeaderAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.dialogFragment.ReviewPostDialog;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ReviewViewModel;
 
 public class ComicReviewActivity extends AppCompatActivity {
 
     public static String COMIC_ID = "comic_id";
+    private static final String KEY_COMIC_ID = "saved_comic_id";
+    private static final String KEY_COMIC_NAME = "saved_comic_name";
+    private static final String KEY_COMIC_COVER = "saved_comic_cover";
+
+    private String comicId;
+    private String comicName;
+    private String comicCover;
     public RecyclerView recyclerView;
     public RatingBar ratingBar;
     public ImageButton btnBack;
@@ -55,8 +63,42 @@ public class ComicReviewActivity extends AppCompatActivity {
         }
     };
 
-    public ReviewViewModel reviewViewModel;
+    private ReviewViewModel reviewViewModel;
+    private AuthViewModel authViewModel;
 
+    private final Observer<List<User>> usersObserver = new Observer<List<User>>() {
+        @Override
+        public void onChanged(List<User> users) {
+            reviewAdapter.setUsers(users);
+        }
+    };
+
+    private final Observer<Boolean> registeredObserver = new Observer<Boolean>() {
+        @Override
+        public void onChanged(Boolean registered) {
+            if (registered != null && registered) {
+                showReviewDialog();
+            }
+        }
+    };
+
+    private final Observer<List<Review>> reviewsObserver = new Observer<List<Review>>() {
+        @Override
+        public void onChanged(List<Review> reviews) {
+            reviewAdapter.setReviews(reviews);
+            headerAdapter.setReviewCount(reviews.size());
+            headerAdapter.setAverageRating(calculateAverageRating(reviews));
+        }
+    };
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(KEY_COMIC_ID, comicId);
+        outState.putString(KEY_COMIC_NAME, comicName);
+        outState.putString(KEY_COMIC_COVER, comicCover);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,9 +111,17 @@ public class ComicReviewActivity extends AppCompatActivity {
             return insets;
         });
 
-        COMIC_ID = getIntent().getStringExtra("comic_id");
-        String comic_name = getIntent().getStringExtra("comic_name");
-        String comic_cover = getIntent().getStringExtra("comic_cover");
+        if (savedInstanceState != null) {
+            comicId = savedInstanceState.getString(KEY_COMIC_ID);
+            comicName = savedInstanceState.getString(KEY_COMIC_NAME);
+            comicCover = savedInstanceState.getString(KEY_COMIC_COVER);
+        } else {
+            comicId = getIntent().getStringExtra("comic_id");
+            comicName = getIntent().getStringExtra("comic_name");
+            comicCover = getIntent().getStringExtra("comic_cover");
+        }
+
+        COMIC_ID = comicId;
 
 
         spnReviewfilter = findViewById(R.id.spinnerReviewFilter);
@@ -87,44 +137,44 @@ public class ComicReviewActivity extends AppCompatActivity {
 
         reviewAdapter = new ComicReviewAdapter();
         headerAdapter = new ComicReviewHeaderAdapter(onReviewClickListener);
-        headerAdapter.setComicInfo(comic_name, comic_cover);
+        headerAdapter.setComicInfo(comicName, comicCover);
 
         ConcatAdapter concatAdapter = new ConcatAdapter(headerAdapter, reviewAdapter);
 
         recyclerView.setAdapter(concatAdapter);
 
-        // ------------ Set up ViewModel ------------
+        // ------------ Set up reviewViewModel ------------
 
         reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
-
-        final Observer<List<Review>> reviewsObserver = new Observer<List<Review>>() {
-            @Override
-            public void onChanged(List<Review> reviews) {
-                reviewAdapter.setReviews(reviews);
-                headerAdapter.setReviewCount(reviews.size());
-                headerAdapter.setAverageRating(calculateAverageRating(reviews));
-            }
-        };
         reviewViewModel.getReviewsByComicId(COMIC_ID).observe(this, reviewsObserver);
-
-        final Observer<List<User>> usersObserver = new Observer<List<User>>() {
-            @Override
-            public void onChanged(List<User> users) {
-                reviewAdapter.setUsers(users);
-            }
-        };
         reviewViewModel.getUsersForComic(COMIC_ID).observe(this, usersObserver);
 
+        // ------------ Set up authViewModel ------------
 
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        authViewModel.getRegistered().observe(this, registeredObserver);
     }
 
+
     public void showReviewDialog() {
+        String userId = authViewModel.getCurrentUserId();
+
+        if (userId == null || userId.isEmpty()) {
+            Toast.makeText(
+                    this,
+                    "Bạn chưa đăng nhập Firebase!",
+                    Toast.LENGTH_LONG
+            ).show();
+            return;
+        }
+
         ReviewPostDialog dialog =
-                new ReviewPostDialog(COMIC_ID, "4v8JeFqSaTObxGn7zePLdsroA5l1");
+                new ReviewPostDialog(comicId, userId);
 
         dialog.show(
                 getSupportFragmentManager(),
-                "ReviewPostDialog");
+                "ReviewPostDialog"
+        );
     }
 
     public float calculateAverageRating(List<Review> reviews) {

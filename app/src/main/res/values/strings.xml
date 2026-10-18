@@ -11,8 +11,9 @@
     </array>
 
     <string-array name="search_comic_options">
-        <item>Squidity</item>
-        <item>MangaDex</item>
+        <item>Name</item>
+        <item>Genre</item>
+        <item>Ratings</item>
     </string-array>
 
 </resources>

@@ -20,6 +20,10 @@ public interface CommentDao {
     @Delete
     void deleteComment(Comment comment);
 
-    @Query("SELECT * FROM comments WHERE post_id = :postId ORDER BY timestamp ASC")
+    /* Bỏ tạm điều kiện ORDER BY timestamp nếu bảng của nhóm chưa cấu hình trường timestamp đầy đủ, tránh bị rỗng data
+    @Query("SELECT * FROM comments WHERE post_id = :postId")
     LiveData<List<Comment>> getCommentsByPost(String postId);
+    */
+    @Query("SELECT * FROM comments WHERE post_id = :postId")
+    LiveData<List<Comment>> getCommentsByPostId(String postId);
 }

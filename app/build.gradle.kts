@@ -21,9 +21,11 @@ android {
 
     buildTypes {
         release {
-            optimization {
-                enable = false
-            }
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -33,23 +35,42 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
-    implementation(libs.firebase.firestore)
     implementation(libs.material)
     implementation(libs.recyclerview)
+    implementation(libs.flexbox)
+    implementation(libs.core.splashscreen)
+
+    // FIREBASE
+    implementation(platform(libs.firebase.bom.v3502))
+    implementation(libs.google.firebase.auth)
+    implementation(libs.google.firebase.firestore)
+    implementation(libs.google.firebase.storage)
+    implementation(libs.play.services.auth.v2200)
+
+    //LIFECYCLE & VIEWMODEL
+    implementation(libs.androidx.lifecycle.viewmodel.v270)
+    implementation(libs.androidx.lifecycle.livedata.v270)
+    implementation(libs.androidx.lifecycle.runtime.v270)
+
+    //ROOM DATABASE
     implementation(libs.room.runtime)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.espresso.core)
-    androidTestImplementation(libs.ext.junit)
     annotationProcessor(libs.room.compiler)
+
+    //NETWORK & UI UTILS
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.glide)
-    implementation(libs.lottie)
-    implementation(libs.core.splashscreen)
     annotationProcessor(libs.compiler)
-    implementation(libs.flexbox)
+    implementation(libs.lottie)
 
+    //TESTING
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }

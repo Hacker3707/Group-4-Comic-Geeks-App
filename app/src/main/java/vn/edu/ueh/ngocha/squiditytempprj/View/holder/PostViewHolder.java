@@ -17,32 +17,29 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
     public TextView tvHandle;
     public ImageView imgAvatar;
     public TextView tvPostContent;
-    public ImageView imgPostImage;
+    public RecyclerView rvPostImages;
     public TextView tvHashtag;
     public TextView tvCommentCount;
     public ImageView btnStamp;
     public EditText edtQuickComment;
+    public ImageView btnSendComment;
 
     public PostViewHolder(@NonNull View itemView) {
         super(itemView);
-
-        // 1. Ánh xạ Header
         btnOptions = itemView.findViewById(R.id.btnOptions);
         btnFollow = itemView.findViewById(R.id.btnFollow);
         tvUserName = itemView.findViewById(R.id.tvUserName);
         tvHandle = itemView.findViewById(R.id.tvHandle);
         imgAvatar = itemView.findViewById(R.id.imgAvatar);
 
-        // 2. Ánh xạ Content
         tvPostContent = itemView.findViewById(R.id.tvPostContent);
-        imgPostImage = itemView.findViewById(R.id.imgPostImage);
+        rvPostImages = itemView.findViewById(R.id.rvPostImages);
 
-        // 3. Ánh xạ Actions
         tvHashtag = itemView.findViewById(R.id.tvHashtag);
         tvCommentCount = itemView.findViewById(R.id.tvCommentCount);
         btnStamp = itemView.findViewById(R.id.btnStamp);
 
-        // 4. Ánh xạ Comment
         edtQuickComment = itemView.findViewById(R.id.edtQuickComment);
+        btnSendComment = itemView.findViewById(R.id.btnSendComment);
     }
 }

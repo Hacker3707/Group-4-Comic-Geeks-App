@@ -1,16 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import vn.edu.ueh.ngocha.squiditytempprj.Model.AppDatabase;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.UserDao;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
-
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
@@ -19,17 +9,31 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.util.Log;
 
+import androidx.lifecycle.ViewModelProvider;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
+
+import androidx.credentials.Credential;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CustomCredential;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.exceptions.GetCredentialException;
+
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
+
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.GoogleAuthProvider;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption;
+
+import java.util.Locale;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 
 public class AuthActivity extends AppCompatActivity {
-
-    private UserDao userDao;
-
-    private final ExecutorService databaseExecutor =
-            Executors.newSingleThreadExecutor();
 
     private TextView tvAuthHeaderTitle;
     private TextView tvModeToggle;
@@ -45,6 +49,7 @@ public class AuthActivity extends AppCompatActivity {
 
     private MaterialButton btnAuthSubmit;
     private MaterialButton btnGoogleSignIn;
+    private AuthViewModel authViewModel;
 
     private boolean registerMode = false;
 
@@ -52,11 +57,15 @@ public class AuthActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
-        userDao = AppDatabase.getDatabase(getApplicationContext()).userDao();
 
         initializeViews();
+
+        authViewModel = new ViewModelProvider(this)
+                .get(AuthViewModel.class);
+
         setRegisterMode(false);
         setupClickListeners();
+        observeAuthState();
     }
 
     private void initializeViews() {
@@ -78,93 +87,13 @@ public class AuthActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        setupFieldFocusValidation();
-        tvModeToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setRegisterMode(!registerMode);
-            }
-        });
+        tvModeToggle.setOnClickListener(
+                view -> setRegisterMode(!registerMode)
+        );
 
-        btnAuthSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                validateForm();
-            }
-        });
+        btnAuthSubmit.setOnClickListener(view -> validateForm());
 
-        btnGoogleSignIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(
-                        AuthActivity.this,
-                        "Cần kết nối Google Sign-In để sử dụng chức năng này.",
-                        Toast.LENGTH_LONG
-                ).show();
-            }
-        });
-    }
-
-    private void setupFieldFocusValidation() {
-        View.OnFocusChangeListener focusListener =
-                new View.OnFocusChangeListener() {
-                    @Override
-                    public void onFocusChange(View view, boolean hasFocus) {
-                        if (hasFocus) {
-                            return;
-                        }
-
-                        EditText field = (EditText) view;
-                        String value = field.getText().toString().trim();
-
-                        if (field.getId() == R.id.etUsername) {
-                            if (registerMode && value.isEmpty()) {
-                                showError("Vui lòng nhập họ và tên.");
-                            }
-                        } else if (field.getId() == R.id.etEmail) {
-                            if (value.isEmpty()) {
-                                showError("Vui lòng nhập email.");
-                            } else if (!Patterns.EMAIL_ADDRESS
-                                    .matcher(value).matches()) {
-                                showError("Email không đúng định dạng.");
-                            } else {
-                                clearStatus();
-                            }
-                        } else if (field.getId() == R.id.etPassword) {
-                            if (value.isEmpty()) {
-                                showError("Vui lòng nhập mật khẩu.");
-                            } else if (registerMode && value.length() < 8) {
-                                showError("Mật khẩu phải có ít nhất 8 ký tự.");
-                            } else {
-                                clearStatus();
-                            }
-                        } else if (field.getId() == R.id.etConfirmPassword) {
-                            String password =
-                                    etPassword.getText().toString();
-                            String confirmPassword =
-                                    etConfirmPassword.getText().toString();
-
-                            if (registerMode && confirmPassword.trim().isEmpty()) {
-                                showError("Vui lòng xác nhận mật khẩu.");
-                            } else if (registerMode
-                                    && !password.equals(confirmPassword)) {
-                                showError("Mật khẩu xác nhận không khớp.");
-                            } else {
-                                clearStatus();
-                            }
-                        }
-                    }
-                };
-
-        etUsername.setOnFocusChangeListener(focusListener);
-        etEmail.setOnFocusChangeListener(focusListener);
-        etPassword.setOnFocusChangeListener(focusListener);
-        etConfirmPassword.setOnFocusChangeListener(focusListener);
-    }
-
-    private void clearStatus() {
-        tvAuthStatus.setText("");
-        tvAuthStatus.setVisibility(View.GONE);
+        btnGoogleSignIn.setOnClickListener(view -> signInWithGoogle());
     }
 
     private void setRegisterMode(boolean isRegisterMode) {
@@ -188,20 +117,17 @@ public class AuthActivity extends AppCompatActivity {
             btnGoogleSignIn.setText("Đăng nhập bằng Google");
         }
 
-        tvAuthStatus.setText("");
-        tvAuthStatus.setVisibility(View.GONE);
+        clearStatus();
     }
 
-
     private void validateForm() {
-        final String email = etEmail.getText().toString()
+        String email = etEmail.getText().toString()
                 .trim().toLowerCase(Locale.ROOT);
-        final String password = etPassword.getText().toString();
-        final String username = etUsername.getText().toString().trim();
+        String password = etPassword.getText().toString();
+        String username = etUsername.getText().toString().trim();
         String confirmPassword = etConfirmPassword.getText().toString();
-        final boolean isRegister = registerMode;
 
-        if (isRegister && TextUtils.isEmpty(username)) {
+        if (registerMode && TextUtils.isEmpty(username)) {
             showError("Vui lòng nhập họ và tên.");
             etUsername.requestFocus();
             return;
@@ -225,116 +151,168 @@ public class AuthActivity extends AppCompatActivity {
             return;
         }
 
-        if (isRegister && password.length() < 8) {
+        if (registerMode && password.length() < 8) {
             showError("Mật khẩu phải có ít nhất 8 ký tự.");
             etPassword.requestFocus();
             return;
         }
 
-        if (isRegister && !password.equals(confirmPassword)) {
+        if (registerMode && !password.equals(confirmPassword)) {
             showError("Mật khẩu xác nhận không khớp.");
             etConfirmPassword.requestFocus();
             return;
         }
 
-        tvAuthStatus.setText("Đang xử lý...");
-        tvAuthStatus.setVisibility(View.VISIBLE);
-        btnAuthSubmit.setEnabled(false);
+        setLoading(true);
 
-        databaseExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (isRegister) {
-                        int count = userDao.countByEmail(email);
+        if (registerMode) {
+            registerWithEmail(email, password, username);
+        } else {
+            loginWithEmail(email, password);
+        }
+    }
 
-                        if (count > 0) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    btnAuthSubmit.setEnabled(true);
-                                    showError("Email này đã được đăng ký.");
-                                }
-                            });
+    private void registerWithEmail(
+            String email,
+            String password,
+            String username
+    ) {
+        authViewModel.registerWithEmail(username, email, password);
+    }
+
+    private void loginWithEmail(String email, String password) {
+        authViewModel.loginWithEmail(email, password);
+    }
+
+    private void signInWithGoogle() {
+        setLoading(true);
+
+        CredentialManager credentialManager = CredentialManager.create(this);
+
+        GetSignInWithGoogleOption googleOption =
+                new GetSignInWithGoogleOption.Builder(
+                        getString(R.string.default_web_client_id)
+                ).build();
+
+        GetCredentialRequest request =
+                new GetCredentialRequest.Builder()
+                        .addCredentialOption(googleOption)
+                        .build();
+
+        credentialManager.getCredentialAsync(
+                this,
+                request,
+                null,
+                getMainExecutor(),
+                new androidx.credentials.CredentialManagerCallback<
+                        GetCredentialResponse,
+                        GetCredentialException>() {
+
+                    @Override
+                    public void onResult(GetCredentialResponse result) {
+                        Credential credential = result.getCredential();
+
+                        if (!(credential instanceof CustomCredential)
+                                || !GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                                .equals(credential.getType())) {
+                            setLoading(false);
+                            showError("Không nhận được thông tin tài khoản Google hợp lệ.");
                             return;
                         }
 
-                        User user = new User(
-                                UUID.randomUUID().toString(),
-                                username,
-                                email,
-                                hashPassword(password),
-                                ""
-                        );
+                        try {
+                            GoogleIdTokenCredential googleCredential =
+                                    GoogleIdTokenCredential.createFrom(
+                                            credential.getData()
+                                    );
 
-                        userDao.insert(user);
+                            String idToken = googleCredential.getIdToken();
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                btnAuthSubmit.setEnabled(true);
-                                setRegisterMode(false);
-                                etEmail.setText(email);
-                                etPassword.setText("");
-                                etConfirmPassword.setText("");
+                            AuthCredential firebaseCredential =
+                                    GoogleAuthProvider.getCredential(idToken, null);
 
-                                showError(
-                                        "Đăng ký thành công! Hãy đăng nhập."
-                                );
-                            }
-                        });
+                            authViewModel.loginWithGoogle(firebaseCredential);
 
-                    } else {
-                        final User user = userDao.getByEmail(email);
-
-                        if (user == null ||
-                                !hashPassword(password).equals(
-                                        user.getPasswordHash())) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    btnAuthSubmit.setEnabled(true);
-                                    showError("Email hoặc mật khẩu không đúng.");
-                                }
-                            });
-                            return;
+                        } catch (Exception e) {
+                            Log.e("AuthActivity", "Lỗi đọc Google ID token", e);
+                            setLoading(false);
+                            showError("Không thể đọc thông tin tài khoản Google.");
                         }
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                btnAuthSubmit.setEnabled(true);
-
-                                getSharedPreferences(
-                                        "ComicGeeksAuth",
-                                        MODE_PRIVATE
-                                ).edit()
-                                        .putBoolean("isLoggedIn", true)
-                                        .putString("email", user.getEmail())
-                                        .apply();
-
-                                Toast.makeText(
-                                        AuthActivity.this,
-                                        "Đăng nhập SQLite thành công!",
-                                        Toast.LENGTH_SHORT
-                                ).show();
-
-                                finish();
-                            }
-                        });
                     }
-                } catch (Exception e) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            btnAuthSubmit.setEnabled(true);
-                            showError(
-                                    "Có lỗi khi truy cập database. "
-                                            + "Vui lòng thử lại."
-                            );
-                        }
-                    });
+
+                    @Override
+                    public void onError(GetCredentialException e) {
+                        Log.e("AuthActivity", "Credential Manager thất bại", e);
+                        setLoading(false);
+                        showError("Không thể đăng nhập Google: " + e.getMessage());
+                    }
                 }
+        );
+    }
+
+    private String getErrorMessage(Exception exception) {
+        if (exception == null) {
+            return "Có lỗi xảy ra. Vui lòng thử lại.";
+        }
+
+        String message = exception.getMessage();
+
+        if (message == null) {
+            return "Có lỗi xảy ra. Vui lòng thử lại.";
+        }
+
+        if (message.contains("email address is already in use")) {
+            return "Email này đã được đăng ký.";
+        }
+
+        if (message.contains("password is invalid")
+                || message.contains("no user record")
+                || message.contains("invalid-credential")) {
+            return "Email hoặc mật khẩu không đúng.";
+        }
+
+        if (message.contains("network")) {
+            return "Không có kết nối mạng. Vui lòng thử lại.";
+        }
+
+        return message;
+    }
+
+    private void setLoading(boolean loading) {
+        btnAuthSubmit.setEnabled(!loading);
+        btnGoogleSignIn.setEnabled(!loading);
+
+        if (loading) {
+            tvAuthStatus.setText("Đang xử lý...");
+            tvAuthStatus.setVisibility(View.VISIBLE);
+        }
+    }
+    private void observeAuthState() {
+        authViewModel.getLoading().observe(this, loading -> {
+            if (loading != null) {
+                setLoading(loading);
+            }
+        });
+
+        authViewModel.getError().observe(this, message -> {
+            if (message != null && !message.isEmpty()) {
+                showError(message);
+            }
+        });
+
+        authViewModel.getLoginResult().observe(this, user -> {
+            if (user != null) {
+                setResult(RESULT_OK);
+                finish();
+            }
+        });
+
+        authViewModel.getRegistered().observe(this, registered -> {
+            if (Boolean.TRUE.equals(registered)) {
+                setRegisterMode(false);
+                etPassword.setText("");
+                etConfirmPassword.setText("");
+                showSuccess("Đăng ký thành công! Hãy đăng nhập.");
             }
         });
     }
@@ -344,29 +322,15 @@ public class AuthActivity extends AppCompatActivity {
         tvAuthStatus.setVisibility(View.VISIBLE);
     }
 
-
-    private String hashPassword(String password) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-            byte[] bytes = digest.digest(
-                    password.getBytes(
-                            java.nio.charset.StandardCharsets.UTF_8
-                    )
-            );
-
-            StringBuilder result = new StringBuilder();
-
-            for (byte b : bytes) {
-                result.append(String.format("%02x", b & 0xff));
-            }
-
-            return result.toString();
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(
-                    "Không hỗ trợ thuật toán SHA-256", e
-            );
-        }
+    private void clearStatus() {
+        tvAuthStatus.setText("");
+        tvAuthStatus.setVisibility(View.GONE);
     }
+
+    private void showSuccess(String message) {
+        tvAuthStatus.setText(message);
+        tvAuthStatus.setTextColor(android.graphics.Color.rgb(46, 125, 50));
+        tvAuthStatus.setVisibility(View.VISIBLE);
+    }
+
 }

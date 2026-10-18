@@ -35,10 +35,39 @@ public class PostViewModel extends AndroidViewModel {
     public void insertPost(Post post) {
         postRepository.insert(post);
     }
+    public void deletePost(Post post) {
+        if (postRepository != null && post != null) {
+            postRepository.deletePost(post, post.getPostId());
+        }
+    }
+    public void updatePost(Post post) {
+        if (postRepository != null && post != null) {
+            postRepository.updatePostInFirestore(post, new PostRepository.OnFirestoreUploadListener() {
+                @Override
+                public void onSuccess() {
+                }
+
+                @Override
+                public void onFailure(String error) {
+                }
+            });
+        }
+    }
+
     public void addComment(Comment comment) {
         commentRepository.insert(comment);
     }
+
+    public LiveData<List<Comment>> getCommentsByPostId(String postId) {
+        return commentRepository.getCommentsByPostId(postId);
+    }
+
     public void addStamp(Stamp stamp) {
         stampRepository.insert(stamp);
+    }
+    public void uploadPostToFirestore(Post post, PostRepository.OnFirestoreUploadListener listener) {
+        if (postRepository != null) {
+            postRepository.uploadPostToFirestore(post, listener);
+        }
     }
 }

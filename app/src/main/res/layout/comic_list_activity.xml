@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- 1. App Bar nằm trên cùng -->
+    <!-- App Bar -->
     <include
         android:id="@+id/appBar"
         layout="@layout/layout_app_bar"
@@ -17,8 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-
-    <!-- 3. Thanh tiêu đề Comic nằm dưới Search Bar -->
+    <!-- Tiêu đề Comic và Spinner -->
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="0dp"
@@ -34,7 +33,7 @@
             android:id="@+id/txtview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
+            android:layout_marginHorizontal="25dp"
             android:fontFamily="@font/jersey25_regular"
             android:text="Comic Zone 📖"
             android:textSize="30sp" />
@@ -42,15 +41,15 @@
         <Spinner
             android:id="@+id/spn_searchopt"
             style="@style/Widget.AppCompat.Spinner.DropDown"
-            android:layout_width="150dp"
-            android:layout_height="26dp"
-            android:layout_marginLeft="20dp"
+            android:layout_width="140dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="20dp"
             android:background="@color/white"
             android:entries="@array/search_comic_options" />
 
     </LinearLayout>
 
-    <!-- 2. Search Bar nằm dưới App Bar -->
+    <!-- Search Bar -->
     <include
         android:id="@+id/searchBar"
         layout="@layout/layout_search_bar"
@@ -60,29 +59,54 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- 4. RecyclerView chiếm phần còn lại -->
-
+    <!-- Hướng dẫn tìm theo tên -->
     <TextView
         android:id="@+id/tvSearchResult"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="15dp"
-        android:layout_marginStart="30dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="12dp"
         android:text="Type in the name of comic you want to find~"
         android:textColor="#8E8E8E"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/searchBar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/searchBar" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Danh sách genre: chỉ hiện khi chọn Genre -->
+    <HorizontalScrollView
+        android:id="@+id/genreScrollView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fillViewport="false"
+        android:scrollbars="none"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tvSearchResult"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupGenres"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            app:singleSelection="true"
+            app:selectionRequired="false"
+            app:singleLine="true"
+            app:chipSpacingHorizontal="8dp" />
+
+    </HorizontalScrollView>
+
+    <!-- Danh sách manga -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcvcomic"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:padding="8dp"
         android:background="@drawable/bg_squidity"
-        app:layout_constraintTop_toBottomOf="@id/tvSearchResult"
+        app:layout_constraintTop_toBottomOf="@id/genreScrollView"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

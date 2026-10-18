@@ -20,6 +20,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -178,4 +179,83 @@ public class ReviewRepository {
 
         };
     }
+
+
+    public LiveData<Float> getAverageRatingLive(String comicId) {
+        return new LiveData<Float>() {
+
+            private ListenerRegistration ratingListener;
+
+            @Override
+            protected void onActive() {
+                super.onActive();
+
+                if (ratingListener == null) {
+                    ratingListener = firestore.collection("reviews")
+                            .whereEqualTo("comicId", comicId)
+                            .addSnapshotListener(
+                                    new EventListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onEvent(
+                                                @Nullable QuerySnapshot snapshots,
+                                                @Nullable FirebaseFirestoreException error) {
+
+                                            if (error != null) {
+                                                Log.e(
+                                                        "ReviewRepository",
+                                                        "Error getting average rating",
+                                                        error
+                                                );
+                                                return;
+                                            }
+
+                                            if (snapshots == null) {
+                                                return;
+                                            }
+
+                                            float totalRating = 0f;
+                                            int count = 0;
+
+                                            for (QueryDocumentSnapshot document
+                                                    : snapshots) {
+
+                                                Object ratingValue =
+                                                        document.get("reviewRating");
+
+                                                if (ratingValue instanceof Number) {
+                                                    float rating =
+                                                            ((Number) ratingValue)
+                                                                    .floatValue();
+
+                                                    totalRating += rating;
+                                                    count++;
+                                                }
+                                            }
+
+                                            float averageRating = 0f;
+
+                                            if (count > 0) {
+                                                averageRating =
+                                                        totalRating / count;
+                                            }
+
+                                            postValue(averageRating);
+                                        }
+                                    }
+                            );
+                }
+            }
+
+            @Override
+            protected void onInactive() {
+                super.onInactive();
+
+                if (ratingListener != null) {
+                    ratingListener.remove();
+                    ratingListener = null;
+                }
+            }
+        };
+    }
+
 }
