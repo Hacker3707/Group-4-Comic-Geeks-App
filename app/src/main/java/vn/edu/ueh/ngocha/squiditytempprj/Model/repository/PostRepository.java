@@ -71,6 +71,7 @@ public class PostRepository {
             return null;
         }
     }
+
     // Hàm đẩy Post lên Firestore 1 lần duy nhất khi bấm Đăng
     public void uploadPostToFirestore(Post post, OnFirestoreUploadListener listener) {
         Map<String, Object> postMap = new HashMap<>();
@@ -79,7 +80,7 @@ public class PostRepository {
         postMap.put("groupId", post.getGroupId());
         postMap.put("comicId", post.getComicId());
         postMap.put("content", post.getContent());
-        postMap.put("imageUri", post.getImageUri());
+        postMap.put("imageUris", post.getImageUris()); // 👉 Sửa thành imageUris (số nhiều) để khớp với danh sách ảnh
         postMap.put("timestamp", post.getTimestamp());
         postMap.put("commentCount", post.getCommentCount());
 
@@ -93,18 +94,28 @@ public class PostRepository {
                     if (listener != null) listener.onFailure(e.getMessage());
                 });
     }
+
     public void deletePost(Post post, String postId) {
         firestore.collection("posts").document(postId).delete();
         delete(post); // Xóa cục bộ
     }
-    public void updatePostInFirestore(Post post) {
+
+    // 👉 Hàm cập nhật bài viết chuẩn, đồng bộ cả Firebase lẫn Room Database cục bộ
+    public void updatePostInFirestore(Post post, OnFirestoreUploadListener listener) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("content", post.getContent());
         updates.put("comicId", post.getComicId());
-        updates.put("imageUri", post.getImageUri());
+        updates.put("imageUris", post.getImageUris()); // 👉 Sửa thành imageUris (số nhiều)
 
-        firestore.collection("posts").document(post.getPostId()).update(updates);
-        update(post); // Cập nhật cục bộ
+        firestore.collection("posts").document(post.getPostId())
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    update(post); // Cập nhật đồng thời vào Room Database cục bộ
+                    if (listener != null) listener.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    if (listener != null) listener.onFailure(e.getMessage());
+                });
     }
 
     public interface OnFirestoreUploadListener {

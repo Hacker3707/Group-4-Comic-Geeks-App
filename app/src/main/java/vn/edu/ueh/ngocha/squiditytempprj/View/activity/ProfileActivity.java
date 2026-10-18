@@ -45,7 +45,9 @@ public class ProfileActivity extends AppCompatActivity {
             Intent intent = new Intent(ProfileActivity.this, CreatePostActivity.class);
             startActivity(intent);
         });
+
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
+
         postAdapter = new PostAdapter(this, new ArrayList<>(), new PostAdapter.OnPostInteractionListener() {
             @Override
             public void onStampClick(Post post) {
@@ -55,6 +57,7 @@ public class ProfileActivity extends AppCompatActivity {
                 postViewModel.addStamp(newStamp);
                 Toast.makeText(ProfileActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
             }
+
             @Override
             public void onCommentSend(Post post, String commentText) {
                 if (commentText != null && !commentText.trim().isEmpty()) {
@@ -67,6 +70,7 @@ public class ProfileActivity extends AppCompatActivity {
                     Toast.makeText(ProfileActivity.this, "Vui lòng nhập nội dung bình luận!", Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onViewCommentsClick(Post post) {
                 BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(ProfileActivity.this);
@@ -81,7 +85,6 @@ public class ProfileActivity extends AppCompatActivity {
                 if (rvComments != null) {
                     rvComments.setAdapter(commentAdapter);
                 }
-
 
                 if (post.getPostId() != null) {
                     postViewModel.getCommentsByPostId(post.getPostId()).observe(ProfileActivity.this, realComments -> {
@@ -104,18 +107,18 @@ public class ProfileActivity extends AppCompatActivity {
                     Toast.makeText(ProfileActivity.this, "Đã xóa bài viết!", Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onEditPost(Post post) {
-                if (post != null) {
-                    // Mở màn hình tạo/sửa bài viết và truyền kèm dữ liệu cũ nếu cần
-                    Intent intent = new Intent(ProfileActivity.this, CreatePostActivity.class);
-                    intent.putExtra("POST_ID", post.getPostId());
-                    intent.putExtra("POST_CONTENT", post.getContent());
-                    startActivity(intent);
-                }
+                Intent intent = new Intent(ProfileActivity.this, CreatePostActivity.class);
+                intent.putExtra("is_edit_mode", true);
+                intent.putExtra("post_id", post.getPostId()); // Dùng post.getPostId() để lấy đúng ID bài viết
+                intent.putExtra("post_content", post.getContent());
+                intent.putExtra("post_comic_id", post.getComicId());
+                intent.putStringArrayListExtra("post_image_urls", post.getImageUris() != null ? new ArrayList<>(post.getImageUris()) : new ArrayList<>());
+                startActivity(intent);
             }
         });
-
 
         recyclerViewProfilePosts.setAdapter(postAdapter);
 

@@ -5,9 +5,7 @@ plugins {
 
 android {
     namespace = "vn.edu.ueh.ngocha.squiditytempprj"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "vn.edu.ueh.ngocha.squiditytempprj"
@@ -21,9 +19,11 @@ android {
 
     buildTypes {
         release {
-            optimization {
-                enable = false
-            }
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -36,28 +36,36 @@ dependencies {
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
+    implementation(libs.material)
+    implementation(libs.recyclerview)
+    implementation(libs.flexbox)
+    implementation(libs.core.splashscreen)
+
+    // FIREBASE
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
     implementation("com.google.android.gms:play-services-auth:21.4.0")
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-    implementation(libs.play.services.auth)
-    implementation(libs.material)
-    implementation(libs.recyclerview)
+
+    //LIFECYCLE & VIEWMODEL
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime:2.7.0")
+
+    //ROOM DATABASE
     implementation(libs.room.runtime)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.espresso.core)
-    androidTestImplementation(libs.ext.junit)
     annotationProcessor(libs.room.compiler)
+
+    //NETWORK & UI UTILS
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.glide)
-    implementation(libs.lottie)
-    implementation(libs.core.splashscreen)
     annotationProcessor(libs.compiler)
-    implementation(libs.flexbox)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.storage)
-    implementation(libs.glide)
+    implementation(libs.lottie)
+
+    //TESTING
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -102,48 +103,45 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- NỘI DUNG BÀI VIẾT -->
-
-        <!-- THANH CÔNG CỤ (Hashtag, Bình luận, Tem) -->
-
         <TextView
             android:id="@+id/tvPostContent"
-            android:layout_width="320dp"
-            android:layout_height="21dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:layout_marginTop="24dp"
             android:fontFamily="@font/mozilla_headline"
-            android:maxLines="1"
             android:text="Opinion on this manga ..."
             android:textColor="#333333"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/headerLayout" />
 
-        <ImageView
-            android:id="@+id/imgPostImage"
+        <!-- RECYCLERVIEW HIỂN THỊ LƯỚI ẢNH (2 CỘT) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvPostImages"
             android:layout_width="0dp"
-            android:layout_height="180dp"
+            android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="20dp"
-            android:background="#E0E0E0"
-            android:scaleType="centerCrop"
+            android:layout_marginTop="12dp"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvPostContent" />
 
+        <!-- THANH CÔNG CỤ (Hashtag, Bình luận, Tem) -->
         <LinearLayout
             android:id="@+id/actionLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingHorizontal="16dp"
             android:paddingVertical="12dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imgPostImage">
+            app:layout_constraintTop_toBottomOf="@id/rvPostImages">
 
             <TextView
                 android:id="@+id/tvHashtag"
@@ -178,7 +176,6 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_ink_stamp"/>
-              <!-- Màu mặc định khi chưa bấm (tím nhạt) -->
         </LinearLayout>
 
         <View
@@ -188,7 +185,7 @@
             android:background="#E0E0E0"
             app:layout_constraintTop_toBottomOf="@id/actionLayout" />
 
-        <!-- BÌNH LUẬN NHANH (Hoặc ô nhập bình luận) -->
+        <!-- BÌNH LUẬN NHANH -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -218,6 +215,5 @@
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </com.google.android.material.card.MaterialCardView>

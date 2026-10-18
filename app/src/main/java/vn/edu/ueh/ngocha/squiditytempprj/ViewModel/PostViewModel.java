@@ -46,7 +46,15 @@ public class PostViewModel extends AndroidViewModel {
     // 👉 HÀM CẬP NHẬT/CHỈNH SỬA BÀI VIẾT
     public void updatePost(Post post) {
         if (postRepository != null && post != null) {
-            postRepository.updatePostInFirestore(post);
+            postRepository.updatePostInFirestore(post, new PostRepository.OnFirestoreUploadListener() {
+                @Override
+                public void onSuccess() {
+                }
+
+                @Override
+                public void onFailure(String error) {
+                }
+            });
         }
     }
 

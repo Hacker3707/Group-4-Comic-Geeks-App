@@ -17,7 +17,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
     public TextView tvHandle;
     public ImageView imgAvatar;
     public TextView tvPostContent;
-    public ImageView imgPostImage;
+    public RecyclerView rvPostImages; // 👉 Đổi thành RecyclerView hiển thị lưới ảnh
     public TextView tvHashtag;
     public TextView tvCommentCount;
     public ImageView btnStamp;
@@ -36,7 +36,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
 
         // 2. Ánh xạ Content
         tvPostContent = itemView.findViewById(R.id.tvPostContent);
-        imgPostImage = itemView.findViewById(R.id.imgPostImage);
+        rvPostImages = itemView.findViewById(R.id.rvPostImages); // 👉 Ánh xạ đúng ID mới trong XML
 
         // 3. Ánh xạ Actions
         tvHashtag = itemView.findViewById(R.id.tvHashtag);
