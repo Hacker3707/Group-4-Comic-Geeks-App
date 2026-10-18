@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -31,9 +32,12 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Relationship;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Tag;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Review;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.MangaDexRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ComicDetailViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ComicViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ReviewViewModel;
 
 public class ComicDetailActivity extends AppCompatActivity {
 
@@ -46,16 +50,24 @@ public class ComicDetailActivity extends AppCompatActivity {
     TextView txtYear;
     TextView txtLastVolume;
     TextView txtLastChapter;
+    TextView txticRatings;
+    TextView txtplacehdRatings;
+    TextView txtRatings;
     ImageView imgCover;
     ImageButton btnBack;
     CardView cardRatings;
+    RatingBar ratingBar;
 
     ComicDetailViewModel viewModel;
+    ComicViewModel comicViewModel;
+
     FlexboxLayout layoutComicGenres;
 
     String comicId;
     String comic_name;
     String comic_cover;
+
+    ReviewViewModel reviewViewModel;
 
     View.OnClickListener onBackClickListener = new View.OnClickListener() {
         @Override
@@ -75,6 +87,19 @@ public class ComicDetailActivity extends AppCompatActivity {
         }
     };
 
+    View.OnClickListener onGenreClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            String tagId = (String) view.getTag();
+
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("genre_id", tagId);
+
+            setResult(RESULT_OK, resultIntent);
+            finish();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +114,8 @@ public class ComicDetailActivity extends AppCompatActivity {
         comicId = getIntent().getStringExtra("comic_id");
         String searchOption = getIntent().getStringExtra("search_option");
         viewModel = new ViewModelProvider(this).get(ComicDetailViewModel.class);
+        reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
+
 
         txtName = findViewById(R.id.textView2);
         txtAuthor = findViewById(R.id.textView6);
@@ -103,9 +130,26 @@ public class ComicDetailActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.imgbtnBack);
         layoutComicGenres = findViewById(R.id.layoutComicGenres);
         cardRatings = findViewById(R.id.cardRatings);
+        ratingBar = findViewById(R.id.ratingBar);
+        txticRatings = findViewById(R.id.txticRatings);
+        txtplacehdRatings = findViewById(R.id.txtComicRating);
+        txtRatings = findViewById(R.id.txtRatings);
 
         btnBack.setOnClickListener(onBackClickListener);
         cardRatings.setOnClickListener(onReviewClickListener);
+
+        final Observer<Float> reviewsratingObserver = new Observer<Float>() {
+            @Override
+            public void onChanged(Float aFloat) {
+                ratingBar.setVisibility(View.VISIBLE);
+                ratingBar.setRating(aFloat);
+                txtRatings.setVisibility(View.VISIBLE);
+                txtRatings.setText(String.valueOf(aFloat) + " / 5");
+                txticRatings.setVisibility(View.GONE);
+                txtplacehdRatings.setVisibility(View.GONE);
+            }
+        };
+        reviewViewModel.getAverageRating(comicId).observe(ComicDetailActivity.this, reviewsratingObserver);
 
 
         if ("MangaDex".equals(searchOption) && comicId != null) {
@@ -156,11 +200,13 @@ public class ComicDetailActivity extends AppCompatActivity {
         MangaAttributes attributes = mangaData.getAttributes();
 
 
-        List<String> genres = new ArrayList<>();
+        List<Tag> genres = new ArrayList<>();
 
         if (attributes.getTags() != null) {
             for (Tag tag : attributes.getTags()) {
-                if (tag.getAttributes() != null
+                if (tag != null
+                        && tag.getId() != null
+                        && tag.getAttributes() != null
                         && "genre".equals(tag.getAttributes().getGroup())) {
 
                     Map<String, String> names =
@@ -170,8 +216,9 @@ public class ComicDetailActivity extends AppCompatActivity {
                         String genreName = names.get("en");
 
                         if (genreName != null && !genreName.isEmpty()) {
-                            genres.add(genreName);
+                            genres.add(tag);
                         }
+
                     }
                 }
             }
@@ -186,9 +233,6 @@ public class ComicDetailActivity extends AppCompatActivity {
         txtDescription.setText(
                 getLocalizedText(attributes.getDescription())
         );
-
-
-
 
         txtStatus.setText(
                 valueOrDefault(attributes.getStatus())
@@ -309,7 +353,7 @@ public class ComicDetailActivity extends AppCompatActivity {
         );
     }
 
-    private void displayGenres(List<String> genres) {
+    private void displayGenres(List<Tag> genres) {
         layoutComicGenres.removeAllViews();
 
         if (genres == null || genres.isEmpty()) {
@@ -318,18 +362,27 @@ public class ComicDetailActivity extends AppCompatActivity {
 
         LayoutInflater inflater = LayoutInflater.from(this);
 
-        for (String genre : genres) {
+        for (Tag tag : genres) {
             TextView genreView = (TextView) inflater.inflate(
                     R.layout.comic_genre_item,
                     layoutComicGenres,
                     false
             );
 
-            genreView.setText(genre);
+            String genreName = getLocalizedText(
+                    tag.getAttributes().getName()
+            );
+
+            genreView.setText(genreName);
+
+            // Lưu ID thật của genre vào View
+            genreView.setTag(tag.getId());
+
+            // Khi bấm genre, gửi ID về ComicListActivity
+            genreView.setOnClickListener(onGenreClickListener);
+
             layoutComicGenres.addView(genreView);
         }
     }
-
-
 
 }

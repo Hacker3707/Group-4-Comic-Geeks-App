@@ -115,6 +115,9 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicViewHolder>{
 
     @Override
     public int getItemCount() {
+        if (mangaList == null) {
+            return 0;
+        }
         return mangaList.size();
     }
 }

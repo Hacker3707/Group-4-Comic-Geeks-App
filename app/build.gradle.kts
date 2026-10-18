@@ -51,5 +51,8 @@ dependencies {
     implementation(libs.core.splashscreen)
     annotationProcessor(libs.compiler)
     implementation(libs.flexbox)
+    implementation(libs.lifecycle.livedata)
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.runtime)
 
 }
