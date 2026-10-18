@@ -10,25 +10,27 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Log;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.material.button.MaterialButton;
+
+import androidx.lifecycle.ViewModelProvider;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
+
+import androidx.credentials.Credential;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CustomCredential;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.exceptions.GetCredentialException;
+
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
+
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.firestore.FirebaseFirestore;
+import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 
 public class AuthActivity extends AppCompatActivity {
@@ -47,74 +49,23 @@ public class AuthActivity extends AppCompatActivity {
 
     private MaterialButton btnAuthSubmit;
     private MaterialButton btnGoogleSignIn;
-    private GoogleSignInClient googleSignInClient;
-
-    private FirebaseAuth firebaseAuth;
-    private FirebaseFirestore firestore;
+    private AuthViewModel authViewModel;
 
     private boolean registerMode = false;
-
-    private final ActivityResultLauncher<Intent> googleSignInLauncher =
-            registerForActivityResult(
-                    new ActivityResultContracts.StartActivityForResult(),
-                    result -> {
-                        if (result.getResultCode() != RESULT_OK || result.getData() == null) {
-                            setLoading(false);
-                            showError("Bạn đã hủy đăng nhập Google.");
-                            return;
-                        }
-
-                        try {
-                            GoogleSignInAccount account =
-                                    GoogleSignIn.getSignedInAccountFromIntent(result.getData())
-                                            .getResult(ApiException.class);
-
-                            if (account == null || account.getIdToken() == null) {
-                                setLoading(false);
-                                showError("Không lấy được Google ID Token. Hãy kiểm tra cấu hình OAuth.");
-                                return;
-                            }
-
-                            AuthCredential credential =
-                                    GoogleAuthProvider.getCredential(account.getIdToken(), null);
-
-                            firebaseAuth.signInWithCredential(credential)
-                                    .addOnCompleteListener(this, task -> {
-                                        if (!task.isSuccessful()) {
-                                            setLoading(false);
-                                            showError(getErrorMessage(task.getException()));
-                                            return;
-                                        }
-
-                                        FirebaseUser user = firebaseAuth.getCurrentUser();
-
-                                        if (user == null) {
-                                            setLoading(false);
-                                            showError("Không lấy được tài khoản Firebase.");
-                                            return;
-                                        }
-
-                                        completeLogin(user);
-                                    });
-
-                        } catch (ApiException e) {
-                            setLoading(false);
-                            showError("Đăng nhập Google thất bại: " + e.getStatusCode());
-                            Log.e("AuthActivity", "Google Sign-In failed", e);
-                        }
-                    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
 
-        firebaseAuth = FirebaseAuth.getInstance();
-        firestore = FirebaseFirestore.getInstance();
-
         initializeViews();
+
+        authViewModel = new ViewModelProvider(this)
+                .get(AuthViewModel.class);
+
         setRegisterMode(false);
         setupClickListeners();
+        observeAuthState();
     }
 
     private void initializeViews() {
@@ -221,110 +172,82 @@ public class AuthActivity extends AppCompatActivity {
         }
     }
 
-    private void registerWithEmail(String email, String password, String username) {
-        firebaseAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (!task.isSuccessful()) {
-                        setLoading(false);
-                        showError(getErrorMessage(task.getException()));
-                        return;
-                    }
-
-                    FirebaseUser user = firebaseAuth.getCurrentUser();
-
-                    if (user == null) {
-                        setLoading(false);
-                        showError("Không lấy được thông tin tài khoản.");
-                        return;
-                    }
-
-                    com.google.firebase.auth.UserProfileChangeRequest request =
-                            new com.google.firebase.auth.UserProfileChangeRequest.Builder()
-                                    .setDisplayName(username)
-                                    .build();
-
-                    user.updateProfile(request).addOnCompleteListener(profileTask -> {
-                        // Đăng ký không phụ thuộc vào việc Firestore có phản hồi hay không.
-                        firebaseAuth.signOut();
-                        setLoading(false);
-
-                        etPassword.setText("");
-                        etConfirmPassword.setText("");
-
-                        setRegisterMode(false);
-                        showSuccess("Đăng ký thành công! Hãy đăng nhập bằng tài khoản vừa tạo.");
-                    });
-                });
+    private void registerWithEmail(
+            String email,
+            String password,
+            String username
+    ) {
+        authViewModel.registerWithEmail(username, email, password);
     }
 
     private void loginWithEmail(String email, String password) {
-        firebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (!task.isSuccessful()) {
-                        setLoading(false);
-                        showError(getErrorMessage(task.getException()));
-                        return;
-                    }
-
-                    FirebaseUser user = firebaseAuth.getCurrentUser();
-
-                    if (user == null) {
-                        setLoading(false);
-                        showError("Không lấy được thông tin tài khoản.");
-                        return;
-                    }
-
-                    completeLogin(user);
-                });
+        authViewModel.loginWithEmail(email, password);
     }
 
     private void signInWithGoogle() {
         setLoading(true);
 
-        String webClientId = getString(R.string.default_web_client_id);
+        CredentialManager credentialManager = CredentialManager.create(this);
 
-        GoogleSignInOptions options = new GoogleSignInOptions.Builder(
-                GoogleSignInOptions.DEFAULT_SIGN_IN
-        )
-                .requestIdToken(webClientId)
-                .requestEmail()
-                .build();
+        GetSignInWithGoogleOption googleOption =
+                new GetSignInWithGoogleOption.Builder(
+                        getString(R.string.default_web_client_id)
+                ).build();
 
-        googleSignInClient = GoogleSignIn.getClient(this, options);
+        GetCredentialRequest request =
+                new GetCredentialRequest.Builder()
+                        .addCredentialOption(googleOption)
+                        .build();
 
-        googleSignInClient.signOut()
-                .addOnCompleteListener(this, task -> {
-                    Intent signInIntent = googleSignInClient.getSignInIntent();
-                    googleSignInLauncher.launch(signInIntent);
-                });
-    }
+        credentialManager.getCredentialAsync(
+                this,
+                request,
+                null,
+                getMainExecutor(),
+                new androidx.credentials.CredentialManagerCallback<
+                        GetCredentialResponse,
+                        GetCredentialException>() {
 
-    private void saveUserProfile(
-            FirebaseUser user,
-            String username,
-            String email
-    ) {
-        Map<String, Object> profile = new HashMap<>();
-        profile.put("userId", user.getUid());
-        profile.put("username", username == null ? "" : username);
-        profile.put("email", email == null ? "" : email);
-        profile.put("avatarUrl", user.getPhotoUrl() == null
-                ? "" : user.getPhotoUrl().toString());
-        profile.put("role", "USER");
-        profile.put("verified", user.isEmailVerified());
-        profile.put("verifiedSource",
-                user.isEmailVerified() ? "FIREBASE" : "");
+                    @Override
+                    public void onResult(GetCredentialResponse result) {
+                        Credential credential = result.getCredential();
 
-        // Lưu hồ sơ bất đồng bộ; không giữ AuthActivity chờ Firestore.
-        firestore.collection("users")
-                .document(user.getUid())
-                .set(profile, com.google.firebase.firestore.SetOptions.merge())
-                .addOnFailureListener(e ->
-                        android.util.Log.e(
-                                "AuthActivity",
-                                "Không lưu được hồ sơ Firestore",
-                                e
-                        ));
+                        if (!(credential instanceof CustomCredential)
+                                || !GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                                .equals(credential.getType())) {
+                            setLoading(false);
+                            showError("Không nhận được thông tin tài khoản Google hợp lệ.");
+                            return;
+                        }
+
+                        try {
+                            GoogleIdTokenCredential googleCredential =
+                                    GoogleIdTokenCredential.createFrom(
+                                            credential.getData()
+                                    );
+
+                            String idToken = googleCredential.getIdToken();
+
+                            AuthCredential firebaseCredential =
+                                    GoogleAuthProvider.getCredential(idToken, null);
+
+                            authViewModel.loginWithGoogle(firebaseCredential);
+
+                        } catch (Exception e) {
+                            Log.e("AuthActivity", "Lỗi đọc Google ID token", e);
+                            setLoading(false);
+                            showError("Không thể đọc thông tin tài khoản Google.");
+                        }
+                    }
+
+                    @Override
+                    public void onError(GetCredentialException e) {
+                        Log.e("AuthActivity", "Credential Manager thất bại", e);
+                        setLoading(false);
+                        showError("Không thể đăng nhập Google: " + e.getMessage());
+                    }
+                }
+        );
     }
 
     private String getErrorMessage(Exception exception) {
@@ -364,6 +287,35 @@ public class AuthActivity extends AppCompatActivity {
             tvAuthStatus.setVisibility(View.VISIBLE);
         }
     }
+    private void observeAuthState() {
+        authViewModel.getLoading().observe(this, loading -> {
+            if (loading != null) {
+                setLoading(loading);
+            }
+        });
+
+        authViewModel.getError().observe(this, message -> {
+            if (message != null && !message.isEmpty()) {
+                showError(message);
+            }
+        });
+
+        authViewModel.getLoginResult().observe(this, user -> {
+            if (user != null) {
+                setResult(RESULT_OK);
+                finish();
+            }
+        });
+
+        authViewModel.getRegistered().observe(this, registered -> {
+            if (Boolean.TRUE.equals(registered)) {
+                setRegisterMode(false);
+                etPassword.setText("");
+                etConfirmPassword.setText("");
+                showSuccess("Đăng ký thành công! Hãy đăng nhập.");
+            }
+        });
+    }
 
     private void showError(String message) {
         tvAuthStatus.setText(message);
@@ -373,23 +325,6 @@ public class AuthActivity extends AppCompatActivity {
     private void clearStatus() {
         tvAuthStatus.setText("");
         tvAuthStatus.setVisibility(View.GONE);
-    }
-    private void completeLogin(FirebaseUser user) {
-        String email = user.getEmail() == null ? "" : user.getEmail();
-        String username = user.getDisplayName();
-
-        if (username == null || username.trim().isEmpty()) {
-            username = email.contains("@")
-                    ? email.substring(0, email.indexOf("@"))
-                    : "Người dùng";
-        }
-
-        saveUserProfile(user, username, email);
-
-        setLoading(false);
-        Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-        setResult(RESULT_OK);
-        finish();
     }
 
     private void showSuccess(String message) {
