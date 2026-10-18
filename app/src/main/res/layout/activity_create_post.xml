@@ -7,14 +7,12 @@
     android:background="#FFFFFF"
     android:fitsSystemWindows="true">
 
-    <!-- APP BAR DÙNG CHUNG CỦA NHÓM TRƯỞNG -->
     <include
         android:id="@+id/appBar"
         layout="@layout/layout_app_bar"
         android:layout_width="match_parent"
         android:layout_height="70dp" />
 
-    <!-- HÀNG THAO TÁC: HỦY VÀ ĐĂNG -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="52dp"
@@ -69,7 +67,6 @@
         android:layout_height="1dp"
         android:background="#E8E3EF" />
 
-    <!-- NỘI DUNG NHẬP BÀI VIẾT -->
     <EditText
         android:id="@+id/edtPostContent"
         android:layout_width="match_parent"
@@ -86,7 +83,7 @@
         android:scrollbars="vertical"
         android:overScrollMode="ifContentScrolls" />
 
-    <!-- Ô NHẬP TÊN TRUYỆN ĐỂ KẾT NỐI API (ĐÃ ĐƯA RA NGOÀI ĐÚNG VỊ TRÍ) -->
+
     <EditText
         android:id="@+id/edtComicSearch"
         android:layout_width="match_parent"
@@ -99,7 +96,6 @@
         android:textColor="#333333"
         android:textSize="14sp" />
 
-    <!-- KHUNG XEM TRƯỚC ẢNH -->
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvImagePreview"
@@ -111,7 +107,6 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="8dp"/>
 
-    <!-- NÚT CHỌN ẢNH -->
     <LinearLayout
         android:id="@+id/btnAddImage"
         android:layout_width="match_parent"

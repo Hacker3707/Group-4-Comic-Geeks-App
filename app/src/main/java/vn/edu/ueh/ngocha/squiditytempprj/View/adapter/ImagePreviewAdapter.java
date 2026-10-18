@@ -41,7 +41,6 @@ public class ImagePreviewAdapter extends RecyclerView.Adapter<ImagePreviewAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Uri uri = imageUris.get(position);
 
-        // 👉 Xử lý thông minh: Dùng Glide nếu là URL mạng, dùng setImageURI nếu là ảnh từ thiết bị
         String uriString = uri.toString();
         if (uriString.startsWith("http://") || uriString.startsWith("https://")) {
             Glide.with(holder.itemView.getContext())

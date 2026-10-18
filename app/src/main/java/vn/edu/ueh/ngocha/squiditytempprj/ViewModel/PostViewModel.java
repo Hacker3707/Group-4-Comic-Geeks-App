@@ -35,15 +35,11 @@ public class PostViewModel extends AndroidViewModel {
     public void insertPost(Post post) {
         postRepository.insert(post);
     }
-
-    // 👉 HÀM XÓA BÀI VIẾT
     public void deletePost(Post post) {
         if (postRepository != null && post != null) {
             postRepository.deletePost(post, post.getPostId());
         }
     }
-
-    // 👉 HÀM CẬP NHẬT/CHỈNH SỬA BÀI VIẾT
     public void updatePost(Post post) {
         if (postRepository != null && post != null) {
             postRepository.updatePostInFirestore(post, new PostRepository.OnFirestoreUploadListener() {
@@ -69,8 +65,6 @@ public class PostViewModel extends AndroidViewModel {
     public void addStamp(Stamp stamp) {
         stampRepository.insert(stamp);
     }
-
-    // 👉 HÀM ĐẨY BÀI LÊN FIRESTORE KHI TẠO MỚI
     public void uploadPostToFirestore(Post post, PostRepository.OnFirestoreUploadListener listener) {
         if (postRepository != null) {
             postRepository.uploadPostToFirestore(post, listener);

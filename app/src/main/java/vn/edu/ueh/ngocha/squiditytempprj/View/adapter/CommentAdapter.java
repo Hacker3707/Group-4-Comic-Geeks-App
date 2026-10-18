@@ -28,7 +28,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = commentList.get(position);
-        // Lưu ý: Đổi tên hàm getUserId() và getContent() cho khớp với class Comment của bạn
         holder.tvCommentUsername.setText(comment.getUserId());
         holder.tvCommentContent.setText(comment.getContent());
     }

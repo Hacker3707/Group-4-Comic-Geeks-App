@@ -3,12 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profileRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F4FA"
     android:fitsSystemWindows="true">
 
-    <!-- NỘI DUNG PROFILE -->
+
     <LinearLayout
         android:id="@+id/profileContent"
         android:layout_width="match_parent"
@@ -16,14 +17,14 @@
         android:orientation="vertical"
         android:background="#F5F4FA">
 
-        <!-- APP BAR DÙNG CHUNG CỦA NHÓM TRƯỞNG -->
+
         <include
-            android:id="@+id/appBar"
+            android:id="@+id/toolbar"
             layout="@layout/layout_app_bar"
             android:layout_width="match_parent"
             android:layout_height="70dp" />
 
-        <!-- PHẦN PROFILE CUỘN ĐƯỢC -->
+
         <androidx.core.widget.NestedScrollView
             android:id="@+id/profileScrollView"
             android:layout_width="match_parent"
@@ -38,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- HEADER: BANNER, AVATAR, THỐNG KÊ -->
+
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -46,7 +47,7 @@
                     android:paddingBottom="16dp">
 
                     <ImageView
-                        android:id="@+id/imgBanner"
+                        android:id="@+id/imgProfileCover"
                         android:layout_width="0dp"
                         android:layout_height="140dp"
                         android:background="#FFB3C6"
@@ -85,8 +86,18 @@
                         app:layout_constraintTop_toBottomOf="@id/imgProfileAvatar"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />
+                    <TextView
+                        android:id="@+id/tvProfileEmail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="email@example.com"
+                        android:textColor="#666666"
+                        android:textSize="12sp"
+                        app:layout_constraintTop_toBottomOf="@id/tvProfileName"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
 
-                    <!-- THỐNG KÊ -->
                     <LinearLayout
                         android:id="@+id/statsLayout"
                         android:layout_width="match_parent"
@@ -195,7 +206,6 @@
 
                     </LinearLayout>
 
-                    <!-- NÚT FOLLOW VÀ MESSAGE -->
                     <LinearLayout
                         android:id="@+id/profileActionButtons"
                         android:layout_width="wrap_content"
@@ -230,7 +240,7 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <!-- BIO CARD -->
+
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -265,7 +275,7 @@
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
-            <!-- EDIT PROFILE CARD -->
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/editProfileCard"
                 android:layout_width="match_parent"
@@ -345,7 +355,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- BIO CARD -->
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -465,7 +475,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- TAB LAYOUT -->
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/tabLayout"
                     android:layout_width="match_parent"
@@ -509,7 +518,7 @@
 
     </LinearLayout>
 
-    <!-- FAB NỔI TRÊN NỘI DUNG -->
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabCreatePost"
         android:layout_width="wrap_content"

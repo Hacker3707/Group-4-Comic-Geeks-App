@@ -2,6 +2,7 @@ package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
@@ -21,6 +24,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
     private List<Post> postList;
     private Context context;
     private OnPostInteractionListener listener;
+    private final Map<String, Boolean> expandedStates = new HashMap<>();
 
     public interface OnPostInteractionListener {
         void onStampClick(Post post);
@@ -47,9 +51,34 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
         Post post = postList.get(position);
 
-        holder.tvPostContent.setText(post.getContent());
         holder.tvUserName.setText(post.getUserId());
         holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
+        String content = post.getContent();
+        String postId = post.getPostId() != null ? post.getPostId() : String.valueOf(position);
+        boolean isExpanded = expandedStates.containsKey(postId) && Boolean.TRUE.equals(expandedStates.get(postId));
+
+        if (content != null && !content.isEmpty()) {
+            holder.tvPostContent.setVisibility(View.VISIBLE);
+
+            if (isExpanded) {
+
+                holder.tvPostContent.setMaxLines(Integer.MAX_VALUE);
+                holder.tvPostContent.setEllipsize(null);
+                holder.tvPostContent.setText(content + " Thu gọn");
+            } else {
+                holder.tvPostContent.setMaxLines(3);
+                holder.tvPostContent.setEllipsize(TextUtils.TruncateAt.END);
+                holder.tvPostContent.setText(content);
+            }
+
+            holder.tvPostContent.setOnClickListener(v -> {
+                boolean currentExpanded = expandedStates.containsKey(postId) && Boolean.TRUE.equals(expandedStates.get(postId));
+                expandedStates.put(postId, !currentExpanded);
+                notifyItemChanged(position);
+            });
+        } else {
+            holder.tvPostContent.setVisibility(View.GONE);
+        }
 
         if (post.getComicId() != null && !post.getComicId().isEmpty()) {
             holder.tvHashtag.setText("# " + post.getComicId());
@@ -113,7 +142,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
             popup.show();
         });
 
-        // 👉 Xử lý hiển thị danh sách ảnh dạng lưới 2 cột tối ưu
         if (post.getImageUris() != null && !post.getImageUris().isEmpty()) {
             holder.rvPostImages.setVisibility(View.VISIBLE);
 

@@ -17,7 +17,6 @@
         android:layout_height="wrap_content"
         android:background="#FFFFFF">
 
-        <!-- HEADER CỦA BÀI VIẾT (Màu tím) -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/headerLayout"
             android:layout_width="match_parent"
@@ -102,7 +101,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- NỘI DUNG BÀI VIẾT -->
         <TextView
             android:id="@+id/tvPostContent"
             android:layout_width="0dp"
@@ -115,7 +113,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/headerLayout" />
 
-        <!-- RECYCLERVIEW HIỂN THỊ LƯỚI ẢNH (2 CỘT) -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvPostImages"
             android:layout_width="0dp"
@@ -129,7 +126,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvPostContent" />
 
-        <!-- THANH CÔNG CỤ (Hashtag, Bình luận, Tem) -->
         <LinearLayout
             android:id="@+id/actionLayout"
             android:layout_width="match_parent"
@@ -170,7 +166,6 @@
                 android:drawablePadding="4dp"
                 android:text="1" />
 
-            <!-- Nút thả Stamp hình vết mực -->
             <ImageView
                 android:id="@+id/btnStamp"
                 android:layout_width="32dp"
@@ -185,7 +180,6 @@
             android:background="#E0E0E0"
             app:layout_constraintTop_toBottomOf="@id/actionLayout" />
 
-        <!-- BÌNH LUẬN NHANH -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
