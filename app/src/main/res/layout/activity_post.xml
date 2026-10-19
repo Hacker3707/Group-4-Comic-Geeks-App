@@ -5,8 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="30dp"
-    android:layout_marginTop="30dp"
+    android:layout_marginHorizontal="20dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginBottom="8dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="4dp"
     app:strokeColor="#E0DCF0"
@@ -17,6 +18,7 @@
         android:layout_height="wrap_content"
         android:background="#FFFFFF">
 
+        <!-- HEADER: THÔNG TIN USER & NÚT TÙY CHỌN -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/headerLayout"
             android:layout_width="match_parent"
@@ -101,6 +103,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- NỘI DUNG BÀI VIẾT -->
         <TextView
             android:id="@+id/tvPostContent"
             android:layout_width="0dp"
@@ -112,7 +115,23 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/headerLayout" />
+        <TextView
+            android:id="@+id/tvLinkedComic"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/jersey25_regular"
+            android:text="📖 Tên bộ truyện liên kết"
+            android:textColor="#493373"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPostContent" />
 
+        <!-- LƯỚI ẢNH BÀI VIẾT -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvPostImages"
             android:layout_width="0dp"
@@ -124,8 +143,9 @@
             app:spanCount="2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvPostContent" />
+            app:layout_constraintTop_toBottomOf="@id/tvLinkedComic" />
 
+        <!-- KHUNG ACTION (HASHTAG, COMMENT, STAMP) -->
         <LinearLayout
             android:id="@+id/actionLayout"
             android:layout_width="match_parent"
@@ -180,6 +200,7 @@
             android:background="#E0E0E0"
             app:layout_constraintTop_toBottomOf="@id/actionLayout" />
 
+        <!-- Ô BÌNH LUẬN NHANH -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

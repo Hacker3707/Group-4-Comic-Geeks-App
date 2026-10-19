@@ -37,9 +37,10 @@ public class Post {
     private int commentCount = 0;
     @ColumnInfo(name = "image_uris")
     private List<String> imageUris;
-
-    public int getCommentCount() { return commentCount; }
-    public void setCommentCount(int count) { this.commentCount = count; }
+    @ColumnInfo(name = "hashtag")
+    private String hashtag;
+    @ColumnInfo(name = "comic_title")
+    private String comicTitle;
 
     public Post(@NonNull String postId, String userId, String comicId, String content, List <String> imageUris) {
         this.postId = postId;
@@ -57,6 +58,9 @@ public class Post {
     public String getComicId() { return comicId; }
     public String getContent() { return content; }
     public Date getTimestamp() { return timestamp; }
+    public String getComicTitle() { return comicTitle; }
+    public String getHashtag() { return hashtag; }
+    public int getCommentCount() { return commentCount; }
 
 
     public void setPostId(@NonNull String postId) { this.postId = postId; }
@@ -65,6 +69,9 @@ public class Post {
     public void setComicId(String comicId) { this.comicId = comicId; }
     public void setContent(String content) { this.content = content; }
     public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
+    public void setHashtag(String hashtag) { this.hashtag = hashtag; }
+    public void setComicTitle(String comicTitle) { this.comicTitle = comicTitle; }
+    public void setCommentCount(int count) { this.commentCount = count; }
     public List<String> getImageUris() { return imageUris; }
     public void setImageUris(List<String> imageUris) { this.imageUris = imageUris; }
     public void editContent(String newContent) {

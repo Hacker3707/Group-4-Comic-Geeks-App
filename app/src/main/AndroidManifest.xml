@@ -53,6 +53,11 @@
             android:name=".View.activity.ComicReviewActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".View.activity.SearchActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
 
         <activity
             android:name=".View.activity.GroupActivity"

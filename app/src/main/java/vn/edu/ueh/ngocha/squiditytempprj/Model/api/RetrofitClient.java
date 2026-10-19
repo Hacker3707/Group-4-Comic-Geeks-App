@@ -20,6 +20,18 @@ public class RetrofitClient {
 
         return retrofit;
     }
+    public static Retrofit getInstance() {
+        if (retrofit == null) {
+            retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .addConverterFactory(
+                            GsonConverterFactory.create()
+                    )
+                    .build();
+        }
+
+        return retrofit;
+    }
 
     public static MangaDexApi getMangaDexApi() {
         return getRetrofit().create(MangaDexApi.class);
