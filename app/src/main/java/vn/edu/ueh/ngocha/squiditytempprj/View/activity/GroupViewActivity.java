@@ -655,9 +655,9 @@ public class GroupViewActivity extends AppCompatActivity {
         if (content.isEmpty()) {
             return;
         }
-        Post post = new Post(UUID.randomUUID().toString(), CURRENT_USER_ID, null, content);
-        post.setGroupId(groupId);
-        postViewModel.insertPost(post);
+        //Post post = new Post(UUID.randomUUID().toString(), CURRENT_USER_ID, null, content);
+        //post.setGroupId(groupId);
+        //postViewModel.insertPost(post);
         edtComposer.setText("");
     }
 }

@@ -112,11 +112,6 @@ public class MainActivity extends AppCompatActivity {
                     int id = item.getItemId();
 
                     if (id == R.id.action_profile) {
-                        startActivity(new Intent(MainActivity.this, ProfileActivity.class));
-
-                    } else if (id == R.id.action_chat) {
-                         startActivity(new Intent(MainActivity.this, ChatListActivity.class));
-                    } else if (id == R.id.action_group) {
                         if (authViewModel.getCurrentUser() == null) {
 
                             new AlertDialog.Builder(MainActivity.this)
@@ -141,6 +136,16 @@ public class MainActivity extends AppCompatActivity {
                             );
                             startActivity(intent);
                         }
+
+                    } else if (id == R.id.action_chat) {
+                         startActivity(new Intent(MainActivity.this, ChatListActivity.class));
+                    } else if (id == R.id.action_group) {
+                        // Mở màn hình Groups
+                        Intent intent = new Intent(
+                                MainActivity.this,
+                                GroupActivity.class
+                        );
+                        startActivity(intent);
                     }
                     else if (id == R.id.action_comic) {
                         Intent intent = new Intent(
