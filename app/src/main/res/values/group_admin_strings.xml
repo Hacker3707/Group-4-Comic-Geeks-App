@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Vai trò thành viên -->
+    <string name="group_role_admin">Admin</string>
+    <string name="group_role_member">Thành viên</string>
+
+    <!-- Admin quản lý thành viên -->
+    <string name="group_member_make_admin">Đặt làm Admin</string>
+    <string name="group_member_make_member">Hạ xuống Thành viên</string>
+    <string name="group_member_remove">Xoá khỏi nhóm</string>
+    <string name="group_member_self">Bạn không thể thao tác với chính mình</string>
+
+    <!-- Quản lý nhóm -->
+    <string name="group_admin_only">Chỉ admin mới quản lý được nhóm</string>
+    <string name="group_delete">Xoá nhóm</string>
+    <string name="group_delete_confirm_title">Xoá nhóm?</string>
+    <string name="group_delete_confirm_message">Toàn bộ thành viên sẽ bị xoá khỏi nhóm. Hành động này không thể hoàn tác.</string>
+    <string name="group_cancel">Huỷ</string>
+    <string name="group_delete_success">Đã xoá nhóm</string>
+</resources>

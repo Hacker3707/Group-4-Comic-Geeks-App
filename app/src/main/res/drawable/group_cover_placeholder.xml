@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ảnh bìa mặc định khi nhóm chưa có link ảnh: nền tím chuyển màu -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <gradient
+        android:angle="315"
+        android:endColor="@color/group_primary"
+        android:startColor="@color/group_header" />
+</shape>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="group_title_default">Manga Readers</string>
+    <string name="group_members_count">%1$d Members</string>
+    <string name="group_join">Join</string>
+    <string name="group_joined">♧ Joined</string>
+    <string name="group_more_dots">⋯</string>
+
+    <string name="group_chip_anime">Anime</string>
+    <string name="group_chip_manga">Manga</string>
+    <string name="group_chip_light_novel">Light Novel</string>
+    <string name="group_chip_discussion">Discussion</string>
+    <string name="group_chip_otaku">Otaku</string>
+
+    <string name="group_tab_posts">Bài viết</string>
+    <string name="group_tab_members">Thành viên</string>
+    <string name="group_tab_events">Sự kiện</string>
+    <string name="group_tab_files">File</string>
+    <string name="group_tab_about">Giới thiệu</string>
+
+    <string name="group_composer_hint">Viết bài, chia sẻ điều gì đó...</string>
+    <string name="group_empty_posts">Chưa có bài viết nào</string>
+    <string name="group_empty_members">Chưa có thành viên nào</string>
+    <string name="group_empty_other">Chưa có nội dung</string>
+
+    <string name="group_post_dots">•••</string>
+    <string name="group_post_topic">Discussion</string>
+    <string name="group_post_say">Say something... くコ:彡</string>
+
+    <string name="group_cd_back">Quay lại</string>
+    <string name="group_cd_search">Tìm kiếm</string>
+    <string name="group_cd_more">Thêm</string>
+    <string name="group_cd_cover">Ảnh bìa group</string>
+    <string name="group_cd_avatar">Ảnh đại diện</string>
+    <string name="group_cd_send">Gửi bài viết</string>
+    <string name="group_cd_topic">Chủ đề</string>
+</resources>

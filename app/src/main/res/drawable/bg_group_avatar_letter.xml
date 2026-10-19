@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Avatar nhóm mặc định: hình tròn tím, viền trắng, bên trong là chữ cái đầu của tên nhóm -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <solid android:color="@color/group_primary" />
+    <stroke android:width="4dp" android:color="@color/white" />
+</shape>
