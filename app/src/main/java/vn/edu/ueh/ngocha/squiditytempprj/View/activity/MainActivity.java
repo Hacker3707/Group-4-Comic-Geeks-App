@@ -12,8 +12,10 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.AuthActivity;
+import com.google.firebase.auth.FirebaseAuth;
 import android.widget.Toast;
 import android.widget.TextView;
 import com.google.firebase.auth.FirebaseUser;
@@ -54,6 +56,8 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
+import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
 public class MainActivity extends AppCompatActivity {
 
     DrawerLayout drawerLayout;
@@ -94,6 +98,11 @@ public class MainActivity extends AppCompatActivity {
                     int id = item.getItemId();
 
                     if (id == R.id.action_profile) {
+                        startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+
+                    } else if (id == R.id.action_chat) {
+                         startActivity(new Intent(MainActivity.this, ChatListActivity.class));
+                    } else if (id == R.id.action_group) {
                         if (authViewModel.getCurrentUser() == null) {
 
                             new AlertDialog.Builder(MainActivity.this)
@@ -134,7 +143,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); NtfChannel.setup(this);
+        NotificationPopup.attach(this, findViewById(R.id.btnNotification));
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
