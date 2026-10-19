@@ -23,9 +23,9 @@
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
                     app:headerLayout="@layout/nav_header"
-                    app:menu="@menu/menu_navigation"
+                    app:itemTextAppearance="@style/NavDrawerText"
                     app:itemVerticalPadding="13dp"
-                    app:itemTextAppearance="@style/NavDrawerText"/>
+                    app:menu="@menu/menu_navigation" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAuthAction"
