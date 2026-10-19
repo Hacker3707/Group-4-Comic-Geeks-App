@@ -23,8 +23,8 @@
         <!-- Avatar nằm chính giữa hình nền -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imageView4"
-            android:layout_width="132dp"
-            android:layout_height="133dp"
+            android:layout_width="125dp"
+            android:layout_height="125dp"
             android:layout_gravity="top|center_horizontal"
             android:layout_marginTop="16dp"
             android:contentDescription="User avatar"

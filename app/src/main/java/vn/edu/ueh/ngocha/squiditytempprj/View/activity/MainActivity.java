@@ -85,11 +85,25 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private View.OnClickListener onProfileClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            drawerLayout.openDrawer(GravityCompat.START);
-        }
-    };
+
+    private View.OnClickListener onProfileClickListener =
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (drawerLayout != null) {
+                        // Portrait: mở menu
+                        drawerLayout.openDrawer(GravityCompat.START);
+                    } else {
+                        // Landscape: mở hồ sơ trực tiếp
+                        Intent intent = new Intent(
+                                MainActivity.this,
+                                ProfileActivity.class
+                        );
+                        startActivity(intent);
+                    }
+                }
+            };
+
 
     private NavigationView.OnNavigationItemSelectedListener onAvatarsClickListener =
             new NavigationView.OnNavigationItemSelectedListener() {
@@ -136,17 +150,39 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
 
-                    drawerLayout.closeDrawer(GravityCompat.START);
+                    if (drawerLayout != null) {
+                        drawerLayout.closeDrawer(GravityCompat.START);
+                    }
                     return true;
                 }
             };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState); NtfChannel.setup(this);
-        NotificationPopup.attach(this, findViewById(R.id.btnNotification));
+        super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                findViewById(R.id.main),
+                (v, insets) -> {
+                    Insets systemBars = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                    );
+
+                    v.setPadding(
+                            systemBars.left,
+                            systemBars.top,
+                            systemBars.right,
+                            systemBars.bottom
+                    );
+
+                    return insets;
+                }
+        );
+
+        NtfChannel.setup(this);
+        NotificationPopup.attach(this, findViewById(R.id.btnNotification));
 
         authViewModel = new ViewModelProvider(this)
                 .get(AuthViewModel.class);
@@ -159,6 +195,26 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         imgvAvatar = findViewById(R.id.imgvAvatar);
         navigationView = findViewById(R.id.navigationView);
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                navigationView,
+                (v, insets) -> {
+
+                    Insets systemBars = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                    );
+
+                    v.setPadding(
+                            v.getPaddingLeft(),
+                            systemBars.top,
+                            v.getPaddingRight(),
+                            v.getPaddingBottom()
+                    );
+
+                    return insets;
+                }
+        );
+
         rcvpostlist = findViewById(R.id.rcv_postlist);
 
         View appBar = findViewById(R.id.appBar);
@@ -205,25 +261,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
-        ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(R.id.main),
-                (v, insets) -> {
-                    Insets systemBars = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                    );
-
-                    v.setPadding(
-                            systemBars.left,
-                            systemBars.top,
-                            systemBars.right,
-                            systemBars.bottom
-                    );
-
-                    return insets;
-                }
-        );
 
 
         imgvAvatar.setOnClickListener(onProfileClickListener);
