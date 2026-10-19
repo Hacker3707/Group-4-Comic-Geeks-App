@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="group_chip_other">Khác</string>
+    <string name="group_empty_tag">Chưa có bài viết nào cho chủ đề này</string>
+    <string name="group_tag_help">Gõ # để gắn chủ đề. Bài không có # hợp lệ sẽ vào mục Khác.</string>
+
+    <!-- Gợi ý khi gõ # (cũng là nội dung được chèn vào bài viết) -->
+    <string name="group_tag_anime">#Anime</string>
+    <string name="group_tag_manga">#Manga</string>
+    <string name="group_tag_light_novel">#LightNovel</string>
+    <string name="group_tag_discussion">#Discussion</string>
+    <string name="group_tag_otaku">#Otaku</string>
+</resources>

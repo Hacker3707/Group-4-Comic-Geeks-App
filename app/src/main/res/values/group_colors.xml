@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Màu của màn Group (lấy từ Figma). Đặt tên có tiền tố group_ để không trùng với màn khác -->
+    <color name="group_header">#3C3A78</color>
+    <color name="group_name">#36366F</color>
+    <color name="group_meta">#6A68A0</color>
+    <color name="group_text">#55567F</color>
+    <color name="group_primary">#6C49D9</color>
+    <color name="group_chip_bg">#EEEEFE</color>
+    <color name="group_chip_text">#6A55D8</color>
+    <color name="group_tab_selected">#5140BB</color>
+    <color name="group_tab_indicator">#6A4DDD</color>
+    <color name="group_divider">#E5E5F5</color>
+    <color name="group_composer_stroke">#D9DAF1</color>
+    <color name="group_composer_hint">#B1B1D4</color>
+    <color name="group_composer_dots">#6867A0</color>
+    <color name="group_send_blue">#4DA3F7</color>
+    <color name="group_post_card_bg">#FFFEFE</color>
+    <color name="group_post_handle">#D4D4D4</color>
+    <color name="group_post_topic">#777777</color>
+    <color name="group_post_say">#8D8D8D</color>
+</resources>
