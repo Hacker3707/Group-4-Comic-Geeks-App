@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F4FA">
+
+    <!-- THANH SEARCH VÀ NÚT BACK -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#FFFFFF"
+        android:paddingHorizontal="12dp"
+        android:elevation="4dp">
+
+        <ImageButton
+            android:id="@+id/btnBackSearch"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_revert"
+            android:contentDescription="Quay lại"
+            app:tint="#493373"/>
+
+        <EditText
+            android:id="@+id/etGlobalSearch"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_search"
+            android:hint="Tìm kiếm bài viết, user, group..."
+            android:paddingHorizontal="12dp"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:imeOptions="actionSearch"
+            android:inputType="text"/>
+    </LinearLayout>
+
+    <!-- TAB LAYOUT CHỌN LOẠI SEARCH (POST, USER, GROUP...) -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/searchTabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        app:tabIndicatorColor="#493373"
+        app:tabSelectedTextColor="#493373"
+        app:tabTextColor="#999999"
+        app:tabMode="fixed">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bài viết (Post)" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Người dùng (User)" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nhóm (Group)" />
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- RECYCLERVIEW HIỂN THỊ KẾT QUẢ TÌM KIẾM -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewSearchResults"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        android:clipToPadding="false"/>
+
+</LinearLayout>

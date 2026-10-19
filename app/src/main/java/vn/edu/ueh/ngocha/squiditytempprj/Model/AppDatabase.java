@@ -39,7 +39,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 
 @Database(entities = {User.class, Post.class, Comment.class, Stamp.class,
         Review.class, Comic.class, Genre.class, Creator.class, Follow.class, Group.class,
-        GroupMember.class, Message.class, ChatRoom.class, Notification.class}, version = 4,
+        GroupMember.class, Message.class, ChatRoom.class, Notification.class}, version = 5,
         exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {

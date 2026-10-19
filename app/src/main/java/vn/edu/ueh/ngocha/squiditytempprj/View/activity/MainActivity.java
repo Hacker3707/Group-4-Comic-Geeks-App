@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -13,7 +12,6 @@ import androidx.appcompat.app.AlertDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
 
-import vn.edu.ueh.ngocha.squiditytempprj.View.activity.AuthActivity;
 import android.widget.Toast;
 import android.widget.TextView;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,37 +28,35 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaResponse;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Relationship;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Stamp;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.StampType;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import vn.edu.ueh.ngocha.squiditytempprj.Model.api.MangaDexApi;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.api.RetrofitClient;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaAttributes;
+import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.Observer;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
-
 public class MainActivity extends AppCompatActivity {
 
-    DrawerLayout drawerLayout;
-    NavigationView navigationView;
-    ImageView imgvAvatar;
-    RecyclerView rcvpostlist;
-    PostAdapter postAdapter;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+    private ImageView imgvAvatar;
+    private RecyclerView rcvpostlist;
+    private PostAdapter postAdapter;
+    private PostViewModel postViewModel;
+
     private TextView tvMainUsername;
     private TextView tvDrawerUsername;
     private TextView tvDrawerEmail;
@@ -72,14 +68,6 @@ public class MainActivity extends AppCompatActivity {
 
     private AuthViewModel authViewModel;
     private UserProfileViewModel profileViewModel;
-
-
-    private View.OnClickListener onComicClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            Intent intent = new Intent(MainActivity.this, ComicListActivity.class);
-            startActivity(intent);
-        }
-    };
 
     private View.OnClickListener onProfileClickListener = new View.OnClickListener() {
         public void onClick(View v) {
@@ -95,35 +83,21 @@ public class MainActivity extends AppCompatActivity {
 
                     if (id == R.id.action_profile) {
                         if (authViewModel.getCurrentUser() == null) {
-
                             new AlertDialog.Builder(MainActivity.this)
                                     .setTitle("Yêu cầu đăng nhập")
                                     .setMessage("Bạn cần đăng nhập để xem profile.")
-                                    .setNegativeButton("Hủy", (dialog, which) -> {
-                                        dialog.dismiss();
-                                    })
+                                    .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
                                     .setPositiveButton("Đăng nhập", (dialog, which) -> {
-                                        Intent intent = new Intent(
-                                                MainActivity.this,
-                                                AuthActivity.class
-                                        );
+                                        Intent intent = new Intent(MainActivity.this, AuthActivity.class);
                                         startActivity(intent);
                                     })
                                     .show();
-
                         } else {
-                            Intent intent = new Intent(
-                                    MainActivity.this,
-                                    ProfileActivity.class
-                            );
+                            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                             startActivity(intent);
                         }
-                    }
-                    else if (id == R.id.action_comic) {
-                        Intent intent = new Intent(
-                                MainActivity.this,
-                                ComicListActivity.class
-                        );
+                    } else if (id == R.id.action_comic) {
+                        Intent intent = new Intent(MainActivity.this, ComicListActivity.class);
                         startActivity(intent);
                     }
 
@@ -138,14 +112,11 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        authViewModel = new ViewModelProvider(this)
-                .get(AuthViewModel.class);
-
-        profileViewModel = new ViewModelProvider(this)
-                .get(UserProfileViewModel.class);
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
+        postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
         tvMainUsername = findViewById(R.id.tvMainUsername);
-
         drawerLayout = findViewById(R.id.drawerLayout);
         imgvAvatar = findViewById(R.id.imgvAvatar);
         navigationView = findViewById(R.id.navigationView);
@@ -155,17 +126,20 @@ public class MainActivity extends AppCompatActivity {
         tvMainUsername = appBar.findViewById(R.id.tvMainUsername);
         imgMainAvatar = appBar.findViewById(R.id.imgvAvatar);
 
+        ImageView btnSearchIcon = appBar.findViewById(R.id.btnSearch); // Thay ID này đúng với nút kính lúp trong layout_app_bar của nhóm
+        if (btnSearchIcon != null) {
+            btnSearchIcon.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+                startActivity(intent);
+            });
+        }
+
         if (navigationView == null || navigationView.getHeaderCount() == 0) {
-            Toast.makeText(
-                    this,
-                    "Không tìm thấy phần header của menu",
-                    Toast.LENGTH_SHORT
-            ).show();
+            Toast.makeText(this, "Không tìm thấy phần header của menu", Toast.LENGTH_SHORT).show();
             return;
         }
 
         View header = navigationView.getHeaderView(0);
-
         tvDrawerUsername = header.findViewById(R.id.tvDrawerUsername);
         tvDrawerEmail = header.findViewById(R.id.tvDrawerEmail);
         imgDrawerAvatar = header.findViewById(R.id.imageView4);
@@ -174,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
 
         btnAuthAction.setOnClickListener(v -> {
             FirebaseUser user = authViewModel.getCurrentUser();
-
             if (user == null) {
                 openAuthActivity();
             } else {
@@ -185,44 +158,106 @@ public class MainActivity extends AppCompatActivity {
                         .setPositiveButton("Đăng xuất", (dialog, which) -> {
                             authViewModel.logout();
                             profileViewModel.loadCurrentProfile();
-                            Toast.makeText(
-                                    MainActivity.this,
-                                    "Đã đăng xuất",
-                                    Toast.LENGTH_SHORT
-                            ).show();
+                            Toast.makeText(MainActivity.this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
                         })
                         .show();
             }
         });
 
-
-
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
                 (v, insets) -> {
-                    Insets systemBars = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                    );
-
-                    v.setPadding(
-                            systemBars.left,
-                            systemBars.top,
-                            systemBars.right,
-                            systemBars.bottom
-                    );
-
+                    Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
                     return insets;
                 }
         );
 
-
         imgvAvatar.setOnClickListener(onProfileClickListener);
         navigationView.setNavigationItemSelectedListener(onAvatarsClickListener);
 
-
-        rcvpostlist.setAdapter(postAdapter);
         rcvpostlist.setLayoutManager(new LinearLayoutManager(this));
 
+        postAdapter = new PostAdapter(this, new ArrayList<>(), new PostAdapter.OnPostInteractionListener() {
+            @Override
+            public void onStampClick(Post post) {
+                String randomStampId = UUID.randomUUID().toString();
+                Stamp newStamp = new Stamp(randomStampId, "Meringoc_17", StampType.LIKE);
+                newStamp.setPostId(post.getPostId());
+                postViewModel.addStamp(newStamp);
+                Toast.makeText(MainActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCommentSend(Post post, String commentText) {
+                if (commentText != null && !commentText.trim().isEmpty()) {
+                    String randomCommentId = UUID.randomUUID().toString();
+                    Comment newComment = new Comment(randomCommentId, "Meringoc_17", post.getPostId(), commentText.trim());
+                    postViewModel.addComment(newComment);
+                    Toast.makeText(MainActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Vui lòng nhập nội dung bình luận!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onViewCommentsClick(Post post) {
+                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
+                bottomSheetDialog.setContentView(R.layout.layout_comment_sheet);
+
+                RecyclerView rvComments = bottomSheetDialog.findViewById(R.id.recyclerViewComments);
+                if (rvComments != null) {
+                    rvComments.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                }
+
+                CommentAdapter commentAdapter = new CommentAdapter(new ArrayList<>());
+                if (rvComments != null) {
+                    rvComments.setAdapter(commentAdapter);
+                }
+
+                if (post.getPostId() != null) {
+                    postViewModel.getCommentsByPostId(post.getPostId()).observe(MainActivity.this, realComments -> {
+                        if (realComments != null) {
+                            commentAdapter.setComments(realComments);
+                            if (!realComments.isEmpty() && rvComments != null) {
+                                rvComments.scrollToPosition(realComments.size() - 1);
+                            }
+                        }
+                    });
+                }
+                bottomSheetDialog.show();
+            }
+
+            @Override
+            public void onDeletePost(Post post) {
+                if (post != null) {
+                    postViewModel.deletePost(post);
+                    Toast.makeText(MainActivity.this, "Đã xóa bài viết!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onEditPost(Post post) {
+                Intent intent = new Intent(MainActivity.this, CreatePostActivity.class);
+                intent.putExtra("is_edit_mode", true);
+                intent.putExtra("post_id", post.getPostId());
+                intent.putExtra("post_content", post.getContent());
+                intent.putExtra("post_comic_id", post.getComicId());
+                intent.putStringArrayListExtra("post_image_urls", post.getImageUris() != null ? new ArrayList<>(post.getImageUris()) : new ArrayList<>());
+                startActivity(intent);
+            }
+        });
+
+        rcvpostlist.setAdapter(postAdapter);
+
+        postViewModel.getAllPosts().observe(this, new Observer<List<Post>>() {
+            @Override
+            public void onChanged(List<Post> realPosts) {
+                if (realPosts != null) {
+                    postAdapter.setPosts(realPosts);
+                }
+            }
+        });
 
         profileViewModel.getProfile().observe(this, state -> {
             if (state == null) {
@@ -258,24 +293,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         profileViewModel.loadCurrentProfile();
-
-
     }
+
     private void openAuthActivity() {
         try {
             Intent intent = new Intent(MainActivity.this, AuthActivity.class);
             startActivity(intent);
         } catch (Exception e) {
             Log.e("MainActivity", "Không mở được AuthActivity", e);
-            Toast.makeText(this, "Không mở được màn hình đăng nhập",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Không mở được màn hình đăng nhập", Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
         if (profileViewModel != null) {
             profileViewModel.loadCurrentProfile();
         }
