@@ -5,17 +5,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import vn.edu.ueh.ngocha.squiditytempprj.View.activity.AuthActivity;
-import com.google.firebase.auth.FirebaseAuth;
 import android.widget.Toast;
 import android.widget.TextView;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,22 +28,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaResponse;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Relationship;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import vn.edu.ueh.ngocha.squiditytempprj.Model.api.MangaDexApi;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.api.RetrofitClient;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaAttributes;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
 
 import androidx.lifecycle.ViewModelProvider;
