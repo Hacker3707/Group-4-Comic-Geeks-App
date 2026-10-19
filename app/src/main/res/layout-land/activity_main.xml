@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@drawable/bg_squidity"
+    tools:context=".View.activity.MainActivity">
+
+        <!-- Sidebar cố định bên trái -->
+        <LinearLayout
+            android:layout_width="260dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@drawable/bg_nav_drawer">
+
+                <com.google.android.material.navigation.NavigationView
+                    android:id="@+id/navigationView"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    app:headerLayout="@layout/nav_header"
+                    app:menu="@menu/menu_navigation"
+                    app:itemVerticalPadding="13dp"
+                    app:itemTextAppearance="@style/NavDrawerText"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAuthAction"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="Đăng nhập / Đăng ký"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    app:backgroundTint="#8B70F5"
+                    app:cornerRadius="12dp" />
+
+        </LinearLayout>
+
+        <!-- Nội dung chính nằm bên phải -->
+        <LinearLayout
+            android:id="@+id/main"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                        <include
+                            android:id="@+id/appBar"
+                            layout="@layout/layout_app_bar" />
+
+                        <ImageButton
+                            android:id="@+id/btnSearch"
+                            android:layout_width="51dp"
+                            android:layout_height="48dp"
+                            android:layout_gravity="top|end"
+                            android:layout_marginTop="62dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/bookmark_bg"
+                            android:contentDescription="Search"
+                            android:padding="8dp"
+                            android:src="@android:drawable/ic_menu_search"
+                            app:tint="@color/white" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/mainContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rcv_postlist"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_squidity" />
+
+                </FrameLayout>
+
+        </LinearLayout>
+
+</LinearLayout>

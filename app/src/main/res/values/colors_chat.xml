@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Màu riêng cho màn Chat, đặt tên chat_* để không đụng colors.xml của nhóm -->
+    <color name="chat_header">#302060</color>
+    <color name="chat_background">#F7F2FF</color>
+    <color name="chat_text_dark">#2B2150</color>
+    <color name="chat_text_hint">#8E84AD</color>
+    <color name="chat_bubble_sent">#9F6FD6</color>
+    <color name="chat_bubble_received">#E2C9FF</color>
+</resources>

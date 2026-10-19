@@ -12,8 +12,10 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.AuthActivity;
+import com.google.firebase.auth.FirebaseAuth;
 import android.widget.Toast;
 import android.widget.TextView;
 import com.google.firebase.auth.FirebaseUser;
@@ -54,6 +56,8 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
+import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
 public class MainActivity extends AppCompatActivity {
 
     DrawerLayout drawerLayout;
@@ -81,11 +85,25 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private View.OnClickListener onProfileClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            drawerLayout.openDrawer(GravityCompat.START);
-        }
-    };
+
+    private View.OnClickListener onProfileClickListener =
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (drawerLayout != null) {
+                        // Portrait: mở menu
+                        drawerLayout.openDrawer(GravityCompat.START);
+                    } else {
+                        // Landscape: mở hồ sơ trực tiếp
+                        Intent intent = new Intent(
+                                MainActivity.this,
+                                ProfileActivity.class
+                        );
+                        startActivity(intent);
+                    }
+                }
+            };
+
 
     private NavigationView.OnNavigationItemSelectedListener onAvatarsClickListener =
             new NavigationView.OnNavigationItemSelectedListener() {
@@ -94,6 +112,11 @@ public class MainActivity extends AppCompatActivity {
                     int id = item.getItemId();
 
                     if (id == R.id.action_profile) {
+                        startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+
+                    } else if (id == R.id.action_chat) {
+                         startActivity(new Intent(MainActivity.this, ChatListActivity.class));
+                    } else if (id == R.id.action_group) {
                         if (authViewModel.getCurrentUser() == null) {
 
                             new AlertDialog.Builder(MainActivity.this)
@@ -127,7 +150,9 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
 
-                    drawerLayout.closeDrawer(GravityCompat.START);
+                    if (drawerLayout != null) {
+                        drawerLayout.closeDrawer(GravityCompat.START);
+                    }
                     return true;
                 }
             };
@@ -137,6 +162,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                findViewById(R.id.main),
+                (v, insets) -> {
+                    Insets systemBars = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                    );
+
+                    v.setPadding(
+                            systemBars.left,
+                            systemBars.top,
+                            systemBars.right,
+                            systemBars.bottom
+                    );
+
+                    return insets;
+                }
+        );
+
+        NtfChannel.setup(this);
+        NotificationPopup.attach(this, findViewById(R.id.btnNotification));
 
         authViewModel = new ViewModelProvider(this)
                 .get(AuthViewModel.class);
@@ -149,6 +195,26 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         imgvAvatar = findViewById(R.id.imgvAvatar);
         navigationView = findViewById(R.id.navigationView);
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                navigationView,
+                (v, insets) -> {
+
+                    Insets systemBars = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                    );
+
+                    v.setPadding(
+                            v.getPaddingLeft(),
+                            systemBars.top,
+                            v.getPaddingRight(),
+                            v.getPaddingBottom()
+                    );
+
+                    return insets;
+                }
+        );
+
         rcvpostlist = findViewById(R.id.rcv_postlist);
 
         View appBar = findViewById(R.id.appBar);
@@ -195,25 +261,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
-        ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(R.id.main),
-                (v, insets) -> {
-                    Insets systemBars = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                    );
-
-                    v.setPadding(
-                            systemBars.left,
-                            systemBars.top,
-                            systemBars.right,
-                            systemBars.bottom
-                    );
-
-                    return insets;
-                }
-        );
 
 
         imgvAvatar.setOnClickListener(onProfileClickListener);

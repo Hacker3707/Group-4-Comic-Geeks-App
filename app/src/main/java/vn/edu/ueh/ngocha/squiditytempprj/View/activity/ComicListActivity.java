@@ -283,11 +283,13 @@ public class ComicListActivity extends AppCompatActivity {
                     if (mangaDataList != null && !isGenreMode) {
                         comicAdapter.setMangaList(mangaDataList);
 
-                        tvSearchResult.setText(
-                                "Searched for "
-                                        + SEARCH_QUERY
-                                        + " successfully!"
-                        );
+                        if (!SEARCH_QUERY.isEmpty() && mangaDataList.isEmpty()) {
+                            tvSearchResult.setText(
+                                    "Searched for "
+                                            + SEARCH_QUERY
+                                            + " successfully!"
+                            );
+                        }
                     }
                 }
             };
