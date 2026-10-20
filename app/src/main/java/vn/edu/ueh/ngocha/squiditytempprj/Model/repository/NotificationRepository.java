@@ -2,17 +2,61 @@ package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
 import android.app.Application;
 import android.os.AsyncTask;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.AppDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.NotificationDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Notification;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.NotificationType;
 
+/**
+ * Thông báo lưu trên Firestore (collection "notifications") và đồng bộ về Room để hiện trong popup.
+ *
+ * Gửi:  khi có người thả stamp, bình luận hoặc follow, gọi sendNotification() để ghi 1 document lên Firestore.
+ * Nhận: startListening() lắng nghe các document có recipientId là mình (addSnapshotListener như bài 10.1),
+ *       document mới thì chép vào Room, NotificationPopup đang observe Room nên tự cập nhật.
+ */
 public class NotificationRepository {
+
+    private static final String TAG = "NotificationRepository";
+    private static final String COLLECTION = "notifications";
+
+    // Chỉ để chạy thử khi chưa có 2 tài khoản:
+    // - cho phép tự thông báo cho chính mình
+    // - Post hiện đang lưu userId cứng "Meringoc_17" nên cũng nhận thông báo gửi cho id này
+    // Khi Post dùng userId thật (Firebase uid) thì đổi TEST_MODE = false.
+    private static final boolean TEST_MODE = true;
+    private static final String TEST_POST_OWNER_ID = "Meringoc_17";
+
     private NotificationDao mNotificationDao;
     private LiveData<List<Notification>> mAllNotifications;
     private LiveData<List<Notification>> mUnreadNotifications;
+
+    private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+    private FirebaseAuth.AuthStateListener authStateListener;
+    private ListenerRegistration snapshotRegistration;
 
     public NotificationRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
@@ -41,8 +85,157 @@ public class NotificationRepository {
         new deleteAsyncTask(mNotificationDao).execute(notification);
     }
 
+    // Đánh dấu đã đọc ở Room, đồng thời cập nhật lên Firestore để lần cài lại không bị hiện là chưa đọc
     public void markAsRead(String notifId) {
         new markAsReadAsyncTask(mNotificationDao).execute(notifId);
+        firestore.collection(COLLECTION).document(notifId)
+                .update("isRead", true)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Thông báo mẫu chỉ có ở máy (không có trên Firestore) thì bỏ qua
+                        Log.d(TAG, "Không cập nhật được isRead trên Firestore: " + e.getMessage());
+                    }
+                });
+    }
+
+    // =================================
+    // Gửi thông báo lên Firestore
+    // =================================
+
+    /**
+     * @param recipientId id người nhận (chủ bài viết, hoặc người được follow)
+     * @param actorId     id người thực hiện hành động
+     * @param actorName   tên hiển thị của người thực hiện
+     * @param type        LIKE, COMMENT hoặc FOLLOW
+     * @param postId      bài viết liên quan (null nếu là FOLLOW)
+     * @param content     nội dung hiển thị
+     */
+    public void sendNotification(String recipientId, String actorId, String actorName,
+                                 NotificationType type, String postId, String content) {
+        if (recipientId == null) {
+            return;
+        }
+        // Không tự báo cho chính mình, trừ khi đang chạy thử
+        if (!TEST_MODE && recipientId.equals(actorId)) {
+            return;
+        }
+
+        String notifId = UUID.randomUUID().toString();
+        Map<String, Object> data = new HashMap<>();
+        data.put("notifId", notifId);
+        data.put("recipientId", recipientId);
+        data.put("actorId", actorId);
+        data.put("actorName", actorName);
+        data.put("type", type.name());
+        data.put("postId", postId);
+        data.put("content", content);
+        data.put("isRead", false);
+        data.put("timestamp", new Date());
+
+        firestore.collection(COLLECTION).document(notifId)
+                .set(data)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Gửi thông báo thất bại: " + e.getMessage());
+                    }
+                });
+    }
+
+    // Tên hiển thị của người đang đăng nhập, nếu chưa có thì dùng id dự phòng
+    public String currentActorName(String fallbackId) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getDisplayName() != null && !user.getDisplayName().isEmpty()) {
+            return user.getDisplayName();
+        }
+        return fallbackId;
+    }
+
+    // =================================
+    // Nhận thông báo từ Firestore
+    // =================================
+
+    // Gọi một lần. Tự bật/tắt lắng nghe theo trạng thái đăng nhập (đăng nhập xong là nhận được ngay)
+    public void startListening() {
+        if (authStateListener != null) {
+            return;
+        }
+        authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                stopSnapshotListener();
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    listenForUser(user.getUid());
+                }
+            }
+        };
+        FirebaseAuth.getInstance().addAuthStateListener(authStateListener);
+    }
+
+    public void stopListening() {
+        if (authStateListener != null) {
+            FirebaseAuth.getInstance().removeAuthStateListener(authStateListener);
+            authStateListener = null;
+        }
+        stopSnapshotListener();
+    }
+
+    private void listenForUser(String uid) {
+        List<String> recipientIds = new ArrayList<>();
+        recipientIds.add(uid);
+        if (TEST_MODE) {
+            recipientIds.add(TEST_POST_OWNER_ID);
+        }
+
+        snapshotRegistration = firestore.collection(COLLECTION)
+                .whereIn("recipientId", recipientIds)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot snapshots,
+                                        @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+                            Log.e(TAG, "Lỗi nhận thông báo: " + error.getMessage());
+                            return;
+                        }
+                        if (snapshots == null) {
+                            return;
+                        }
+                        for (DocumentChange change : snapshots.getDocumentChanges()) {
+                            if (change.getType() == DocumentChange.Type.ADDED) {
+                                insert(toNotification(change.getDocument()));
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void stopSnapshotListener() {
+        if (snapshotRegistration != null) {
+            snapshotRegistration.remove();
+            snapshotRegistration = null;
+        }
+    }
+
+    private Notification toNotification(QueryDocumentSnapshot doc) {
+        NotificationType type = NotificationType.SYSTEM;
+        String typeName = doc.getString("type");
+        if (typeName != null) {
+            try {
+                type = NotificationType.valueOf(typeName);
+            } catch (IllegalArgumentException e) {
+                type = NotificationType.SYSTEM;
+            }
+        }
+        Boolean read = doc.getBoolean("isRead");
+        Date time = doc.getDate("timestamp");
+        return new Notification(
+                doc.getId(),
+                doc.getString("content"),
+                type,
+                read != null && read,
+                time != null ? time : new Date());
     }
 
     //======================== AsyncTask cho các thao tác trong Notification ========================

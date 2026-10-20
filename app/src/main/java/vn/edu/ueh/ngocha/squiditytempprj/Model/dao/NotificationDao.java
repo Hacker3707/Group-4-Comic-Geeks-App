@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -13,7 +14,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Notification;
 
 @Dao
 public interface NotificationDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertNotification(Notification notification);
 
     @Update

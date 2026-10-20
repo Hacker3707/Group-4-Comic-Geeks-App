@@ -193,8 +193,7 @@ public class ProfileActivity extends AppCompatActivity {
                 String randomStampId = UUID.randomUUID().toString();
                 Stamp newStamp = new Stamp(randomStampId, "Meringoc_17", StampType.LIKE);
                 newStamp.setPostId(post.getPostId());
-                postViewModel.addStamp(newStamp);
-                Toast.makeText(ProfileActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
+                postViewModel.addStamp(newStamp, post);                Toast.makeText(ProfileActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -202,7 +201,7 @@ public class ProfileActivity extends AppCompatActivity {
                 if (commentText != null && !commentText.trim().isEmpty()) {
                     String randomCommentId = UUID.randomUUID().toString();
                     Comment newComment = new Comment(randomCommentId, "Meringoc_17", post.getPostId(), commentText.trim());
-                    postViewModel.addComment(newComment);
+                    postViewModel.addComment(newComment, post);
                     Toast.makeText(ProfileActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(ProfileActivity.this, "Vui lòng nhập nội dung bình luận!", Toast.LENGTH_SHORT).show();
