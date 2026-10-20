@@ -10,6 +10,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -53,13 +54,27 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
 
         setContentView(R.layout.activity_base_drawer);
 
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navigationView);
+        activityContent = findViewById(R.id.activityContent);
+
 
         View mainContainer = findViewById(R.id.mainContainer);
+
+        Log.d("BaseActivity", "drawerLayout = " + drawerLayout);
+        Log.d("BaseActivity", "navigationView = " + navigationView);
+        Log.d("BaseActivity", "mainContainer = " + mainContainer);
+
+        if (drawerLayout == null || navigationView == null
+                || mainContainer == null || activityContent == null) {
+            throw new IllegalStateException(
+                    "Không tìm thấy View trong activity_base_drawer.xml"
+            );
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 drawerLayout,
