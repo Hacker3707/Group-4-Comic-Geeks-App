@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.NotificationType;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.FollowRepository;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.NotificationRepository;
 
 /**
  * ViewModel cho chức năng Follow.
@@ -29,6 +31,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.FollowRepository;
 public class FollowViewModel extends AndroidViewModel {
 
     private final FollowRepository followRepository;
+    private final NotificationRepository notificationRepository;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private final MutableLiveData<List<User>> followers = new MutableLiveData<>();
@@ -40,6 +43,7 @@ public class FollowViewModel extends AndroidViewModel {
     public FollowViewModel(@NonNull Application application) {
         super(application);
         followRepository = new FollowRepository(application);
+        notificationRepository = new NotificationRepository(application);
     }
 
     // =================================
@@ -121,7 +125,13 @@ public class FollowViewModel extends AndroidViewModel {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                followRepository.follow(currentUserId, targetUserId);
+                boolean followed = followRepository.follow(currentUserId, targetUserId);
+                if (followed) {
+                    // Follow mới thì báo cho người được follow
+                    String actorName = notificationRepository.currentActorName(currentUserId);
+                    notificationRepository.sendNotification(targetUserId, currentUserId, actorName,
+                            NotificationType.FOLLOW, null, actorName + " đã theo dõi bạn");
+                }
                 refresh(currentUserId, targetUserId);
             }
         });
