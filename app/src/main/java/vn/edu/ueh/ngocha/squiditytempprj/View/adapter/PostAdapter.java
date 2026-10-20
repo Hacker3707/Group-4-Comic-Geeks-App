@@ -6,6 +6,8 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,7 +18,8 @@ import java.util.Map;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
-import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ComicListActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ComicDetailActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.SearchActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.holder.PostViewHolder;
 
 public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
@@ -24,6 +27,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
     private List<Post> postList;
     private Context context;
     private OnPostInteractionListener listener;
+
+    // Lưu trạng thái mở rộng ("Xem thêm") của từng bài viết theo ID để tránh lỗi khi cuộn RecyclerView
     private final Map<String, Boolean> expandedStates = new HashMap<>();
 
     public interface OnPostInteractionListener {
@@ -53,6 +58,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
 
         holder.tvUserName.setText(post.getUserId());
         holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
+
         String content = post.getContent();
         String postId = post.getPostId() != null ? post.getPostId() : String.valueOf(position);
         boolean isExpanded = expandedStates.containsKey(postId) && Boolean.TRUE.equals(expandedStates.get(postId));
@@ -61,7 +67,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
             holder.tvPostContent.setVisibility(View.VISIBLE);
 
             if (isExpanded) {
-
                 holder.tvPostContent.setMaxLines(Integer.MAX_VALUE);
                 holder.tvPostContent.setEllipsize(null);
                 holder.tvPostContent.setText(content + " Thu gọn");
@@ -80,28 +85,58 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
             holder.tvPostContent.setVisibility(View.GONE);
         }
 
-        if (post.getComicId() != null && !post.getComicId().isEmpty()) {
-            holder.tvHashtag.setText("# " + post.getComicId());
+        if (holder.tvLinkedComic != null) {
+            String comicTitle = post.getComicTitle();
+            String comicId = post.getComicId();
+
+            if (comicTitle != null && !comicTitle.isEmpty()) {
+                holder.tvLinkedComic.setVisibility(View.VISIBLE);
+                holder.tvLinkedComic.setText("📖 " + comicTitle);
+
+                holder.tvLinkedComic.setOnClickListener(v -> {
+                    if (comicId != null && !comicId.isEmpty() && !comicId.equals("Discussion")) {
+                        Intent intent = new Intent(context, ComicDetailActivity.class);
+                        intent.putExtra("comic_id", comicId);
+                        intent.putExtra("search_option", "MangaDex");
+                        context.startActivity(intent);
+                    } else {
+                        Toast.makeText(context, "Không tìm thấy mã ID truyện này!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                holder.tvLinkedComic.setVisibility(View.GONE);
+            }
+        }
+        String hashtag = post.getHashtag();
+        if (hashtag != null && !hashtag.isEmpty()) {
+            holder.tvHashtag.setText(hashtag);
         } else {
             holder.tvHashtag.setText("# Discussion");
         }
 
         holder.tvHashtag.setOnClickListener(v -> {
-            String comicName = post.getComicId();
-            if (comicName != null && !comicName.isEmpty() && !comicName.equals("C01") && !comicName.equals("Discussion")) {
-                Intent intent = new Intent(context, ComicListActivity.class);
-                intent.putExtra("SEARCH_QUERY", comicName);
+            String tagQuery = post.getHashtag();
+            if (tagQuery != null && !tagQuery.isEmpty()) {
+                Intent intent = new Intent(context, SearchActivity.class);
+                intent.putExtra("SEARCH_QUERY", tagQuery);
+                context.startActivity(intent);
+            } else {
+                Intent intent = new Intent(context, SearchActivity.class);
+                intent.putExtra("SEARCH_QUERY", "Discussion");
                 context.startActivity(intent);
             }
         });
 
+        // --- 4. CÁC SỰ KIỆN TƯƠNG TÁC KHÁC (Stamp, Comment, Options...) ---
         holder.btnStamp.setOnClickListener(v -> {
             boolean isStamped = holder.btnStamp.getTag() != null && (boolean) holder.btnStamp.getTag();
             if (isStamped) {
                 holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#A890D3"));
+                holder.btnStamp.setImageResource(R.drawable.ic_splash_unfill);
                 holder.btnStamp.setTag(false);
             } else {
                 holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#493373"));
+                holder.btnStamp.setImageResource(R.drawable.post_ink_splat);
                 holder.btnStamp.setTag(true);
                 if (listener != null) {
                     listener.onStampClick(post);
@@ -142,15 +177,37 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
             popup.show();
         });
 
-        if (post.getImageUris() != null && !post.getImageUris().isEmpty()) {
+        // --- 5. XỬ LÝ LƯỚI ẢNH ---
+        List<String> imageUris = post.getImageUris();
+
+        if (imageUris != null && !imageUris.isEmpty()) {
             holder.rvPostImages.setVisibility(View.VISIBLE);
 
-            if (holder.rvPostImages.getLayoutManager() == null) {
-                holder.rvPostImages.setLayoutManager(new GridLayoutManager(context, 2));
-            }
+            int imageCount = imageUris.size();
 
-            PostImageAdapter imageAdapter = new PostImageAdapter(context, post.getImageUris());
+            // Mặc định 2 cột; nếu chỉ có 1 ảnh thì ảnh chiếm cả 2 cột
+            GridLayoutManager layoutManager =
+                    new GridLayoutManager(context, 2);
+
+            layoutManager.setSpanSizeLookup(
+                    new GridLayoutManager.SpanSizeLookup() {
+                        @Override
+                        public int getSpanSize(int position) {
+                            if (imageCount == 1) {
+                                return 2;
+                            }
+                            return 1;
+                        }
+                    }
+            );
+
+            holder.rvPostImages.setLayoutManager(layoutManager);
+
+            PostImageAdapter imageAdapter =
+                    new PostImageAdapter(context, imageUris);
+
             holder.rvPostImages.setAdapter(imageAdapter);
+
         } else {
             holder.rvPostImages.setVisibility(View.GONE);
         }

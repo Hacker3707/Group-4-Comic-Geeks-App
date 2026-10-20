@@ -8,6 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.chip.Chip;
+
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 
 public class PostViewHolder extends RecyclerView.ViewHolder {
@@ -23,6 +25,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
     public ImageView btnStamp;
     public EditText edtQuickComment;
     public ImageView btnSendComment;
+    public Chip tvLinkedComic; // Biến toàn cục của lớp
 
     public PostViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -41,5 +44,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
 
         edtQuickComment = itemView.findViewById(R.id.edtQuickComment);
         btnSendComment = itemView.findViewById(R.id.btnSendComment);
+
+        tvLinkedComic = itemView.findViewById(R.id.tvLinkedComic);
     }
 }

@@ -40,10 +40,17 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Tag;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ComicViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.SearchViewModel;
 
-public class ComicListActivity extends AppCompatActivity {
+public class ComicListActivity extends BaseActivity {
+
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.comic_list_activity;
+    }
+
 
     private ComicAdapter comicAdapter;
     private final ActivityResultLauncher<Intent> detailLauncher =
@@ -68,8 +75,8 @@ public class ComicListActivity extends AppCompatActivity {
                         }
                     }
             );
+
     private RecyclerView rcvcomic;
-    private DrawerLayout drawerLayout;
     private ImageView btnSearch;
     private TextView tvSearchResult;
     private Spinner spnSearchOpt;
@@ -77,9 +84,7 @@ public class ComicListActivity extends AppCompatActivity {
     private MaterialAutoCompleteTextView etSearch;
     private ArrayAdapter<String> searchAdapter;
 
-    NavigationView navigationView;
     HorizontalScrollView genreScrollView;
-    ImageView imgvAvatar;
     View searchbar;
 
     private static final String CURRENT_SEARCH_QUERY = "current_search_query";
@@ -129,12 +134,6 @@ public class ComicListActivity extends AppCompatActivity {
             if (lastVisible >= totalItems - 5) {
                 comicViewModel.loadNextPage();
             }
-        }
-    };
-
-    private View.OnClickListener onProfileClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            drawerLayout.openDrawer(GravityCompat.START);
         }
     };
 
@@ -321,18 +320,9 @@ public class ComicListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.comic_list_activity);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         rcvcomic = findViewById(R.id.rcvcomic);
-        drawerLayout = findViewById(R.id.drawerLayout);
         etSearch = findViewById(R.id.etSearch);
-        navigationView = findViewById(R.id.navigationView);
-        imgvAvatar = findViewById(R.id.imgvAvatar);
         btnSearch = findViewById(R.id.btnSearch);
         tvSearchResult = findViewById(R.id.tvSearchResult);
         spnSearchOpt = findViewById(R.id.spn_searchopt);
@@ -342,7 +332,6 @@ public class ComicListActivity extends AppCompatActivity {
 
         spnSearchOpt.setOnItemSelectedListener(onSearchOptionSelectedListener);
         btnSearch.setOnClickListener(onSearchClickListener);
-        imgvAvatar.setOnClickListener(onProfileClickListener);
         rcvcomic.addOnScrollListener(scrollListener);
 
         chipGroupGenres.setSingleSelection(true);

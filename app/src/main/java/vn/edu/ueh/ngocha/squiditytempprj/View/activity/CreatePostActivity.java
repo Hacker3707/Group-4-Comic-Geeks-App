@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -17,7 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -27,6 +28,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.api.MangaDexApi;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.api.RetrofitClient;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaResponse;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.PostRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
@@ -35,7 +43,9 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
 public class CreatePostActivity extends AppCompatActivity {
 
-    private EditText edtPostContent, edtComicSearch;
+    private com.google.android.material.textfield.TextInputEditText edtPostContent;
+    private EditText edtPostHashtag;
+    private MaterialAutoCompleteTextView edtComicSearch;
     private MaterialButton btnPublish;
     private ImageButton btnCancelPost;
     private PostViewModel postViewModel;
@@ -44,9 +54,12 @@ public class CreatePostActivity extends AppCompatActivity {
     private RecyclerView rvImagePreview;
     private ImagePreviewAdapter imagePreviewAdapter;
     private List<Uri> selectedImageUris = new ArrayList<>();
-    private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private ActivityResultLauncher<
+            androidx.activity.result.PickVisualMediaRequest
+            > imagePickerLauncher;
 
-    // Biến phục vụ chế độ chỉnh sửa (Edit Mode)
+    private final String[] selectedComicInfo = {"Discussion", ""}; // [0]: comicId, [1]: comicTitle
+
     private boolean isEditMode = false;
     private String editPostId = null;
 
@@ -56,6 +69,7 @@ public class CreatePostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_post);
 
         edtPostContent = findViewById(R.id.edtPostContent);
+        edtPostHashtag = findViewById(R.id.edtPostHashtag);
         edtComicSearch = findViewById(R.id.edtComicSearch);
         btnPublish = findViewById(R.id.btnPublish);
         btnCancelPost = findViewById(R.id.btnCancelPost);
@@ -64,7 +78,6 @@ public class CreatePostActivity extends AppCompatActivity {
 
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
-        // Cài đặt RecyclerView hiển thị danh sách ảnh ngang
         rvImagePreview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         imagePreviewAdapter = new ImagePreviewAdapter(selectedImageUris, position -> {
             selectedImageUris.remove(position);
@@ -75,23 +88,28 @@ public class CreatePostActivity extends AppCompatActivity {
         });
         rvImagePreview.setAdapter(imagePreviewAdapter);
 
-        // Kiểm tra chế độ Sửa bài viết (Edit Mode)
+        setupComicAutoComplete();
+
         isEditMode = getIntent().getBooleanExtra("is_edit_mode", false);
         editPostId = getIntent().getStringExtra("post_id");
         String oldContent = getIntent().getStringExtra("post_content");
-
-        // Đọc thông tin hashtag (comicId) và danh sách ảnh cũ được truyền sang từ Intent
         String oldComicId = getIntent().getStringExtra("post_comic_id");
+        String oldComicTitle = getIntent().getStringExtra("post_comic_title");
+        String oldHashtag = getIntent().getStringExtra("post_hashtag");
         ArrayList<String> oldImageUrls = getIntent().getStringArrayListExtra("post_image_urls");
 
         if (isEditMode) {
             edtPostContent.setText(oldContent);
-            if (oldComicId != null && !oldComicId.isEmpty()) {
-                edtComicSearch.setText(oldComicId);
+            if (oldComicId != null) selectedComicInfo[0] = oldComicId;
+            if (oldComicTitle != null) {
+                selectedComicInfo[1] = oldComicTitle;
+                edtComicSearch.setText(oldComicTitle);
+            }
+            if (oldHashtag != null) {
+                edtPostHashtag.setText(oldHashtag);
             }
             btnPublish.setText("Cập nhật bài viết");
 
-            // Nạp lại danh sách ảnh cũ lên thanh xem trước
             if (oldImageUrls != null && !oldImageUrls.isEmpty()) {
                 for (String url : oldImageUrls) {
                     selectedImageUris.add(Uri.parse(url));
@@ -101,53 +119,43 @@ public class CreatePostActivity extends AppCompatActivity {
             }
         }
 
-        // Cài đặt bộ chọn NHIỀU ảnh
         imagePickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        if (result.getData().getClipData() != null) {
-                            int count = result.getData().getClipData().getItemCount();
-                            for (int i = 0; i < count; i++) {
-                                Uri imageUri = result.getData().getClipData().getItemAt(i).getUri();
-                                try {
-                                    getContentResolver().takePersistableUriPermission(imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                } catch (Exception ignored) {}
-                                selectedImageUris.add(imageUri);
-                            }
-                        } else if (result.getData().getData() != null) {
-                            Uri imageUri = result.getData().getData();
-                            try {
-                                getContentResolver().takePersistableUriPermission(imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            } catch (Exception ignored) {}
-                            selectedImageUris.add(imageUri);
-                        }
+                new ActivityResultContracts.PickMultipleVisualMedia(10),
+                uris -> {
+                    if (uris != null && !uris.isEmpty()) {
+                        selectedImageUris.addAll(uris);
 
-                        if (!selectedImageUris.isEmpty()) {
-                            rvImagePreview.setVisibility(View.VISIBLE);
-                            imagePreviewAdapter.notifyDataSetChanged();
-                            Toast.makeText(this, "Đã chọn " + selectedImageUris.size() + " ảnh!", Toast.LENGTH_SHORT).show();
-                        }
+                        rvImagePreview.setVisibility(View.VISIBLE);
+                        imagePreviewAdapter.notifyDataSetChanged();
+
+                        Toast.makeText(
+                                this,
+                                "Đã chọn " + selectedImageUris.size() + " ảnh!",
+                                Toast.LENGTH_SHORT
+                        ).show();
                     }
                 }
         );
 
         btnAddImage.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("image/*");
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); // Cho phép chọn nhiều ảnh cùng lúc
-            imagePickerLauncher.launch(intent);
+            imagePickerLauncher.launch(
+                    new androidx.activity.result.PickVisualMediaRequest.Builder()
+                            .setMediaType(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE
+                            )
+                            .build()
+            );
         });
 
         btnCancelPost.setOnClickListener(v -> finish());
 
-        // Sự kiện Đăng / Cập nhật bài viết
         btnPublish.setOnClickListener(v -> {
             try {
                 String content = edtPostContent.getText().toString().trim();
-                String comicNameInput = edtComicSearch.getText().toString().trim();
-                String comicIdToSave = comicNameInput.isEmpty() ? "C01" : comicNameInput;
+                String hashtag = edtPostHashtag.getText().toString().trim();
+                if (!hashtag.isEmpty() && !hashtag.startsWith("#")) {
+                    hashtag = "#" + hashtag;
+                }
 
                 if (content.isEmpty() && selectedImageUris.isEmpty()) {
                     Toast.makeText(this, "Vui lòng nhập nội dung hoặc chọn ít nhất 1 ảnh!", Toast.LENGTH_SHORT).show();
@@ -157,40 +165,36 @@ public class CreatePostActivity extends AppCompatActivity {
                 ProgressDialog progressDialog = new ProgressDialog(this);
                 progressDialog.setCancelable(false);
 
-                // --- TRƯỜNG HỢP 1: ĐANG Ở CHẾ ĐỘ CHỈNH SỬA ---
+                String currentComicId = selectedComicInfo[0];
+                String currentComicTitle = selectedComicInfo[1];
+                String finalHashtag = hashtag;
+
                 if (isEditMode && editPostId != null) {
                     progressDialog.setMessage("Đang cập nhật bài viết...");
                     progressDialog.show();
 
-                    // Tách riêng ảnh cũ (http) và ảnh mới chọn từ thiết bị
                     List<String> finalImageUrls = new ArrayList<>();
                     List<Uri> newUrisToUpload = new ArrayList<>();
 
                     for (Uri uri : selectedImageUris) {
                         String uriStr = uri.toString();
                         if (uriStr.startsWith("http://") || uriStr.startsWith("https://")) {
-                            finalImageUrls.add(uriStr); // Giữ lại ảnh cũ
+                            finalImageUrls.add(uriStr);
                         } else {
-                            newUrisToUpload.add(uri); // Ảnh mới cần upload
+                            newUrisToUpload.add(uri);
                         }
                     }
 
-                    // Nếu người dùng có chọn thêm ảnh mới
                     if (!newUrisToUpload.isEmpty()) {
-                        List<Uri> tempUris = selectedImageUris;
                         selectedImageUris = newUrisToUpload;
-
                         uploadMultipleImagesToStorage(editPostId, uploadedNewUrls -> {
-                            finalImageUrls.addAll(uploadedNewUrls); // Gộp ảnh cũ và ảnh mới upload xong
-                            updatePostOnCloud(editPostId, content, comicIdToSave, finalImageUrls, progressDialog);
+                            finalImageUrls.addAll(uploadedNewUrls);
+                            updatePostOnCloud(editPostId, content, currentComicId, currentComicTitle, finalHashtag, finalImageUrls, progressDialog);
                         }, progressDialog);
                     } else {
-                        // Không chọn ảnh mới, chỉ cập nhật nội dung, hashtag và danh sách ảnh cũ đang có
-                        updatePostOnCloud(editPostId, content, comicIdToSave, finalImageUrls, progressDialog);
+                        updatePostOnCloud(editPostId, content, currentComicId, currentComicTitle, finalHashtag, finalImageUrls, progressDialog);
                     }
-                }
-                // --- TRƯỜNG HỢP 2: TẠO MỚI BÀI VIẾT ---
-                else {
+                } else {
                     String newPostId = UUID.randomUUID().toString();
 
                     if (!selectedImageUris.isEmpty()) {
@@ -198,14 +202,18 @@ public class CreatePostActivity extends AppCompatActivity {
                         progressDialog.show();
 
                         uploadMultipleImagesToStorage(newPostId, imageUrls -> {
-                            Post newPost = new Post(newPostId, "Meringoc_17", comicIdToSave, content, imageUrls);
+                            Post newPost = new Post(newPostId, "Meringoc_17", currentComicId, content, imageUrls);
+                            newPost.setComicTitle(currentComicTitle);
+                            newPost.setHashtag(finalHashtag);
                             uploadPostToCloud(newPost, progressDialog);
                         }, progressDialog);
                     } else {
                         progressDialog.setMessage("Đang đăng bài viết...");
                         progressDialog.show();
 
-                        Post newPost = new Post(newPostId, "Meringoc_17", comicIdToSave, content, null);
+                        Post newPost = new Post(newPostId, "Meringoc_17", currentComicId, content, null);
+                        newPost.setComicTitle(currentComicTitle);
+                        newPost.setHashtag(finalHashtag);
                         uploadPostToCloud(newPost, progressDialog);
                     }
                 }
@@ -217,7 +225,69 @@ public class CreatePostActivity extends AppCompatActivity {
         });
     }
 
-    // Hàm vòng lặp bất đồng bộ upload nhiều ảnh lên Firebase Storage
+    private void setupComicAutoComplete() {
+        if (edtComicSearch == null) return;
+
+        Map<String, String> titleToIdMap = new HashMap<>();
+
+        edtComicSearch.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString().trim();
+                if (query.length() >= 2) {
+                    searchMangaFromApi(query, titleToIdMap);
+                }
+            }
+            @Override public void afterTextChanged(android.text.Editable s) {}
+        });
+    }
+
+    private void searchMangaFromApi(String query, Map<String, String> titleToIdMap) {
+        MangaDexApi api = RetrofitClient.getInstance().create(MangaDexApi.class);
+        api.searchManga(query, 5, 0, "cover_art")
+                .enqueue(new Callback<MangaResponse>() {
+                    @Override
+                    public void onResponse(Call<MangaResponse> call, Response<MangaResponse> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                            List<MangaData> mangaList = response.body().getData();
+                            List<String> titles = new ArrayList<>();
+                            titleToIdMap.clear();
+
+                            for (MangaData manga : mangaList) {
+                                if (manga.getAttributes() != null && manga.getAttributes().getTitle() != null) {
+                                    String title = manga.getAttributes().getTitle().get("en");
+                                    if (title == null && !manga.getAttributes().getTitle().isEmpty()) {
+                                        title = manga.getAttributes().getTitle().values().iterator().next();
+                                    }
+                                    if (title != null) {
+                                        titles.add(title);
+                                        titleToIdMap.put(title, manga.getId());
+                                    }
+                                }
+                            }
+
+                            ArrayAdapter<String> adapter = new ArrayAdapter<>(CreatePostActivity.this, android.R.layout.simple_dropdown_item_1line, titles);
+                            edtComicSearch.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
+                            edtComicSearch.showDropDown();
+
+                            edtComicSearch.setOnItemClickListener((parent, view, position, id) -> {
+                                String selectedTitle = adapter.getItem(position);
+                                if (selectedTitle != null && titleToIdMap.containsKey(selectedTitle)) {
+                                    selectedComicInfo[0] = titleToIdMap.get(selectedTitle); // Lưu ID chuẩn
+                                    selectedComicInfo[1] = selectedTitle;               // Lưu Tên hiển thị
+                                    Toast.makeText(CreatePostActivity.this, "Đã liên kết truyện: " + selectedTitle, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<MangaResponse> call, Throwable t) {}
+                });
+    }
+
     private interface OnMultiImageUploadListener {
         void onComplete(List<String> downloadUrls);
     }
@@ -270,15 +340,13 @@ public class CreatePostActivity extends AppCompatActivity {
         }
     }
 
-    private void updatePostOnCloud(String postId, String content, String comicId, List<String> imageUrls, ProgressDialog progressDialog) {
-        // 👉 Tạo một đối tượng Post mới chứa đầy đủ thông tin vừa sửa
+    private void updatePostOnCloud(String postId, String content, String comicId, String comicTitle, String hashtag, List<String> imageUrls, ProgressDialog progressDialog) {
         Post updatedPost = new Post(postId, "Meringoc_17", comicId, content, imageUrls);
+        updatedPost.setComicTitle(comicTitle);
+        updatedPost.setHashtag(hashtag);
 
-        // 👉 Gọi thông qua PostViewModel để nó cập nhật cả Firebase lẫn Room Database cục bộ
         if (postViewModel != null) {
             postViewModel.updatePost(updatedPost);
-
-            // Đóng dialog và kết thúc Activity ngay sau khi gửi lệnh cập nhật
             progressDialog.dismiss();
             Toast.makeText(CreatePostActivity.this, "Cập nhật bài viết thành công!", Toast.LENGTH_SHORT).show();
 

@@ -22,6 +22,35 @@
                 <include
                     android:id="@+id/appBar"
                     layout="@layout/layout_app_bar" />
+                <LinearLayout
+                    android:id="@+id/layoutSearchBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="#FFFFFF"
+                    android:padding="8dp"
+                    android:visibility="gone"
+                    android:elevation="4dp">
+
+                        <EditText
+                            android:id="@+id/etMainSearch"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_search"
+                            android:hint="Tìm kiếm bài viết, hashtag..."
+                            android:paddingHorizontal="12dp"
+                            android:textSize="14sp"
+                            android:maxLines="1"/>
+
+                        <ImageButton
+                            android:id="@+id/btnDoSearch"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@android:drawable/ic_menu_search"
+                            android:contentDescription="Tìm kiếm"/>
+                </LinearLayout>
 
                 <ImageButton
                     android:id="@+id/btnSearch"
