@@ -51,4 +51,14 @@ public class NotificationViewModel extends AndroidViewModel {
         notificationRepository.delete(notification);
     }
 
+    // Bắt đầu nhận thông báo từ Firestore (gọi nhiều lần cũng chỉ lắng nghe một lần)
+    public void startListening() {
+        notificationRepository.startListening();
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        notificationRepository.stopListening();
+    }
 }

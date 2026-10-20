@@ -63,6 +63,8 @@ public class NotificationPopup {
         this.activity = activity;
         this.bellButton = bellButton;
         this.viewModel = new ViewModelProvider(activity).get(NotificationViewModel.class);
+        // Bắt đầu nhận thông báo từ Firestore
+        viewModel.startListening();
 
         View content = LayoutInflater.from(activity).inflate(R.layout.popup_notification, null);
         rcvNotifications = content.findViewById(R.id.rcvNotifications);
@@ -140,11 +142,19 @@ public class NotificationPopup {
             return;
         }
         for (Notification notification : unread) {
-            if (handledIds.add(notification.getNotifId()) && !firstUnreadLoad) {
+            if (handledIds.add(notification.getNotifId()) && !firstUnreadLoad && isRecent(notification)) {
                 NtfChannel.show(activity, notification);
             }
         }
         firstUnreadLoad = false;
+    }
+
+    // Chỉ đẩy ra hệ thống thông báo vừa xảy ra (dưới 2 phút), tránh hiện hàng loạt thông báo cũ khi mới cài app
+    private boolean isRecent(Notification notification) {
+        if (notification.getTimestamp() == null) {
+            return false;
+        }
+        return System.currentTimeMillis() - notification.getTimestamp().getTime() < 2 * 60 * 1000;
     }
 
     private void markAllAsRead() {
