@@ -1,0 +1,295 @@
+package vn.edu.ueh.ngocha.squiditytempprj.View.menu;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.bumptech.glide.Glide;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.imageview.ShapeableImageView;
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseUser;
+
+import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.AuthActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ChatListActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ComicListActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.GroupActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.MainActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ProfileActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
+
+public abstract class BaseActivity extends AppCompatActivity {
+
+    protected DrawerLayout drawerLayout;
+    protected NavigationView navigationView;
+    protected TextView tvDrawerUsername;
+    protected TextView tvDrawerEmail;
+    protected TextView tvMainUsername;
+    protected ShapeableImageView imgDrawerAvatar;
+    protected ShapeableImageView imgMainAvatar;
+    protected FrameLayout activityContent;
+    protected AuthViewModel authViewModel;
+    protected UserProfileViewModel profileViewModel;
+    private MaterialButton btnAuthAction;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_base_drawer);
+
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navigationView = findViewById(R.id.navigationView);
+
+        View mainContainer = findViewById(R.id.mainContainer);
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                drawerLayout,
+                (v, insets) -> {
+                    Insets systemBars = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                    );
+
+                    mainContainer.setPadding(
+                            mainContainer.getPaddingLeft(),
+                            systemBars.top,
+                            mainContainer.getPaddingRight(),
+                            mainContainer.getPaddingBottom()
+                    );
+
+                    return insets;
+                }
+        );
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                navigationView,
+                (v, insets) -> {
+
+                    Insets systemBars = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                    );
+
+                    v.setPadding(
+                            v.getPaddingLeft(),
+                            systemBars.top,
+                            v.getPaddingRight(),
+                            v.getPaddingBottom()
+                    );
+
+                    return insets;
+                }
+        );
+
+        ViewCompat.requestApplyInsets(drawerLayout);
+
+        activityContent = findViewById(R.id.activityContent);
+        btnAuthAction = findViewById(R.id.btnAuthAction);
+        View header = navigationView.getHeaderView(0);
+        tvDrawerUsername = header.findViewById(R.id.tvDrawerUsername);
+        tvDrawerEmail = header.findViewById(R.id.tvDrawerEmail);
+        imgDrawerAvatar = header.findViewById(R.id.imageView4);
+        imgMainAvatar = findViewById(R.id.imgvAvatar);
+        tvMainUsername = findViewById(R.id.tvMainUsername);
+
+        btnAuthAction.setOnClickListener(onAuthClickListener);
+        imgMainAvatar.setOnClickListener(onProfileClickListener);
+
+        authViewModel = new ViewModelProvider(this)
+                .get(AuthViewModel.class);
+        profileViewModel = new ViewModelProvider(this)
+                .get(UserProfileViewModel.class);
+
+        profileViewModel.getProfile().observe(this, currentuserNav);
+        profileViewModel.loadCurrentProfile();
+
+        getLayoutInflater().inflate(
+                getContentLayoutId(),
+                activityContent,
+                true
+        );
+
+        setupDrawer();
+    }
+
+    // Mỗi Activity con tự cung cấp layout nội dung
+    protected abstract int getContentLayoutId();
+
+    private void setupDrawer() {
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(
+                            MenuItem item) {
+
+                        int id = item.getItemId();
+
+                        if (id == R.id.action_profile) {
+                            if (authViewModel.getCurrentUser() == null) {
+
+                                new AlertDialog.Builder(BaseActivity.this)
+                                        .setTitle("Yêu cầu đăng nhập")
+                                        .setMessage("Bạn cần đăng nhập để xem profile.")
+                                        .setNegativeButton("Hủy", (dialog, which) -> {
+                                            dialog.dismiss();
+                                        })
+                                        .setPositiveButton("Đăng nhập", (dialog, which) -> {
+                                            Intent intent = new Intent(
+                                                    BaseActivity.this,
+                                                    AuthActivity.class
+                                            );
+                                            startActivity(intent);
+                                        })
+                                        .show();
+
+                            } else {
+                                Intent intent = new Intent(
+                                        BaseActivity.this,
+                                        ProfileActivity.class
+                                );
+                                startActivity(intent);
+                            }
+
+                        } else if (id == R.id.action_chat) {
+                            startActivity(new Intent(BaseActivity.this, ChatListActivity.class));
+                        } else if (id == R.id.action_group) {
+                            // Mở màn hình Groups
+                            Intent intent = new Intent(
+                                    BaseActivity.this,
+                                    GroupActivity.class
+                            );
+                            startActivity(intent);
+                        }
+                        else if (id == R.id.action_comic) {
+                            Intent intent = new Intent(
+                                    BaseActivity.this,
+                                    ComicListActivity.class
+                            );
+                            startActivity(intent);
+                        }
+
+                        drawerLayout.closeDrawers();
+                        return true;
+                    }
+                }
+        );
+    }
+
+    private Observer<UserProfileViewModel.ProfileUiState> currentuserNav = new Observer<UserProfileViewModel.ProfileUiState>() {
+
+        @Override
+        public void onChanged(UserProfileViewModel.ProfileUiState state) {
+            if (state == null) {
+                return;
+            }
+
+            tvDrawerUsername.setText(state.username);
+            tvDrawerEmail.setText(state.email);
+            tvMainUsername.setText(state.username);
+
+            btnAuthAction.setText(
+                    state.loggedIn ? "Đăng xuất" : "Đăng nhập / Đăng ký"
+            );
+
+            if (state.avatarUrl == null || state.avatarUrl.isEmpty()) {
+                imgDrawerAvatar.setImageResource(
+                        R.drawable.ic_launcher_background
+                );
+
+                imgMainAvatar.setImageResource(
+                        R.drawable.ic_launcher_background
+                );
+            } else {
+                Glide.with(BaseActivity.this)
+                        .load(state.avatarUrl)
+                        .placeholder(R.drawable.ic_launcher_background)
+                        .error(R.drawable.ic_launcher_background)
+                        .circleCrop()
+                        .into(imgDrawerAvatar);
+
+                Glide.with(BaseActivity.this)
+                        .load(state.avatarUrl)
+                        .placeholder(R.drawable.ic_launcher_background)
+                        .error(R.drawable.ic_launcher_background)
+                        .circleCrop()
+                        .into(imgMainAvatar);
+            }
+        }
+    };
+
+
+    protected View.OnClickListener onProfileClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (imgMainAvatar == null) {
+                Log.e("DrawerDebug", "Avatar is NULL");
+                return;
+            }
+
+
+            Log.d("DrawerDebug",
+                    "Drawer width after layout = " + drawerLayout.getWidth());
+            Log.d("DrawerDebug",
+                    "Drawer height after layout = " + drawerLayout.getHeight());
+
+            if (drawerLayout.getWidth() > 0
+                    && drawerLayout.getHeight() > 0) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        }
+    };
+
+    private void openAuthActivity() {
+        try {
+            Intent intent = new Intent(BaseActivity.this, AuthActivity.class);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e("BaseActivity", "Không mở được AuthActivity", e);
+            Toast.makeText(this, "Không mở được màn hình đăng nhập", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private View.OnClickListener onAuthClickListener = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View view) {
+            FirebaseUser user = authViewModel.getCurrentUser();
+            if (user == null) {
+                openAuthActivity();
+            } else {
+                new AlertDialog.Builder(BaseActivity.this)
+                        .setTitle("Đăng xuất")
+                        .setMessage("Bạn có chắc muốn đăng xuất không?")
+                        .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
+                        .setPositiveButton("Đăng xuất", (dialog, which) -> {
+                            authViewModel.logout();
+                            profileViewModel.loadCurrentProfile();
+                            Toast.makeText(
+                                    BaseActivity.this,
+                                    "Đã đăng xuất",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        })
+                        .show();
+            }
+        }
+    };
+
+}
