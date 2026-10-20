@@ -30,6 +30,10 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Stamp;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.StampType;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
@@ -38,6 +42,11 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.Observer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
@@ -334,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         rcvpostlist.setAdapter(postAdapter);
+        postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
         postViewModel.getAllPosts().observe(this, new Observer<List<Post>>() {
             @Override

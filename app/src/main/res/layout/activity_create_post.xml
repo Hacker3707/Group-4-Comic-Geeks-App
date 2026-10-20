@@ -40,10 +40,12 @@
             android:textColor="#493373"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/btnCancelPost"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnPublish"
+            app:layout_constraintHorizontal_bias="0.563"
+            app:layout_constraintStart_toEndOf="@id/btnCancelPost"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintVertical_bias="0.533" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPublish"
@@ -54,11 +56,11 @@
             android:textColor="#493373"
             android:textSize="13sp"
             android:textStyle="bold"
-            app:backgroundTint="#FFB3C6"
+            app:backgroundTint="#DFC6FF"
             app:cornerRadius="18dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -70,18 +72,17 @@
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/edtPostContent"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="350dp"
         android:background="@android:color/transparent"
         android:gravity="top|start"
-        android:padding="16dp"
         android:hint="Bạn đang nghĩ gì về bộ truyện này?"
+        android:inputType="textCapSentences|textMultiLine"
+        android:overScrollMode="ifContentScrolls"
+        android:padding="16dp"
+        android:scrollbars="vertical"
         android:textColor="#333333"
         android:textColorHint="#999999"
-        android:textSize="16sp"
-        android:inputType="textCapSentences|textMultiLine"
-        android:scrollbars="vertical"
-        android:overScrollMode="ifContentScrolls" />
+        android:textSize="16sp" />
 
 
     <!-- 1. Ô nhập hashtag cho bài viết -->

@@ -54,7 +54,9 @@ public class CreatePostActivity extends AppCompatActivity {
     private RecyclerView rvImagePreview;
     private ImagePreviewAdapter imagePreviewAdapter;
     private List<Uri> selectedImageUris = new ArrayList<>();
-    private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private ActivityResultLauncher<
+            androidx.activity.result.PickVisualMediaRequest
+            > imagePickerLauncher;
 
     private final String[] selectedComicInfo = {"Discussion", ""}; // [0]: comicId, [1]: comicTitle
 
@@ -118,41 +120,31 @@ public class CreatePostActivity extends AppCompatActivity {
         }
 
         imagePickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        if (result.getData().getClipData() != null) {
-                            int count = result.getData().getClipData().getItemCount();
-                            for (int i = 0; i < count; i++) {
-                                Uri imageUri = result.getData().getClipData().getItemAt(i).getUri();
-                                try {
-                                    getContentResolver().takePersistableUriPermission(imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                } catch (Exception ignored) {}
-                                selectedImageUris.add(imageUri);
-                            }
-                        } else if (result.getData().getData() != null) {
-                            Uri imageUri = result.getData().getData();
-                            try {
-                                getContentResolver().takePersistableUriPermission(imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            } catch (Exception ignored) {}
-                            selectedImageUris.add(imageUri);
-                        }
+                new ActivityResultContracts.PickMultipleVisualMedia(10),
+                uris -> {
+                    if (uris != null && !uris.isEmpty()) {
+                        selectedImageUris.addAll(uris);
 
-                        if (!selectedImageUris.isEmpty()) {
-                            rvImagePreview.setVisibility(View.VISIBLE);
-                            imagePreviewAdapter.notifyDataSetChanged();
-                            Toast.makeText(this, "Đã chọn " + selectedImageUris.size() + " ảnh!", Toast.LENGTH_SHORT).show();
-                        }
+                        rvImagePreview.setVisibility(View.VISIBLE);
+                        imagePreviewAdapter.notifyDataSetChanged();
+
+                        Toast.makeText(
+                                this,
+                                "Đã chọn " + selectedImageUris.size() + " ảnh!",
+                                Toast.LENGTH_SHORT
+                        ).show();
                     }
                 }
         );
 
         btnAddImage.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("image/*");
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            imagePickerLauncher.launch(intent);
+            imagePickerLauncher.launch(
+                    new androidx.activity.result.PickVisualMediaRequest.Builder()
+                            .setMediaType(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE
+                            )
+                            .build()
+            );
         });
 
         btnCancelPost.setOnClickListener(v -> finish());

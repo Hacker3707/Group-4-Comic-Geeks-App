@@ -132,9 +132,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
             boolean isStamped = holder.btnStamp.getTag() != null && (boolean) holder.btnStamp.getTag();
             if (isStamped) {
                 holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#A890D3"));
+                holder.btnStamp.setImageResource(R.drawable.ic_splash_unfill);
                 holder.btnStamp.setTag(false);
             } else {
                 holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#493373"));
+                holder.btnStamp.setImageResource(R.drawable.post_ink_splat);
                 holder.btnStamp.setTag(true);
                 if (listener != null) {
                     listener.onStampClick(post);
@@ -176,15 +178,36 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
         });
 
         // --- 5. XỬ LÝ LƯỚI ẢNH ---
-        if (post.getImageUris() != null && !post.getImageUris().isEmpty()) {
+        List<String> imageUris = post.getImageUris();
+
+        if (imageUris != null && !imageUris.isEmpty()) {
             holder.rvPostImages.setVisibility(View.VISIBLE);
 
-            if (holder.rvPostImages.getLayoutManager() == null) {
-                holder.rvPostImages.setLayoutManager(new GridLayoutManager(context, 2));
-            }
+            int imageCount = imageUris.size();
 
-            PostImageAdapter imageAdapter = new PostImageAdapter(context, post.getImageUris());
+            // Mặc định 2 cột; nếu chỉ có 1 ảnh thì ảnh chiếm cả 2 cột
+            GridLayoutManager layoutManager =
+                    new GridLayoutManager(context, 2);
+
+            layoutManager.setSpanSizeLookup(
+                    new GridLayoutManager.SpanSizeLookup() {
+                        @Override
+                        public int getSpanSize(int position) {
+                            if (imageCount == 1) {
+                                return 2;
+                            }
+                            return 1;
+                        }
+                    }
+            );
+
+            holder.rvPostImages.setLayoutManager(layoutManager);
+
+            PostImageAdapter imageAdapter =
+                    new PostImageAdapter(context, imageUris);
+
             holder.rvPostImages.setAdapter(imageAdapter);
+
         } else {
             holder.rvPostImages.setVisibility(View.GONE);
         }

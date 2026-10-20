@@ -115,21 +115,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/headerLayout" />
-        <TextView
-            android:id="@+id/tvLinkedComic"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp"
-            android:fontFamily="@font/jersey25_regular"
-            android:text="📖 Tên bộ truyện liên kết"
-            android:textColor="#493373"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvPostContent" />
+
 
         <!-- LƯỚI ẢNH BÀI VIẾT -->
         <androidx.recyclerview.widget.RecyclerView
@@ -143,9 +129,8 @@
             app:spanCount="2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvLinkedComic" />
+            app:layout_constraintTop_toBottomOf="@id/tvPostContent" />
 
-        <!-- KHUNG ACTION (HASHTAG, COMMENT, STAMP) -->
         <LinearLayout
             android:id="@+id/actionLayout"
             android:layout_width="match_parent"
@@ -154,10 +139,10 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingVertical="8dp"
+            app:layout_constraintTop_toBottomOf="@id/rvPostImages"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/rvPostImages">
+            app:layout_constraintEnd_toEndOf="parent">
 
             <TextView
                 android:id="@+id/tvHashtag"
@@ -167,14 +152,13 @@
                 android:drawablePadding="4dp"
                 android:fontFamily="@font/jersey25_regular"
                 android:text="# Discussion"
-                android:textAlignment="center"
                 android:textColor="#2F2148"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="normal" />
 
             <Space
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="1dp"
                 android:layout_weight="1" />
 
             <TextView
@@ -190,15 +174,44 @@
                 android:id="@+id/btnStamp"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/ic_ink_stamp"/>
+                android:src="@drawable/ic_splash_unfill" />
+
         </LinearLayout>
 
+        <!-- CHIP COMIC: HÀNG RIÊNG BÊN DƯỚI -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/tvLinkedComic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/jersey25_regular"
+            android:text="📖 Linked Comic"
+            android:textColor="#493373"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:chipBackgroundColor="#EEE7FF"
+            app:chipCornerRadius="16dp"
+            app:chipIconVisible="false"
+            app:chipMinHeight="36dp"
+            app:chipStrokeColor="#D2C3FF"
+            app:chipStrokeWidth="1dp"
+            app:closeIconVisible="false"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/actionLayout" />
+
+        <!-- DIVIDER -->
         <View
             android:id="@+id/divider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
+            android:layout_marginTop="8dp"
             android:background="#E0E0E0"
-            app:layout_constraintTop_toBottomOf="@id/actionLayout" />
+            app:layout_constraintTop_toBottomOf="@id/tvLinkedComic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
 
         <!-- Ô BÌNH LUẬN NHANH -->
         <LinearLayout
