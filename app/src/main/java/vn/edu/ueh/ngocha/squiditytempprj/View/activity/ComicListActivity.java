@@ -319,7 +319,6 @@ public class ComicListActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
 
         rcvcomic = findViewById(R.id.rcvcomic);
         etSearch = findViewById(R.id.etSearch);

@@ -22,9 +22,10 @@ import java.util.List;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends BaseActivity {
 
     private EditText etGlobalSearch;
     private ImageButton btnBackSearch;
@@ -39,25 +40,6 @@ public class SearchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
-
-        ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(R.id.search_layout),
-                (v, insets) -> {
-                    Insets systemBars = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                    );
-
-                    v.setPadding(
-                            systemBars.left,
-                            systemBars.top,
-                            systemBars.right,
-                            systemBars.bottom
-                    );
-
-                    return insets;
-                }
-        );
 
         etGlobalSearch = findViewById(R.id.etGlobalSearch);
         btnBackSearch = findViewById(R.id.btnBackSearch);
@@ -106,6 +88,12 @@ public class SearchActivity extends AppCompatActivity {
             return false;
         });
     }
+
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.activity_search;
+    }
+
     private void performSearch(String queryStr, int searchType) {
         if (queryStr == null || queryStr.isEmpty()) {
             postAdapter.setPosts(new ArrayList<>());
