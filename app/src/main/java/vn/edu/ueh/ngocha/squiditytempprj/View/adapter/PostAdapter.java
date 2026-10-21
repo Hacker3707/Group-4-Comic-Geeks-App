@@ -9,9 +9,12 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +22,10 @@ import java.util.Map;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ComicDetailActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.CreatePostActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.SearchActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.holder.PostViewHolder;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
 public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
 
@@ -28,7 +33,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
     private Context context;
     private OnPostInteractionListener listener;
 
-    // Lưu trạng thái mở rộng ("Xem thêm") của từng bài viết theo ID để tránh lỗi khi cuộn RecyclerView
     private final Map<String, Boolean> expandedStates = new HashMap<>();
 
     public interface OnPostInteractionListener {
@@ -57,7 +61,27 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
         Post post = postList.get(position);
 
         holder.tvUserName.setText(post.getUserId());
-        holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
+
+        // Lắng nghe và hiển thị chính xác số lượng comment thực tế từ cơ sở dữ liệu
+        if (context instanceof AppCompatActivity) {
+            AppCompatActivity activity = (AppCompatActivity) context;
+            PostViewModel postViewModel = new ViewModelProvider(activity).get(PostViewModel.class);
+            if (post.getPostId() != null) {
+                postViewModel.getCommentsByPostId(post.getPostId()).observe(activity, comments -> {
+                    if (comments != null) {
+                        int realCount = comments.size();
+                        holder.tvCommentCount.setText(String.valueOf(realCount));
+                        post.setCommentCount(realCount);
+                    } else {
+                        holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
+                    }
+                });
+            } else {
+                holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
+            }
+        } else {
+            holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
+        }
 
         String content = post.getContent();
         String postId = post.getPostId() != null ? post.getPostId() : String.valueOf(position);
@@ -107,6 +131,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
                 holder.tvLinkedComic.setVisibility(View.GONE);
             }
         }
+
         String hashtag = post.getHashtag();
         if (hashtag != null && !hashtag.isEmpty()) {
             holder.tvHashtag.setText(hashtag);
@@ -116,28 +141,28 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
 
         holder.tvHashtag.setOnClickListener(v -> {
             String tagQuery = post.getHashtag();
+            Intent intent = new Intent(context, SearchActivity.class);
             if (tagQuery != null && !tagQuery.isEmpty()) {
-                Intent intent = new Intent(context, SearchActivity.class);
                 intent.putExtra("SEARCH_QUERY", tagQuery);
-                context.startActivity(intent);
             } else {
-                Intent intent = new Intent(context, SearchActivity.class);
                 intent.putExtra("SEARCH_QUERY", "Discussion");
-                context.startActivity(intent);
             }
+            context.startActivity(intent);
         });
 
-        // --- 4. CÁC SỰ KIỆN TƯƠNG TÁC KHÁC (Stamp, Comment, Options...) ---
         holder.btnStamp.setOnClickListener(v -> {
             boolean isStamped = holder.btnStamp.getTag() != null && (boolean) holder.btnStamp.getTag();
             if (isStamped) {
                 holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#A890D3"));
                 holder.btnStamp.setImageResource(R.drawable.ic_splash_unfill);
                 holder.btnStamp.setTag(false);
+                // Nếu muốn xử lý hủy stamp trên Firebase bạn có thể viết thêm ở đây sau
             } else {
                 holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#493373"));
                 holder.btnStamp.setImageResource(R.drawable.post_ink_splat);
                 holder.btnStamp.setTag(true);
+
+                // 👉 BẮT BUỘC PHẢI CÓ DÒNG NÀY ĐỂ GỌI ĐẨY STAMP LÊN FIREBASE
                 if (listener != null) {
                     listener.onStampClick(post);
                 }
@@ -154,7 +179,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
             String commentText = holder.edtQuickComment.getText().toString().trim();
             if (!commentText.isEmpty()) {
                 if (listener != null) listener.onCommentSend(post, commentText);
-                post.setCommentCount(post.getCommentCount() + 1);
                 holder.edtQuickComment.setText("");
                 notifyItemChanged(position);
             }
@@ -166,7 +190,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
             popup.setOnMenuItemClickListener(item -> {
                 int id = item.getItemId();
                 if (id == R.id.action_edit) {
-                    if (listener != null) listener.onEditPost(post);
+                    Intent intent = new Intent(context, CreatePostActivity.class);
+                    intent.putExtra("is_edit_mode", true);
+                    intent.putExtra("post_id", post.getPostId());
+                    intent.putExtra("post_content", post.getContent());
+                    intent.putExtra("post_comic_id", post.getComicId());
+                    intent.putExtra("post_comic_title", post.getComicTitle());
+                    intent.putExtra("post_hashtag", post.getHashtag());
+                    intent.putStringArrayListExtra("post_image_urls", post.getImageUris() != null ? new ArrayList<>(post.getImageUris()) : new ArrayList<>());
+                    context.startActivity(intent);
                     return true;
                 } else if (id == R.id.action_delete) {
                     if (listener != null) listener.onDeletePost(post);
@@ -177,44 +209,35 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
             popup.show();
         });
 
-        // --- 5. XỬ LÝ LƯỚI ẢNH ---
         List<String> imageUris = post.getImageUris();
 
         if (imageUris != null && !imageUris.isEmpty()) {
             holder.rvPostImages.setVisibility(View.VISIBLE);
-
             int imageCount = imageUris.size();
 
-            // Mặc định 2 cột; nếu chỉ có 1 ảnh thì ảnh chiếm cả 2 cột
-            GridLayoutManager layoutManager =
-                    new GridLayoutManager(context, 2);
+            GridLayoutManager layoutManager = new GridLayoutManager(context, 2);
 
-            layoutManager.setSpanSizeLookup(
-                    new GridLayoutManager.SpanSizeLookup() {
-                        @Override
-                        public int getSpanSize(int position) {
-                            if (imageCount == 1) {
-                                return 2;
-                            }
-                            return 1;
-                        }
+            // 👉 Đã sửa từ spanSize thành getSpanSize đúng chuẩn Android
+            layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    if (imageCount == 1) {
+                        return 2;
                     }
-            );
+                    return 1;
+                }
+            });
 
             holder.rvPostImages.setLayoutManager(layoutManager);
-
-            PostImageAdapter imageAdapter =
-                    new PostImageAdapter(context, imageUris);
-
+            PostImageAdapter imageAdapter = new PostImageAdapter(context, imageUris);
             holder.rvPostImages.setAdapter(imageAdapter);
-
         } else {
             holder.rvPostImages.setVisibility(View.GONE);
         }
     }
 
     @Override
-    public int getItemCount() {
+    public int getItemCount() { // 👉 Đã thêm từ khóa public vào đây
         return postList != null ? postList.size() : 0;
     }
 
