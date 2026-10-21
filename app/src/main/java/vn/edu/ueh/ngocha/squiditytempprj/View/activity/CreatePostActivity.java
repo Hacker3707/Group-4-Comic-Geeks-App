@@ -21,6 +21,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -202,7 +203,7 @@ public class CreatePostActivity extends AppCompatActivity {
                         progressDialog.show();
 
                         uploadMultipleImagesToStorage(newPostId, imageUrls -> {
-                            Post newPost = new Post(newPostId, "Meringoc_17", currentComicId, content, imageUrls);
+                            Post newPost = new Post(newPostId, currentUid(), currentComicId, content, imageUrls);
                             newPost.setComicTitle(currentComicTitle);
                             newPost.setHashtag(finalHashtag);
                             uploadPostToCloud(newPost, progressDialog);
@@ -211,7 +212,7 @@ public class CreatePostActivity extends AppCompatActivity {
                         progressDialog.setMessage("Đang đăng bài viết...");
                         progressDialog.show();
 
-                        Post newPost = new Post(newPostId, "Meringoc_17", currentComicId, content, null);
+                        Post newPost = new Post(newPostId, currentUid(), currentComicId, content, null);
                         newPost.setComicTitle(currentComicTitle);
                         newPost.setHashtag(finalHashtag);
                         uploadPostToCloud(newPost, progressDialog);
@@ -340,8 +341,16 @@ public class CreatePostActivity extends AppCompatActivity {
         }
     }
 
+    // Id của tài khoản đang đăng nhập, chưa đăng nhập thì dùng "guest"
+    private String currentUid() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            return "guest";
+        }
+        return FirebaseAuth.getInstance().getCurrentUser().getUid();
+    }
+
     private void updatePostOnCloud(String postId, String content, String comicId, String comicTitle, String hashtag, List<String> imageUrls, ProgressDialog progressDialog) {
-        Post updatedPost = new Post(postId, "Meringoc_17", comicId, content, imageUrls);
+        Post updatedPost = new Post(postId, currentUid(), comicId, content, imageUrls);
         updatedPost.setComicTitle(comicTitle);
         updatedPost.setHashtag(hashtag);
 

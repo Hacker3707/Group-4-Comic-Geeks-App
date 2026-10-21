@@ -47,7 +47,7 @@ public class NotificationRepository {
     // - cho phép tự thông báo cho chính mình
     // - Post hiện đang lưu userId cứng "Meringoc_17" nên cũng nhận thông báo gửi cho id này
     // Khi Post dùng userId thật (Firebase uid) thì đổi TEST_MODE = false.
-    private static final boolean TEST_MODE = true;
+    private static final boolean TEST_MODE = false;
     private static final String TEST_POST_OWNER_ID = "Meringoc_17";
 
     private NotificationDao mNotificationDao;

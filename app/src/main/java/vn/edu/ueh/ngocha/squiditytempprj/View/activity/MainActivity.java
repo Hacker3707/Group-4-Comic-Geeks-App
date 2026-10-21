@@ -38,7 +38,6 @@ import vn.edu.ueh.ngocha.squiditytempprj.R;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
-import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.Observer;
@@ -54,6 +53,8 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
 import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
+import com.google.firebase.auth.FirebaseAuth;
+
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
@@ -136,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                     } else if (id == R.id.action_chat) {
-                         startActivity(new Intent(MainActivity.this, ChatListActivity.class));
+                        startActivity(new Intent(MainActivity.this, ChatListActivity.class));
                     } else if (id == R.id.action_group) {
                         // Mở màn hình Groups
                         Intent intent = new Intent(
@@ -159,6 +160,14 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
             };
+
+    // Id của tài khoản đang đăng nhập, chưa đăng nhập thì dùng "guest"
+    private String currentUid() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            return "guest";
+        }
+        return FirebaseAuth.getInstance().getCurrentUser().getUid();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -276,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onStampClick(Post post) {
                 String randomStampId = UUID.randomUUID().toString();
-                Stamp newStamp = new Stamp(randomStampId, "Meringoc_17", StampType.LIKE);
+                Stamp newStamp = new Stamp(randomStampId, currentUid(), StampType.LIKE);
                 newStamp.setPostId(post.getPostId());
                 postViewModel.addStamp(newStamp, post);
                 Toast.makeText(MainActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
@@ -286,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
             public void onCommentSend(Post post, String commentText) {
                 if (commentText != null && !commentText.trim().isEmpty()) {
                     String randomCommentId = UUID.randomUUID().toString();
-                    Comment newComment = new Comment(randomCommentId, "Meringoc_17", post.getPostId(), commentText.trim());
+                    Comment newComment = new Comment(randomCommentId, currentUid(), post.getPostId(), commentText.trim());
                     postViewModel.addComment(newComment, post);
                     Toast.makeText(MainActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
                 } else {

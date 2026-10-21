@@ -1,0 +1,54 @@
+[33mcommit a3a9ca1bdab03821730a4dde66824c9b7107899d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mminhkhang[m[33m)[m
+Author: Hồ Minh Khang <khangho.31241023603@st.ueh.edu.vn>
+Date:   Fri Oct 16 00:47:49 2026 +0700
+
+    Add notification channel and popup
+
+ app/src/main/AndroidManifest.xml                   |   2 [32m+[m[31m-[m
+ .../View/activity/MainActivity.java                |   8 [32m+[m[31m-[m
+ .../View/adapter/NotificationAdapter.java          |  76 [32m+++++++++[m
+ .../View/holder/NotificationViewHolder.java        |  22 [32m+++[m
+ .../View/notification/NotificationPopup.java       | 171 [32m+++++++++++++++++++++[m
+ .../View/notification/NtfChannel.java              | 114 [32m++++++++++++++[m
+ app/src/main/res/drawable/bg_notification_dot.xml  |   5 [32m+[m
+ .../main/res/drawable/bg_notification_popup.xml    |   9 [32m++[m
+ app/src/main/res/drawable/ic_notification.xml      |  10 [32m++[m
+ app/src/main/res/layout/item_notification.xml      |  40 [32m+++++[m
+ app/src/main/res/layout/popup_notification.xml     |  61 [32m++++++++[m
+ app/src/main/res/values/colors_notification.xml    |   8 [32m+[m
+ 12 files changed, 522 insertions(+), 4 deletions(-)
+
+[33mcommit 32e4f22c36a18126decc46ae941d22fd9c4acf90[m
+Author: Hồ Minh Khang <khangho.31241023603@st.ueh.edu.vn>
+Date:   Fri Oct 16 00:37:03 2026 +0700
+
+    Add ChatListActivity and ChatActivity
+
+ app/src/main/AndroidManifest.xml                   |   7 [32m+[m
+ .../View/activity/ChatActivity.java                | 223 [32m+++++++++++++++++[m
+ .../View/activity/ChatListActivity.java            | 274 [32m+++++++++++++++++++++[m
+ .../View/activity/MainActivity.java                |   2 [32m+[m
+ .../View/adapter/ChatItemAdapter.java              | 112 [32m+++++++++[m
+ .../View/adapter/MessageAdapter.java               |  91 [32m+++++++[m
+ .../View/holder/ChatItemViewHolder.java            |  23 [32m++[m
+ .../View/holder/MessageViewHolder.java             |  23 [32m++[m
+ app/src/main/res/drawable/bg_chat_avatar.xml       |   5 [32m+[m
+ .../main/res/drawable/bg_chat_bubble_received.xml  |  10 [32m+[m
+ app/src/main/res/drawable/bg_chat_bubble_sent.xml  |  10 [32m+[m
+ app/src/main/res/drawable/bg_chat_input.xml        |   9 [32m+[m
+ app/src/main/res/layout/activity_chat.xml          | 103 [32m++++++++[m
+ app/src/main/res/layout/activity_chat_list.xml     |  80 [32m++++++[m
+ app/src/main/res/layout/item_chat_room.xml         |  48 [32m++++[m
+ app/src/main/res/layout/item_message_received.xml  |  41 [32m+++[m
+ app/src/main/res/layout/item_message_sent.xml      |  41 [32m+++[m
+ app/src/main/res/values/colors_chat.xml            |  10 [32m+[m
+ 18 files changed, 1112 insertions(+)
+
+[33mcommit 014bf2768a3cbccb9cb37dcee2a68b15d36fd36b[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 70db6ce 5313781
+Author: 3707 <lolemagikarp@gmail.com>
+Date:   Thu Oct 15 19:22:09 2026 +0700
+
+    Merge pull request #100 from Hacker3707/Ngoc-Ha
+    
+    Ngoc ha
