@@ -10,6 +10,15 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import android.net.Uri;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
+
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.UserProfileRepository;
 
 public class UserProfileViewModel extends ViewModel {
@@ -36,6 +45,37 @@ public class UserProfileViewModel extends ViewModel {
 
     public LiveData<ProfileUiState> getProfile() {
         return profile;
+    }
+
+    // Danh sách tài khoản dùng cho màn tìm kiếm người dùng
+    private final MutableLiveData<List<User>> searchableUsers = new MutableLiveData<List<User>>();
+
+    public LiveData<List<User>> getSearchableUsers() {
+        return searchableUsers;
+    }
+
+    public void loadAllUsers() {
+        repository.getAllUsers()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot snapshots) {
+                        List<User> users = new ArrayList<User>();
+                        for (DocumentSnapshot doc : snapshots.getDocuments()) {
+                            User user = doc.toObject(User.class);
+                            if (user != null) {
+                                user.setUserId(doc.getId());
+                                users.add(user);
+                            }
+                        }
+                        searchableUsers.setValue(users);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(Exception e) {
+                        searchableUsers.setValue(new ArrayList<User>());
+                    }
+                });
     }
 
     public void loadCurrentProfile() {

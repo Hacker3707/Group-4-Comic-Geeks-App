@@ -4,6 +4,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import android.net.Uri;
@@ -24,6 +25,13 @@ public class UserProfileRepository {
 
     private final FirebaseFirestore firestore =
             FirebaseFirestore.getInstance();
+
+    // Lấy danh sách tài khoản để tìm kiếm theo tên (Firestore không hỗ trợ tìm "chứa" nên lọc ở máy)
+    public Task<QuerySnapshot> getAllUsers() {
+        return firestore.collection("users")
+                .limit(300)
+                .get();
+    }
 
     public Task<DocumentSnapshot> getProfile(String uid) {
         return firestore.collection("users")
