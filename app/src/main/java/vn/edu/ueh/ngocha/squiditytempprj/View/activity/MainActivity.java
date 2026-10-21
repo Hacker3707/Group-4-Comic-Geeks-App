@@ -1,10 +1,18 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -12,8 +20,11 @@ import androidx.appcompat.app.AlertDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
 
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.widget.TextView;
+
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.firebase.auth.FirebaseUser;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -42,6 +53,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.Observer;
+import androidx.transition.TransitionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +61,7 @@ import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.SearchViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
 
@@ -57,8 +70,17 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
+    private FrameLayout headerContainer;
     private NavigationView navigationView;
     private ImageView imgvAvatar;
+
+    private MaterialAutoCompleteTextView etMainSearch;
+    private LinearLayout layoutSearchBar;
+    private ImageButton btnSearch;
+    private LinearLayout searchOverlay;
+    private boolean isSearchAnimating = false;
+    private int statusBarInset = 0;
+
     private RecyclerView rcvpostlist;
     private PostAdapter postAdapter;
     private PostViewModel postViewModel;
@@ -75,13 +97,16 @@ public class MainActivity extends AppCompatActivity {
     private AuthViewModel authViewModel;
     private UserProfileViewModel profileViewModel;
 
+    private View searchDimOverlay;
 
-    private View.OnClickListener onComicClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            Intent intent = new Intent(MainActivity.this, ComicListActivity.class);
-            startActivity(intent);
-        }
-    };
+    private SearchViewModel searchViewModel;
+    private ArrayAdapter<String> searchHistoryAdapter;
+    private ImageButton btnDoSearch;
+
+    private List<Post> allPosts = new ArrayList<>();
+    private String currentSearchQuery = "";
+
+    private boolean isSearchOpen = false;
 
 
     private View.OnClickListener onProfileClickListener =
@@ -102,6 +127,91 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
 
+    private View.OnClickListener onSearchClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (view.getId() == R.id.btnSearch) {
+                toggleSearchBar();
+            }
+            else {
+                performHomeSearch();
+            }
+        }
+    };
+
+    private TextView.OnEditorActionListener onSearchEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(
+                TextView v, int actionId,
+                android.view.KeyEvent event) {
+
+            if (actionId == EditorInfo.IME_ACTION_SEARCH
+                    || (event != null
+                    && event.getKeyCode()
+                    == android.view.KeyEvent.KEYCODE_ENTER
+                    && event.getAction()
+                    == android.view.KeyEvent.ACTION_DOWN)) {
+
+                performHomeSearch();
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+    private AdapterView.OnItemClickListener onSearchHistoryClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(
+                AdapterView<?> parent,
+                View view,
+                int position,
+                long id) {
+
+            String query = parent
+                    .getItemAtPosition(position)
+                    .toString();
+
+            etMainSearch.setText(query);
+            etMainSearch.setSelection(query.length());
+
+            performHomeSearch();
+        }
+    };
+
+    private View.OnFocusChangeListener onSearchFocusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (hasFocus) {
+                etMainSearch.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        etMainSearch.showDropDown();
+                    }
+                });
+            }
+        }
+    };
+
+    private View.OnClickListener onSearchBGClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (isSearchOpen) {
+                toggleSearchBar();
+            }
+        }
+    };
+
+    private Observer<List<String>> historyObserver = new Observer<>() {
+        @Override
+        public void onChanged(List<String> historyList) {
+            if (historyList != null) {
+                searchHistoryAdapter.clear();
+                searchHistoryAdapter.addAll(historyList);
+                searchHistoryAdapter.notifyDataSetChanged();
+            }
+        }
+    };
 
     private NavigationView.OnNavigationItemSelectedListener onAvatarsClickListener =
             new NavigationView.OnNavigationItemSelectedListener() {
@@ -164,14 +274,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
         setContentView(R.layout.activity_main);
 
+        View mainView = findViewById(R.id.main);
+
         ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(R.id.main),
+                mainView,
                 (v, insets) -> {
                     Insets systemBars = insets.getInsets(
                             WindowInsetsCompat.Type.systemBars()
                     );
+
+                    statusBarInset = systemBars.top;
 
                     v.setPadding(
                             systemBars.left,
@@ -179,6 +294,10 @@ public class MainActivity extends AppCompatActivity {
                             systemBars.right,
                             systemBars.bottom
                     );
+
+                    if (searchOverlay != null) {
+                        updateSearchOverlayPosition();
+                    }
 
                     return insets;
                 }
@@ -197,6 +316,7 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         imgvAvatar = findViewById(R.id.imgvAvatar);
         navigationView = findViewById(R.id.navigationView);
+
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 navigationView,
@@ -218,18 +338,9 @@ public class MainActivity extends AppCompatActivity {
         );
 
         rcvpostlist = findViewById(R.id.rcv_postlist);
-
         View appBar = findViewById(R.id.appBar);
         tvMainUsername = appBar.findViewById(R.id.tvMainUsername);
         imgMainAvatar = appBar.findViewById(R.id.imgvAvatar);
-
-        ImageView btnSearchIcon = appBar.findViewById(R.id.btnSearch); // Thay ID này đúng với nút kính lúp trong layout_app_bar của nhóm
-        if (btnSearchIcon != null) {
-            btnSearchIcon.setOnClickListener(v -> {
-                Intent intent = new Intent(MainActivity.this, SearchActivity.class);
-                startActivity(intent);
-            });
-        }
 
         if (navigationView == null || navigationView.getHeaderCount() == 0) {
             Toast.makeText(this, "Không tìm thấy phần header của menu", Toast.LENGTH_SHORT).show();
@@ -240,8 +351,37 @@ public class MainActivity extends AppCompatActivity {
         tvDrawerUsername = header.findViewById(R.id.tvDrawerUsername);
         tvDrawerEmail = header.findViewById(R.id.tvDrawerEmail);
         imgDrawerAvatar = header.findViewById(R.id.imageView4);
-
+        etMainSearch = findViewById(R.id.etMainSearch);
+        layoutSearchBar = findViewById(R.id.layoutSearchBar);
+        btnSearch = findViewById(R.id.btnSearch);
         btnAuthAction = findViewById(R.id.btnAuthAction);
+        headerContainer = findViewById(R.id.headerContainer);
+        searchOverlay = findViewById(R.id.searchOverlay);
+        searchDimOverlay = findViewById(R.id.searchDimOverlay);
+        btnDoSearch = findViewById(R.id.btnDoSearch);
+
+        searchViewModel = new ViewModelProvider(this)
+                .get(SearchViewModel.class);
+
+        searchViewModel.loadhomeHistory();
+
+        searchHistoryAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                new ArrayList<String>()
+        );
+
+        etMainSearch.setAdapter(searchHistoryAdapter);
+        etMainSearch.setThreshold(0);
+
+        searchViewModel.gethomeHistory().observe(this, historyObserver);
+
+        btnSearch.setOnClickListener(onSearchClickListener);
+        searchDimOverlay.setOnClickListener(onSearchBGClickListener);
+        etMainSearch.setOnEditorActionListener(onSearchEditorActionListener);
+        etMainSearch.setOnItemClickListener(onSearchHistoryClickListener);
+        etMainSearch.setOnFocusChangeListener(onSearchFocusChangeListener);
+        btnDoSearch.setOnClickListener(onSearchClickListener);
 
         btnAuthAction.setOnClickListener(v -> {
             FirebaseUser user = authViewModel.getCurrentUser();
@@ -407,4 +547,142 @@ public class MainActivity extends AppCompatActivity {
             profileViewModel.loadCurrentProfile();
         }
     }
+
+    private void toggleSearchBar() {
+        if (isSearchAnimating) {
+            return;
+        }
+
+        isSearchAnimating = true;
+
+        if (!isSearchOpen) {
+            btnSearch.setImageResource(R.drawable.ic_crossx);
+            btnSearch.setContentDescription("Đóng tìm kiếm");
+            // Mở Search bar
+            layoutSearchBar.setVisibility(View.VISIBLE);
+            searchDimOverlay.setVisibility(View.VISIBLE);
+            searchDimOverlay.setAlpha(0f);
+            btnSearch.setTranslationX(10);
+
+            searchDimOverlay.animate()
+                    .alpha(1f)
+                    .setDuration(320)
+                    .start();
+
+            // Đo chiều cao thực tế sau khi layout hoàn tất
+            searchOverlay.post(new Runnable() {
+                @Override
+                public void run() {
+                    float distance = layoutSearchBar.getHeight();
+
+                    searchOverlay.setTranslationY(-distance);
+                    searchOverlay.setAlpha(0.7f);
+                    searchOverlay.setBackground(null);
+                    searchOverlay.animate()
+                            .translationY(0f)
+                            .alpha(1f)
+                            .setDuration(320)
+                            .setInterpolator(
+                                    new android.view.animation.DecelerateInterpolator()
+                            )
+                            .withEndAction(new Runnable() {
+                                @Override
+                                public void run() {
+                                    isSearchAnimating = false;
+                                }
+                            })
+                            .start();
+
+                    isSearchOpen = true;
+                }
+            });
+
+        } else {
+            // Đóng Search bar
+            float distance = layoutSearchBar.getHeight();
+            btnSearch.setImageResource(R.drawable.ic_search_white);
+            btnSearch.setContentDescription("Mở tìm kiếm");
+            btnSearch.setTranslationX(-10);
+
+            searchOverlay.animate()
+                    .translationY(-distance)
+                    .alpha(0.7f)
+                    .setDuration(250)
+                    .setInterpolator(
+                            new android.view.animation.AccelerateInterpolator()
+                    )
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            layoutSearchBar.setVisibility(View.GONE);
+                            searchOverlay.setTranslationY(0f);
+                            searchOverlay.setAlpha(1f);
+                            searchOverlay.setBackgroundColor(getColor(R.color.squidity_transparentwhite));
+                            isSearchOpen = false;
+                            isSearchAnimating = false;
+
+                        }
+                    })
+                    .start();
+
+            searchDimOverlay.animate()
+                    .alpha(0f)
+                    .setDuration(250)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            searchDimOverlay.setVisibility(View.GONE);
+                        }
+                    })
+                    .start();
+        }
+    }
+
+    private void updateSearchOverlayPosition() {
+        if (searchOverlay == null) {
+            return;
+        }
+
+        FrameLayout.LayoutParams params =
+                (FrameLayout.LayoutParams) searchOverlay.getLayoutParams();
+
+        float density = getResources().getDisplayMetrics().density;
+        int topMargin = statusBarInset + (int) (72 * density);
+
+        params.topMargin = topMargin;
+        searchOverlay.setLayoutParams(params);
+    }
+
+    private void performHomeSearch() {
+        String query = etMainSearch.getText()
+                .toString()
+                .trim();
+
+        currentSearchQuery = query;
+
+        if (!query.isEmpty()) {
+            // Lưu lịch sử tìm kiếm trang Home
+            searchViewModel.savehomeSearch(query);
+        }
+
+        // Ẩn bàn phím
+        InputMethodManager imm =
+                (InputMethodManager) getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(
+                    etMainSearch.getWindowToken(), 0);
+        }
+
+        etMainSearch.clearFocus();
+        toggleSearchBar();
+
+        Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+        intent.putExtra("SEARCH_QUERY", query);
+        startActivity(intent);
+
+    }
+
+
 }

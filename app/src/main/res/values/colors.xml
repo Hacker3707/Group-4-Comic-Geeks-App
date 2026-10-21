@@ -10,4 +10,5 @@
     <color name="squidity_lightaqua">#c9feff</color>
     <color name="squidity_darkpurple">#54136b</color>
     <color name="squidity_magenta">#fa055f</color>
+    <color name="squidity_transparentwhite">#33FFFFFF</color>
 </resources>
