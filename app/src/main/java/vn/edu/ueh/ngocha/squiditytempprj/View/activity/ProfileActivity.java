@@ -12,6 +12,7 @@ import android.app.Dialog;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import com.google.firebase.firestore.ListenerRegistration;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.MainActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -74,6 +75,7 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView tvIntroGender;
     private TextView tvIntroBirthDate;
     private TextView tvIntroBio;
+    private ListenerRegistration profileDetailsListener;
     private View layoutIntroductionDetails;
     private com.google.android.material.tabs.TabLayout tabLayout;
     private final ActivityResultLauncher<String> avatarPicker =
@@ -161,7 +163,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
-        loadBioPreview();
         if (tabLayout != null) {
             tabLayout.addOnTabSelectedListener(
                     new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
@@ -250,13 +251,6 @@ public class ProfileActivity extends AppCompatActivity {
 
 
             tvProfileName.setText(username);
-            if (tvProfileBio != null) {
-                tvProfileBio.setText(
-                        state.bio == null || state.bio.trim().isEmpty()
-                                ? "Chưa có giới thiệu"
-                                : state.bio.trim()
-                );
-            }
 
             if (tvIntroUsername != null) {
                 tvIntroUsername.setText(username);
@@ -284,13 +278,6 @@ public class ProfileActivity extends AppCompatActivity {
                 );
             }
 
-            if (tvIntroBio != null) {
-                tvIntroBio.setText(
-                        state.bio == null || state.bio.trim().isEmpty()
-                                ? "Chưa có giới thiệu"
-                                : state.bio.trim()
-                );
-            }
             View profileToolbar = findViewById(R.id.toolbar);
 
             if (profileToolbar != null) {
@@ -580,7 +567,8 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
-    private void loadBioPreview() {
+
+    private void listenProfileDetails() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             return;
         }
@@ -589,24 +577,65 @@ public class ProfileActivity extends AppCompatActivity {
                 .getCurrentUser()
                 .getUid();
 
-        FirebaseFirestore.getInstance()
+        if (profileDetailsListener != null) {
+            profileDetailsListener.remove();
+        }
+
+        profileDetailsListener = FirebaseFirestore.getInstance()
                 .collection("users")
                 .document(uid)
-                .get()
-                .addOnSuccessListener(document -> {
+                .addSnapshotListener((document, error) -> {
                     if (isFinishing() || isDestroyed()) {
                         return;
                     }
 
+                    if (error != null) {
+                        Toast.makeText(
+                                this,
+                                "Không tải được Bio và giới thiệu.",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        return;
+                    }
+
+                    if (document == null || !document.exists()) {
+                        return;
+                    }
+
                     String bio = document.getString("bio");
+                    String introduction = document.getString("introduction");
 
                     if (tvProfileBio != null) {
                         tvProfileBio.setText(
                                 bio == null || bio.trim().isEmpty()
-                                        ? "Chưa có giới thiệu"
+                                        ? "Chưa có bio"
                                         : bio.trim()
                         );
                     }
+
+                    if (tvIntroBio != null) {
+                        tvIntroBio.setText(
+                                introduction == null
+                                        || introduction.trim().isEmpty()
+                                        ? "Chưa có giới thiệu bản thân"
+                                        : introduction.trim()
+                        );
+                    }
                 });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        listenProfileDetails();
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (profileDetailsListener != null) {
+            profileDetailsListener.remove();
+            profileDetailsListener = null;
+        }
     }
 }

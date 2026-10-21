@@ -30,6 +30,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private EditText etBirthDate;
     private EditText etBio;
     private Spinner spGender;
+    private EditText etIntroduction;
     private TextView tvEmail;
     private MaterialButton btnSave;
 
@@ -65,6 +66,7 @@ public class EditProfileActivity extends AppCompatActivity {
         etBirthDate = findViewById(R.id.etEditBirthDate);
         etBio = findViewById(R.id.etEditBio);
         spGender = findViewById(R.id.spEditGender);
+        etIntroduction = findViewById(R.id.etEditIntroduction);
         tvEmail = findViewById(R.id.tvEditEmail);
         btnSave = findViewById(R.id.btnSaveProfile);
 
@@ -97,6 +99,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     String bio = document.getString("bio");
                     String gender = document.getString("gender");
                     String birthDate = document.getString("birthDate");
+                    String introduction = document.getString("introduction");
 
                     if (username == null || username.trim().isEmpty()) {
                         username = currentUser.getDisplayName();
@@ -107,6 +110,11 @@ public class EditProfileActivity extends AppCompatActivity {
                     );
 
                     etBio.setText(bio == null ? "" : bio);
+                    if (etIntroduction != null) {
+                        etIntroduction.setText(
+                                introduction == null ? "" : introduction
+                        );
+                    }
 
                     etBirthDate.setText(
                             birthDate == null ? "" : birthDate
@@ -184,6 +192,9 @@ public class EditProfileActivity extends AppCompatActivity {
         String bio = etBio.getText().toString().trim();
         String birthDate = etBirthDate.getText().toString().trim();
         String gender = spGender.getSelectedItem().toString();
+        String introduction = etIntroduction == null
+                ? ""
+                : etIntroduction.getText().toString().trim();
 
         if (username.isEmpty()) {
             etUsername.setError("Vui lòng nhập tên hiển thị.");
@@ -202,6 +213,7 @@ public class EditProfileActivity extends AppCompatActivity {
         Map<String, Object> data = new HashMap<>();
         data.put("username", username);
         data.put("bio", bio);
+        data.put("introduction", introduction);
         data.put("gender", gender.equals("Chưa chọn") ? "" : gender);
         data.put("birthDate", birthDate);
         data.put("email",

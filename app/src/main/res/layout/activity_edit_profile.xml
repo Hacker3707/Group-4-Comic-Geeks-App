@@ -121,19 +121,34 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Giới thiệu bản thân"
-                android:textStyle="bold"
-                android:textColor="#493373"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="16dp"
+                android:text="Bio"
+                android:textStyle="bold" />
 
             <EditText
                 android:id="@+id/etEditBio"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:gravity="top"
-                android:hint="Hãy giới thiệu một chút về bạn"
+                android:layout_height="wrap_content"
+                android:hint="Viết một câu ngắn về bạn..."
                 android:inputType="textCapSentences|textMultiLine"
-                android:maxLength="500"
+                android:maxLines="3"
+                android:minHeight="48dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Giới thiệu bản thân"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/etEditIntroduction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top|start"
+                android:hint="Giới thiệu chi tiết về bản thân..."
+                android:inputType="textCapSentences|textMultiLine"
+                android:minHeight="120dp"
                 android:padding="12dp" />
 
             <com.google.android.material.button.MaterialButton
