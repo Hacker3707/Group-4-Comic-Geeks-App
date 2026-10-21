@@ -78,6 +78,9 @@
             android:name=".View.activity.GroupSettingsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".View.activity.EditProfileActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

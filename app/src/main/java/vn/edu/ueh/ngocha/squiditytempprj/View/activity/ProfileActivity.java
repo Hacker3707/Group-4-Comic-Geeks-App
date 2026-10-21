@@ -8,6 +8,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.Dialog;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.MainActivity;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -44,7 +50,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    // ViewModel & UI Profile (Phần của Nghĩa)
+    // ViewModel & UI Profile
     private UserProfileViewModel profileViewModel;
     private ShapeableImageView imgProfileAvatar;
     private ImageView imgProfileCover;
@@ -52,13 +58,24 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView tvProfileName;
     private TextView tvProfileEmail;
     private androidx.constraintlayout.widget.ConstraintLayout appBarLayout;
-    private MaterialButton btnChangeAvatar;
-    private MaterialButton btnChangeCover;
-    private MaterialButton btnSaveProfile;
     private RecyclerView recyclerViewProfilePosts;
     private PostAdapter postAdapter;
     private PostViewModel postViewModel;
-
+    private MaterialButton btnEditProfile;
+    private MaterialButton btnFollow;
+    private MaterialButton btnMessage;
+    private String currentAvatarUrl = "";
+    private String currentCoverUrl = "";
+    private ImageButton btnEditAvatarImage;
+    private ImageButton btnEditCoverImage;
+    private TextView tvProfileBio;
+    private TextView tvIntroUsername;
+    private TextView tvIntroEmail;
+    private TextView tvIntroGender;
+    private TextView tvIntroBirthDate;
+    private TextView tvIntroBio;
+    private View layoutIntroductionDetails;
+    private com.google.android.material.tabs.TabLayout tabLayout;
     private final ActivityResultLauncher<String> avatarPicker =
             registerForActivityResult(
                     new ActivityResultContracts.GetContent(),
@@ -85,17 +102,56 @@ public class ProfileActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
 
+        View toolbar = findViewById(R.id.toolbar);
+
+        if (toolbar != null) {
+            ImageButton btnBackHome =
+                    toolbar.findViewById(R.id.btnBackHome);
+
+            if (btnBackHome != null) {
+                btnBackHome.setVisibility(View.VISIBLE);
+
+                btnBackHome.setOnClickListener(v -> {
+                    Intent intent = new Intent(
+                            ProfileActivity.this,
+                            MainActivity.class
+                    );
+                    intent.addFlags(
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    );
+                    startActivity(intent);
+                    finish();
+                });
+            }
+        }
+
         // Ánh xạ các view Profile
         appBarLayout = findViewById(R.id.appBar);
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileEmail = findViewById(R.id.tvProfileEmail);
         imgProfileAvatar = findViewById(R.id.imgProfileAvatar);
         imgProfileCover = findViewById(R.id.imgProfileCover);
-        etProfileUsername = findViewById(R.id.etProfileUsername);
-        btnChangeAvatar = findViewById(R.id.btnChangeAvatar);
-        btnChangeCover = findViewById(R.id.btnChangeCover);
-        btnSaveProfile = findViewById(R.id.btnSaveProfile);
 
+        btnEditProfile = findViewById(R.id.btnEditProfile);
+        btnEditAvatarImage = findViewById(R.id.btnEditAvatarImage);
+        btnEditCoverImage = findViewById(R.id.btnEditCoverImage);
+        tvProfileBio = findViewById(R.id.tvProfileBio);
+
+        layoutIntroductionDetails =
+                findViewById(R.id.layoutIntroductionDetails);
+
+        tvIntroUsername = findViewById(R.id.tvIntroUsername);
+        tvIntroEmail = findViewById(R.id.tvIntroEmail);
+        tvIntroGender = findViewById(R.id.tvIntroGender);
+        tvIntroBirthDate = findViewById(R.id.tvIntroBirthDate);
+        tvIntroBio = findViewById(R.id.tvIntroBio);
+        btnFollow = findViewById(R.id.btnFollow);
+        btnMessage = findViewById(R.id.btnMessage);
+
+        tabLayout = findViewById(R.id.tabLayout);
+
+        btnEditProfile = findViewById(R.id.btnEditProfile);
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             startActivity(new Intent(this, AuthActivity.class));
@@ -105,17 +161,84 @@ public class ProfileActivity extends AppCompatActivity {
 
         profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
-        btnChangeAvatar.setOnClickListener(v -> avatarPicker.launch("image/*"));
-        btnChangeCover.setOnClickListener(v -> coverPicker.launch("image/*"));
-        btnSaveProfile.setOnClickListener(v -> {
-            String username = etProfileUsername.getText().toString().trim();
-            if (username.isEmpty()) {
-                etProfileUsername.setError("Vui lòng nhập tên hiển thị");
-                etProfileUsername.requestFocus();
-                return;
-            }
-            profileViewModel.updateUsername(username);
-        });
+        loadBioPreview();
+        if (tabLayout != null) {
+            tabLayout.addOnTabSelectedListener(
+                    new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
+
+                        @Override
+                        public void onTabSelected(
+                                com.google.android.material.tabs.TabLayout.Tab tab) {
+
+                            if (tab == null) return;
+
+                            boolean showIntroduction = tab.getPosition() == 0;
+
+                            if (layoutIntroductionDetails != null) {
+                                layoutIntroductionDetails.setVisibility(
+                                        showIntroduction ? View.VISIBLE : View.GONE
+                                );
+                            }
+
+                            if (recyclerViewProfilePosts != null) {
+                                recyclerViewProfilePosts.setVisibility(
+                                        showIntroduction ? View.GONE : View.VISIBLE
+                                );
+                            }
+                        }
+
+                        @Override
+                        public void onTabUnselected(
+                                com.google.android.material.tabs.TabLayout.Tab tab) {
+                        }
+
+                        @Override
+                        public void onTabReselected(
+                                com.google.android.material.tabs.TabLayout.Tab tab) {
+                        }
+                    }
+            );
+
+            // Mặc định mở tab POSTS.
+            tabLayout.selectTab(tabLayout.getTabAt(1));
+        }
+        // Mở màn hình chỉnh sửa thông tin cá nhân
+        if (btnEditProfile != null) {
+            btnEditProfile.setOnClickListener(v ->
+                    startActivity(new Intent(
+                            ProfileActivity.this,
+                            EditProfileActivity.class
+                    ))
+            );
+        }
+
+// Bấm avatar để xem ảnh lớn
+        if (imgProfileAvatar != null) {
+            imgProfileAvatar.setOnClickListener(v ->
+                    showLargeImage(currentAvatarUrl, true)
+            );
+        }
+
+// Bấm ảnh bìa để xem ảnh lớn
+        if (imgProfileCover != null) {
+            imgProfileCover.setOnClickListener(v ->
+                    showLargeImage(currentCoverUrl, false)
+            );
+        }
+
+// Nút riêng để đổi avatar
+        if (btnEditAvatarImage != null) {
+            btnEditAvatarImage.setOnClickListener(v ->
+                    avatarPicker.launch("image/*")
+            );
+        }
+
+// Nút riêng để đổi ảnh bìa
+        if (btnEditCoverImage != null) {
+            btnEditCoverImage.setOnClickListener(v ->
+                    coverPicker.launch("image/*")
+            );
+        }
 
         profileViewModel.getProfile().observe(this, state -> {
             if (state == null) return;
@@ -125,11 +248,77 @@ public class ProfileActivity extends AppCompatActivity {
 
             String email = state.email == null ? "" : state.email.trim();
 
-            if (!username.equals(etProfileUsername.getText().toString())) {
-                etProfileUsername.setText(username);
-            }
 
             tvProfileName.setText(username);
+            if (tvProfileBio != null) {
+                tvProfileBio.setText(
+                        state.bio == null || state.bio.trim().isEmpty()
+                                ? "Chưa có giới thiệu"
+                                : state.bio.trim()
+                );
+            }
+
+            if (tvIntroUsername != null) {
+                tvIntroUsername.setText(username);
+            }
+
+            if (tvIntroEmail != null) {
+                tvIntroEmail.setText(
+                        email.isEmpty() ? "Chưa cập nhật" : email
+                );
+            }
+
+            if (tvIntroGender != null) {
+                tvIntroGender.setText(
+                        state.gender == null || state.gender.trim().isEmpty()
+                                ? "Chưa cập nhật"
+                                : state.gender
+                );
+            }
+
+            if (tvIntroBirthDate != null) {
+                tvIntroBirthDate.setText(
+                        state.birthDate == null || state.birthDate.trim().isEmpty()
+                                ? "Chưa cập nhật"
+                                : state.birthDate
+                );
+            }
+
+            if (tvIntroBio != null) {
+                tvIntroBio.setText(
+                        state.bio == null || state.bio.trim().isEmpty()
+                                ? "Chưa có giới thiệu"
+                                : state.bio.trim()
+                );
+            }
+            View profileToolbar = findViewById(R.id.toolbar);
+
+            if (profileToolbar != null) {
+                TextView tvMainUsername =
+                        profileToolbar.findViewById(R.id.tvMainUsername);
+
+                ShapeableImageView imgMainAvatar =
+                        profileToolbar.findViewById(R.id.imgvAvatar);
+
+                if (tvMainUsername != null) {
+                    tvMainUsername.setText(username);
+                }
+
+                if (imgMainAvatar != null) {
+                    if (state.avatarUrl != null && !state.avatarUrl.isEmpty()) {
+                        Glide.with(ProfileActivity.this)
+                                .load(state.avatarUrl)
+                                .placeholder(R.drawable.ic_launcher_background)
+                                .error(R.drawable.ic_launcher_background)
+                                .circleCrop()
+                                .into(imgMainAvatar);
+                    } else {
+                        imgMainAvatar.setImageResource(
+                                R.drawable.ic_launcher_background
+                        );
+                    }
+                }
+            }
 
             tvProfileEmail.setText(email);
             tvProfileEmail.setVisibility(email.isEmpty() ? View.GONE : View.VISIBLE);
@@ -151,14 +340,61 @@ public class ProfileActivity extends AppCompatActivity {
             } else {
                 imgProfileCover.setImageResource(R.drawable.ic_launcher_background);
             }
+
+            boolean isOwner =
+                    FirebaseAuth.getInstance().getCurrentUser() != null
+                            && state.loggedIn;
+
+            if (btnEditProfile != null) {
+                btnEditProfile.setVisibility(
+                        isOwner ? View.VISIBLE : View.GONE
+                );
+            }
+
+            if (btnEditAvatarImage != null) {
+                btnEditAvatarImage.setVisibility(
+                        isOwner ? View.VISIBLE : View.GONE
+                );
+            }
+
+            if (btnEditCoverImage != null) {
+                btnEditCoverImage.setVisibility(
+                        isOwner ? View.VISIBLE : View.GONE
+                );
+            }
+            if (btnFollow != null) {
+                btnFollow.setVisibility(
+                        isOwner ? View.GONE : View.VISIBLE
+                );
+            }
+
+            if (btnMessage != null) {
+                btnMessage.setVisibility(
+                        isOwner ? View.GONE : View.VISIBLE
+                );
+            }
+            currentAvatarUrl = state.avatarUrl == null
+                    ? "" : state.avatarUrl;
+
+            currentCoverUrl = state.coverUrl == null
+                    ? "" : state.coverUrl;
         });
 
 
         profileViewModel.getSaving().observe(this, saving -> {
             boolean isSaving = Boolean.TRUE.equals(saving);
-            btnSaveProfile.setEnabled(!isSaving);
-            btnChangeAvatar.setEnabled(!isSaving);
-            btnChangeCover.setEnabled(!isSaving);
+
+            if (btnEditProfile != null) {
+                btnEditProfile.setEnabled(!isSaving);
+            }
+
+            if (btnEditAvatarImage != null) {
+                btnEditAvatarImage.setEnabled(!isSaving);
+            }
+
+            if (btnEditCoverImage != null) {
+                btnEditCoverImage.setEnabled(!isSaving);
+            }
         });
 
         profileViewModel.getMessage().observe(this, message -> {
@@ -170,14 +406,26 @@ public class ProfileActivity extends AppCompatActivity {
         View rootLayout = findViewById(R.id.profileRoot);
         if (rootLayout != null) {
             ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (view, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                Insets systemBars = insets.getInsets(
+                        WindowInsetsCompat.Type.systemBars()
+                );
+                view.setPadding(
+                        systemBars.left,
+                        systemBars.top,
+                        systemBars.right,
+                        systemBars.bottom
+                );
                 return insets;
             });
         }
 
         recyclerViewProfilePosts = findViewById(R.id.recyclerViewProfilePosts);
-        recyclerViewProfilePosts.setLayoutManager(new LinearLayoutManager(this));
+
+        if (recyclerViewProfilePosts != null) {
+            recyclerViewProfilePosts.setLayoutManager(
+                    new LinearLayoutManager(this)
+            );
+        }
 
         FloatingActionButton fabCreatePost = findViewById(R.id.fabCreatePost);
         if (fabCreatePost != null) {
@@ -257,7 +505,9 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        recyclerViewProfilePosts.setAdapter(postAdapter);
+        if (recyclerViewProfilePosts != null) {
+            recyclerViewProfilePosts.setAdapter(postAdapter);
+        }
         postViewModel.getAllPosts().observe(this, new Observer<List<Post>>() {
             @Override
             public void onChanged(List<Post> realPosts) {
@@ -269,6 +519,58 @@ public class ProfileActivity extends AppCompatActivity {
 
         profileViewModel.loadCurrentProfile();
     }
+    private boolean isOwnerProfile(String profileUid) {
+        com.google.firebase.auth.FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        return currentUser != null
+                && profileUid != null
+                && currentUser.getUid().equals(profileUid);
+    }
+
+    private void showLargeImage(String imageUrl, boolean isAvatar) {
+        Dialog dialog = new Dialog(this);
+
+        ImageView imageView = new ImageView(this);
+        imageView.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imageView.setBackgroundColor(android.graphics.Color.BLACK);
+
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            Glide.with(this)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .error(R.drawable.ic_launcher_background)
+                    .into(imageView);
+        } else {
+            imageView.setImageResource(R.drawable.ic_launcher_background);
+        }
+
+        FrameLayout container = new FrameLayout(this);
+        container.setBackgroundColor(android.graphics.Color.BLACK);
+        container.addView(imageView);
+
+        dialog.setContentView(container);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(
+                    android.R.color.black
+            );
+        }
+
+        imageView.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+            );
+        }
+    }
 
     @Override
     protected void onResume() {
@@ -276,5 +578,35 @@ public class ProfileActivity extends AppCompatActivity {
         if (profileViewModel != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
             profileViewModel.loadCurrentProfile();
         }
+    }
+
+    private void loadBioPreview() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            return;
+        }
+
+        String uid = FirebaseAuth.getInstance()
+                .getCurrentUser()
+                .getUid();
+
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (isFinishing() || isDestroyed()) {
+                        return;
+                    }
+
+                    String bio = document.getString("bio");
+
+                    if (tvProfileBio != null) {
+                        tvProfileBio.setText(
+                                bio == null || bio.trim().isEmpty()
+                                        ? "Chưa có giới thiệu"
+                                        : bio.trim()
+                        );
+                    }
+                });
     }
 }
