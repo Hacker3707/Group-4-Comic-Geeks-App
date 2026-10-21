@@ -17,6 +17,19 @@
             android:layout_height="156dp"
             android:background="@drawable/bg_auth_wave">
 
+            <ImageButton
+                android:id="@+id/btnAuthBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="top|start"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Quay lại"
+                android:padding="12dp"
+                android:src="@drawable/ic_group_back"
+                app:tint="#FFFFFF" />
+
             <TextView
                 android:id="@+id/tvAuthHeaderTitle"
                 android:layout_width="match_parent"
@@ -234,6 +247,21 @@
                 app:iconGravity="textStart"
                 app:iconTint="@null"
                 app:strokeColor="#222222"
+                app:strokeWidth="1dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExitToLogin"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="12dp"
+                android:text="Thoát ra màn hình đăng nhập"
+                android:textAllCaps="false"
+                android:textColor="#33264A"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:backgroundTint="#F2F2F7"
+                app:cornerRadius="10dp"
+                app:strokeColor="#CCCCCC"
                 app:strokeWidth="1dp" />
 
         </LinearLayout>

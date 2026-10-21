@@ -8,38 +8,6 @@
     android:background="@color/chat_background"
     tools:context=".View.activity.ChatListActivity">
 
-    <LinearLayout
-        android:id="@+id/layoutChatListHeader"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@color/chat_header"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/btnChatListBack"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:contentDescription="Back"
-            android:padding="4dp"
-            android:src="@drawable/ic_arrow_back"
-            app:tint="@color/white" />
-
-        <TextView
-            android:id="@+id/tvChatListTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:fontFamily="@font/jersey25_regular"
-            android:text="Chats"
-            android:textColor="@color/white"
-            android:textSize="30sp" />
-    </LinearLayout>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcvChatRooms"
         android:layout_width="0dp"
@@ -50,7 +18,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layoutChatListHeader" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvChatListEmpty"
@@ -63,7 +31,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layoutChatListHeader" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabNewChat"

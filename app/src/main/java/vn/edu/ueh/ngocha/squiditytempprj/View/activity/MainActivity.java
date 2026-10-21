@@ -278,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
                 String randomStampId = UUID.randomUUID().toString();
                 Stamp newStamp = new Stamp(randomStampId, "Meringoc_17", StampType.LIKE);
                 newStamp.setPostId(post.getPostId());
-                postViewModel.addStamp(newStamp);
+                postViewModel.addStamp(newStamp, post);
                 Toast.makeText(MainActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
             }
 
@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
                 if (commentText != null && !commentText.trim().isEmpty()) {
                     String randomCommentId = UUID.randomUUID().toString();
                     Comment newComment = new Comment(randomCommentId, "Meringoc_17", post.getPostId(), commentText.trim());
-                    postViewModel.addComment(newComment);
+                    postViewModel.addComment(newComment, post);
                     Toast.makeText(MainActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Vui lòng nhập nội dung bình luận!", Toast.LENGTH_SHORT).show();

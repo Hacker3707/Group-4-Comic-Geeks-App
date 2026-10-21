@@ -8,13 +8,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.OnApplyWindowInsetsListener;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,10 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -35,6 +27,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Message;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ChatItemAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ChatViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.FollowViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
@@ -44,7 +37,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
  * Nút "+" cho chọn người để chat, chỉ gồm những người theo dõi qua lại (mutual follow).
  * Activity chỉ gọi ViewModel, không gọi DAO trực tiếp.
  */
-public class ChatListActivity extends AppCompatActivity {
+public class ChatListActivity extends BaseActivity {
 
     public static final String EXTRA_USER_ID = "extra_user_id";
 
@@ -79,20 +72,15 @@ public class ChatListActivity extends AppCompatActivity {
                 }
             };
 
+    // Thanh trên và thanh bên do BaseActivity lo, Activity chỉ cung cấp layout nội dung
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.activity_chat_list;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_chat_list);
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), new OnApplyWindowInsetsListener() {
-            @Override
-            public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
-                Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
-                return insets;
-            }
-        });
 
         String userIdFromIntent = getIntent().getStringExtra(EXTRA_USER_ID);
         currentUserId = (userIdFromIntent != null) ? userIdFromIntent : DEMO_USER_ID;
@@ -104,13 +92,6 @@ public class ChatListActivity extends AppCompatActivity {
         chatRoomAdapter = new ChatItemAdapter(currentUserId, onChatRoomClickListener);
         rcvChatRooms.setLayoutManager(new LinearLayoutManager(this));
         rcvChatRooms.setAdapter(chatRoomAdapter);
-
-        findViewById(R.id.btnChatListBack).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
 
         chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);

@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +50,8 @@ public class AuthActivity extends AppCompatActivity {
 
     private MaterialButton btnAuthSubmit;
     private MaterialButton btnGoogleSignIn;
+    private MaterialButton btnExitToLogin;
+    private ImageButton btnAuthBack;
     private AuthViewModel authViewModel;
 
     private boolean registerMode = false;
@@ -84,6 +87,8 @@ public class AuthActivity extends AppCompatActivity {
 
         btnAuthSubmit = findViewById(R.id.btnAuthSubmit);
         btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn);
+        btnExitToLogin = findViewById(R.id.btnExitToLogin);
+        btnAuthBack = findViewById(R.id.btnAuthBack);
     }
 
     private void setupClickListeners() {
@@ -94,6 +99,14 @@ public class AuthActivity extends AppCompatActivity {
         btnAuthSubmit.setOnClickListener(view -> validateForm());
 
         btnGoogleSignIn.setOnClickListener(view -> signInWithGoogle());
+
+        if (btnAuthBack != null) {
+            btnAuthBack.setOnClickListener(view -> finish());
+        }
+
+        if (btnExitToLogin != null) {
+            btnExitToLogin.setOnClickListener(view -> exitToLoginScreen());
+        }
     }
 
     private void setRegisterMode(boolean isRegisterMode) {
@@ -284,9 +297,25 @@ public class AuthActivity extends AppCompatActivity {
 
         if (loading) {
             tvAuthStatus.setText("Đang xử lý...");
+            tvAuthStatus.setTextColor(android.graphics.Color.rgb(100, 100, 100));
             tvAuthStatus.setVisibility(View.VISIBLE);
+            if (btnExitToLogin != null) {
+                btnExitToLogin.setVisibility(View.VISIBLE);
+                btnExitToLogin.setEnabled(true);
+            }
         }
     }
+
+    private void exitToLoginScreen() {
+        setLoading(false);
+        setRegisterMode(false);
+        clearStatus();
+        if (btnExitToLogin != null) {
+            btnExitToLogin.setVisibility(View.GONE);
+        }
+        Toast.makeText(this, "Đã quay lại màn hình đăng nhập", Toast.LENGTH_SHORT).show();
+    }
+
     private void observeAuthState() {
         authViewModel.getLoading().observe(this, loading -> {
             if (loading != null) {
@@ -319,12 +348,19 @@ public class AuthActivity extends AppCompatActivity {
 
     private void showError(String message) {
         tvAuthStatus.setText(message);
+        tvAuthStatus.setTextColor(android.graphics.Color.rgb(198, 40, 40));
         tvAuthStatus.setVisibility(View.VISIBLE);
+        if (btnExitToLogin != null) {
+            btnExitToLogin.setVisibility(View.VISIBLE);
+        }
     }
 
     private void clearStatus() {
         tvAuthStatus.setText("");
         tvAuthStatus.setVisibility(View.GONE);
+        if (btnExitToLogin != null) {
+            btnExitToLogin.setVisibility(View.GONE);
+        }
     }
 
     private void showSuccess(String message) {
