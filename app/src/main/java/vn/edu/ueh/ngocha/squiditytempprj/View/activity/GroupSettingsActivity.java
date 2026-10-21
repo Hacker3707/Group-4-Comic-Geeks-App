@@ -147,7 +147,7 @@ public class GroupSettingsActivity extends AppCompatActivity {
                 }
                 if (!permissionChecked) {
                     permissionChecked = true;
-                    if (!GroupPermissionUtils.canManageGroup(GroupActivity.CURRENT_USER_ID, group)) {
+                    if (!GroupPermissionUtils.canManageGroup(GroupActivity.currentUserId(), group)) {
                         Toast.makeText(GroupSettingsActivity.this,
                                 R.string.group_settings_no_permission, Toast.LENGTH_SHORT).show();
                         finish();

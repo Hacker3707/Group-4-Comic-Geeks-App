@@ -157,9 +157,10 @@
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/tvFollowersCount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="1000"
+                                android:text="0"
                                 android:textColor="#FFFFFF"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
@@ -189,9 +190,10 @@
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/tvFollowingCount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="179"
+                                android:text="0"
                                 android:textColor="#FFFFFF"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />

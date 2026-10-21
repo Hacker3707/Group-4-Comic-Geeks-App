@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="follow_button_follow">+ Follow</string>
+    <string name="follow_button_following">Following</string>
+</resources>

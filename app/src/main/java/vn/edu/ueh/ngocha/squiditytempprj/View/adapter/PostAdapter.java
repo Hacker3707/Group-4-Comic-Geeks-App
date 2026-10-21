@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
@@ -12,13 +13,21 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.ListenerRegistration;
+
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.FollowRemoteRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ComicDetailActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ProfileActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.SearchActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.holder.PostViewHolder;
 
@@ -30,6 +39,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
 
     // Lưu trạng thái mở rộng ("Xem thêm") của từng bài viết theo ID để tránh lỗi khi cuộn RecyclerView
     private final Map<String, Boolean> expandedStates = new HashMap<>();
+
+    // Follow: danh sách id mình đang follow (cập nhật realtime từ Firestore)
+    private static final String PAYLOAD_FOLLOW = "follow_state";
+    private final Set<String> myFollowingIds = new HashSet<>();
+    private FollowRemoteRepository followRepository;
+    private ListenerRegistration followRegistration;
 
     public interface OnPostInteractionListener {
         void onStampClick(Post post);
@@ -45,6 +60,78 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
         this.listener = listener;
     }
 
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
+        if (me == null || followRegistration != null) {
+            return;
+        }
+        followRepository = new FollowRemoteRepository((Application) context.getApplicationContext());
+        followRegistration = followRepository.listenFollowingIds(me.getUid(),
+                new FollowRemoteRepository.Callback<Set<String>>() {
+                    @Override
+                    public void onResult(Set<String> ids) {
+                        myFollowingIds.clear();
+                        myFollowingIds.addAll(ids);
+                        // Chỉ vẽ lại nút Follow, không bind lại cả bài viết
+                        notifyItemRangeChanged(0, getItemCount(), PAYLOAD_FOLLOW);
+                    }
+                });
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        if (followRegistration != null) {
+            followRegistration.remove();
+            followRegistration = null;
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull PostViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (payloads.contains(PAYLOAD_FOLLOW)) {
+            bindFollowButton(holder, postList.get(position));
+        } else {
+            super.onBindViewHolder(holder, position, payloads);
+        }
+    }
+
+    // Nút Follow ở góc bài viết: follow / unfollow chủ bài viết
+    private void bindFollowButton(PostViewHolder holder, Post post) {
+        if (holder.btnFollow == null) return;
+
+        FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
+        final String ownerId = post.getUserId();
+
+        // Chưa đăng nhập, bài không có chủ, hoặc bài của chính mình thì không cần nút Follow
+        if (me == null || ownerId == null || ownerId.isEmpty() || ownerId.equals(me.getUid())) {
+            holder.btnFollow.setVisibility(View.GONE);
+            return;
+        }
+
+        holder.btnFollow.setVisibility(View.VISIBLE);
+        holder.btnFollow.setText(myFollowingIds.contains(ownerId) ? "Following" : "+ Follow");
+        holder.btnFollow.setOnClickListener(v -> {
+            if (followRepository == null) return;
+            if (myFollowingIds.contains(ownerId)) {
+                followRepository.unfollow(me.getUid(), ownerId);
+            } else {
+                followRepository.follow(me.getUid(), ownerId);
+            }
+        });
+
+        // Bấm tên / avatar để xem profile người đó (và thấy số follow của họ)
+        View.OnClickListener openProfile = v -> {
+            Intent intent = new Intent(context, ProfileActivity.class);
+            intent.putExtra(ProfileActivity.EXTRA_USER_ID, ownerId);
+            context.startActivity(intent);
+        };
+        holder.tvUserName.setOnClickListener(openProfile);
+        holder.imgAvatar.setOnClickListener(openProfile);
+    }
+
     @NonNull
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -57,6 +144,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
         Post post = postList.get(position);
 
         holder.tvUserName.setText(post.getUserId());
+        bindFollowButton(holder, post);
         holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
 
         String content = post.getContent();

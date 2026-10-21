@@ -89,6 +89,31 @@ public class UserProfileViewModel extends ViewModel {
                         profile.setValue(fallback));
     }
 
+    // Xem profile của người khác (không đổi gì ở profile của chính mình)
+    public void loadProfile(String uid) {
+        FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (uid == null || uid.isEmpty()
+                || (me != null && uid.equals(me.getUid()))) {
+            loadCurrentProfile();
+            return;
+        }
+
+        final ProfileUiState fallback =
+                new ProfileUiState("Người dùng", "", "", "", true);
+        profile.setValue(fallback);
+
+        repository.getProfile(uid)
+                .addOnSuccessListener(document -> {
+                    ProfileUiState state = createState(document, fallback);
+                    // Không hiện email của người khác
+                    profile.setValue(new ProfileUiState(
+                            state.username, "", state.avatarUrl,
+                            state.coverUrl, true));
+                })
+                .addOnFailureListener(error -> profile.setValue(fallback));
+    }
+
     public void saveCurrentProfile() {
         FirebaseUser user =
                 FirebaseAuth.getInstance().getCurrentUser();

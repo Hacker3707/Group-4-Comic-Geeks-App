@@ -41,6 +41,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.GroupMemberAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.GroupPostAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.GroupHashtagUtils;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.GroupPermissionUtils;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.GroupSyncManager;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.GroupViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
@@ -59,7 +60,18 @@ public class GroupViewActivity extends AppCompatActivity {
     public static final String EXTRA_GROUP_ID = "group_id";
 
     // TODO: user thử, dùng chung với GroupActivity. Thay bằng user đang đăng nhập khi có đăng nhập
-    private static final String CURRENT_USER_ID = GroupActivity.CURRENT_USER_ID;
+    private final String CURRENT_USER_ID = GroupActivity.currentUserId();
+
+    // Khi nhóm/thành viên thay đổi trên Firestore thì tải lại trang nhóm này
+    private final GroupSyncManager.OnSyncListener syncListener = new GroupSyncManager.OnSyncListener() {
+        @Override
+        public void onGroupsSynced() {
+            if (groupId != null && groupViewModel != null) {
+                groupViewModel.loadGroup(groupId);
+                groupViewModel.loadMembers(groupId);
+            }
+        }
+    };
 
     private static final int TAB_POSTS = 0;
     private static final int TAB_MEMBERS = 1;
@@ -144,6 +156,15 @@ public class GroupViewActivity extends AppCompatActivity {
         if (groupId != null && groupViewModel != null) {
             groupViewModel.loadGroup(groupId);
         }
+        GroupSyncManager syncManager = GroupSyncManager.getInstance(getApplication());
+        syncManager.addListener(syncListener);
+        syncManager.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GroupSyncManager.getInstance(getApplication()).removeListener(syncListener);
     }
 
     // =================================

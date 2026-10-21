@@ -130,6 +130,6 @@ public class CreateGroupActivity extends AppCompatActivity {
 
         submitting = true;
         btnCreateGroup.setEnabled(false);
-        groupViewModel.createGroup(name, description, coverUrl, avatarUrl, GroupActivity.CURRENT_USER_ID);
+        groupViewModel.createGroup(name, description, coverUrl, avatarUrl, GroupActivity.currentUserId());
     }
 }
