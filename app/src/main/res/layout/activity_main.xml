@@ -6,83 +6,127 @@
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:id="@+id/main"
-    tools:context=".View.activity.MainActivity">
 
+        <!-- Nội dung chính và lớp Search overlay -->
         <FrameLayout
+            android:id="@+id/contentOverlayContainer"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:clipChildren="false"
-            android:clipToPadding="false">
+            android:layout_height="match_parent">
 
-                <include
-                    android:id="@+id/appBar"
-                    layout="@layout/layout_app_bar" />
+                <!-- Nội dung màn hình -->
                 <LinearLayout
-                    android:id="@+id/layoutSearchBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="#FFFFFF"
-                    android:padding="8dp"
-                    android:visibility="gone"
-                    android:elevation="4dp">
-
-                        <EditText
-                            android:id="@+id/etMainSearch"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/bg_search"
-                            android:hint="Tìm kiếm bài viết, hashtag..."
-                            android:paddingHorizontal="12dp"
-                            android:textSize="14sp"
-                            android:maxLines="1"/>
-
-                        <ImageButton
-                            android:id="@+id/btnDoSearch"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:src="@android:drawable/ic_menu_search"
-                            android:contentDescription="Tìm kiếm"/>
-                </LinearLayout>
-
-                <ImageButton
-                    android:id="@+id/btnSearch"
-                    android:layout_width="51dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="top|end"
-                    android:layout_marginTop="62dp"
-                    android:layout_marginEnd="16dp"
-                    android:background="@drawable/bookmark_bg"
-                    android:contentDescription="Search"
-                    android:padding="8dp"
-                    android:src="@android:drawable/ic_menu_search"
-                    app:tint="@color/white" />
-        </FrameLayout>
-
-        <!-- Nội dung màn hình chính -->
-        <FrameLayout
-            android:id="@+id/mainContent"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" >
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rcv_postlist"
+                    android:id="@+id/main"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/bg_squidity"/>
+                    android:orientation="vertical"
+                    tools:context=".View.activity.MainActivity">
+
+                        <!-- App Bar -->
+                        <FrameLayout
+                            android:id="@+id/headerContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="120dp"
+                            android:clipChildren="false"
+                            android:clipToPadding="false">
+
+                                <include
+                                    android:id="@+id/appBar"
+                                    layout="@layout/layout_app_bar" />
+
+                        </FrameLayout>
+
+                        <!-- Danh sách bài viết -->
+                        <FrameLayout
+                            android:id="@+id/mainContent"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1">
+
+                                <androidx.recyclerview.widget.RecyclerView
+                                    android:id="@+id/rcv_postlist"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@drawable/bg_squidity" />
+
+                        </FrameLayout>
+
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/searchDimOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#80FFFFFF"
+                    android:visibility="gone"
+                    android:alpha="0" />
+
+                <!-- Search overlay nằm trên nội dung -->
+                <LinearLayout
+                    android:id="@+id/searchOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:orientation="vertical"
+                    android:layout_marginTop="62dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:elevation="12dp"
+                    android:background="@color/squidity_transparentwhite">
+
+                        <!-- Thanh nhập tìm kiếm -->
+                        <LinearLayout
+                            android:id="@+id/layoutSearchBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:padding="8dp"
+                            android:background="@drawable/bg_search_bar"
+                            android:visibility="gone">
+
+                                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                    android:id="@+id/etMainSearch"
+                                    android:layout_width="0dp"
+                                    android:layout_height="40dp"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/bg_search"
+                                    android:hint="Type in words to start searching..."
+                                    android:paddingHorizontal="12dp"
+                                    android:textSize="14sp"
+                                    android:maxLines="1"
+                                    android:singleLine="true" />
+
+                                <ImageButton
+                                    android:id="@+id/btnDoSearch"
+                                    android:layout_width="48dp"
+                                    android:layout_height="48dp"
+                                    android:layout_marginEnd="4dp"
+                                    android:contentDescription="Search"
+                                    android:padding="12dp"
+                                    android:scaleType="fitCenter"
+                                    android:src="@drawable/ic_search"
+                                    android:background="@drawable/bg_search_button" />
+
+                        </LinearLayout>
+
+                        <!-- Nút kính lúp nằm dưới thanh Search -->
+                        <ImageButton
+                            android:id="@+id/btnSearch"
+                            android:layout_width="51dp"
+                            android:layout_height="48dp"
+                            android:layout_gravity="end"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/bookmark_bg"
+                            android:contentDescription="Mở hoặc đóng tìm kiếm"
+                            android:padding="8dp"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_search_white" />
+
+                </LinearLayout>
+
         </FrameLayout>
 
-
-        </LinearLayout>
-
+        <!-- Navigation Drawer: giữ nguyên -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -116,4 +160,5 @@
                     app:cornerRadius="12dp" />
 
         </LinearLayout>
+
 </androidx.drawerlayout.widget.DrawerLayout>

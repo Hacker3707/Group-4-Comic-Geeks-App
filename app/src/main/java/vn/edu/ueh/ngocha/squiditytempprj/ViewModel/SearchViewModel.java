@@ -15,7 +15,10 @@ public class SearchViewModel extends AndroidViewModel {
 
     private final SearchHistoryRepository repository;
 
-    private final MutableLiveData<List<String>> history =
+    private final MutableLiveData<List<String>> comicsearchHistory =
+            new MutableLiveData<>();
+
+    private final MutableLiveData<List<String>> homesearchHistory =
             new MutableLiveData<>();
 
     public SearchViewModel(@NonNull Application application) {
@@ -23,24 +26,41 @@ public class SearchViewModel extends AndroidViewModel {
 
         repository = new SearchHistoryRepository(application);
 
-        loadHistory();
+        loadcomicHistory();
     }
 
-    public LiveData<List<String>> getHistory() {
-        return history;
+    public LiveData<List<String>> getcomicHistory() {
+        return comicsearchHistory;
     }
 
-    public void loadHistory() {
-        history.setValue(repository.getHistory());
+    public LiveData<List<String>> gethomeHistory() {
+        return homesearchHistory;
     }
 
-    public void saveSearch(String query) {
-        repository.saveSearch(query);
-        loadHistory();
+    public void loadcomicHistory() {
+        comicsearchHistory.setValue(repository.getcomicHistory());
+    }
+    public void loadhomeHistory() {
+        homesearchHistory.setValue(repository.gethomeHistory());
     }
 
-    public void clearHistory() {
-        repository.clearHistory();
-        loadHistory();
+    public void savecomicSearch(String query) {
+        repository.savecomicSearch(query);
+        loadhomeHistory();
+    }
+
+    public void savehomeSearch(String query) {
+        repository.savehomeSearch(query);
+        loadhomeHistory();
+    }
+
+    public void clearcomicHistory() {
+        repository.clearcomicHistory();
+        loadcomicHistory();
+    }
+
+    public void clearhomeHistory() {
+        repository.clearhomeHistory();
+        loadhomeHistory();
     }
 }
