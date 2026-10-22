@@ -65,18 +65,71 @@
                         app:strokeColor="#FFFFFF"
                         app:strokeWidth="3dp" />
 
-                    <TextView
-                        android:id="@+id/tvProfileName"
+
+                    <ImageButton
+                        android:id="@+id/btnEditAvatarImage"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="@drawable/bg_profile_edit_button"
+                        android:contentDescription="Đổi ảnh đại diện"
+                        android:src="@android:drawable/ic_menu_edit"
+                        android:visibility="gone"
+                        app:tint="#493373"
+                        app:layout_constraintStart_toEndOf="@id/imgProfileAvatar"
+                        app:layout_constraintBottom_toBottomOf="@id/imgProfileAvatar" />
+
+                    <ImageButton
+                        android:id="@+id/btnEditCoverImage"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_profile_edit_button"
+                        android:contentDescription="Đổi ảnh bìa"
+                        android:src="@android:drawable/ic_menu_edit"
+                        android:visibility="gone"
+                        app:tint="#493373"
+                        app:layout_constraintEnd_toEndOf="@id/imgProfileCover"
+                        app:layout_constraintTop_toTopOf="@id/imgProfileCover" />
+
+
+
+                    <LinearLayout
+                        android:id="@+id/profileNameRow"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="🌸 Meilin Zhang 🌸"
-                        android:textColor="#493373"
-                        android:textSize="25sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        app:layout_constraintTop_toBottomOf="@id/imgProfileAvatar"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/imgProfileAvatar" />
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <TextView
+                            android:id="@+id/tvProfileName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tên tài khoản"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="#493373"
+                            android:maxLines="1" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnEditProfile"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="4dp"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:padding="0dp"
+                            android:text="✎"
+                            android:textSize="20sp"
+                            android:textColor="#493373"
+                            android:backgroundTint="#D1C4E9"
+                            android:visibility="gone"
+                            app:cornerRadius="18dp" />
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/tvProfileEmail"
@@ -88,7 +141,7 @@
                         android:textSize="12sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tvProfileName" />
+                        app:layout_constraintTop_toBottomOf="@id/profileNameRow" />
 
                     <LinearLayout
                         android:id="@+id/statsLayout"
@@ -98,7 +151,7 @@
                         android:orientation="horizontal"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tvProfileName">
+                        app:layout_constraintTop_toBottomOf="@id/tvProfileEmail">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -239,17 +292,16 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <!-- THẺ BIO (Có icon chỉnh sửa và ô nhập bio độc lập) -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="16dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
-                    app:strokeColor="#E0DCF0"
-                    app:strokeWidth="1dp">
+
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#E0DCF0"
+                app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -258,156 +310,25 @@
                         android:padding="16dp"
                         android:background="#FFFFFF">
 
-                        <!-- Dòng tiêu đề BIO kèm icon chỉnh sửa -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
+                            android:text="BIO"
+                            android:textStyle="bold"
+                            android:textColor="#333333" />
 
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="BIO"
-                                android:textColor="#333333"
-                                android:textStyle="bold" />
-
-                            <!-- Icon bút để bấm vào chỉnh sửa Bio -->
-                            <ImageView
-                                android:id="@+id/btnEditBio"
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:src="@android:drawable/ic_menu_edit"
-                                android:background="?attr/selectableItemBackgroundBorderless"
-                                android:contentDescription="Sửa Bio"
-                                app:tint="#493373" />
-                        </LinearLayout>
-
-                        <!-- TextView hiển thị Bio đã lưu -->
                         <TextView
                             android:id="@+id/tvProfileBio"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"
-                            android:text="Chưa có tiểu sử..."
+                            android:text="Chưa có giới thiệu"
                             android:textColor="#666666"
-                            android:textSize="14sp" />
-
-                        <!-- Ô nhập Bio (Mặc định ẩn đi, khi bấm icon bút mới hiện ra) -->
-                        <LinearLayout
-                            android:id="@+id/layoutEditBio"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:visibility="gone"
-                            android:layout_marginTop="8dp">
-
-                            <EditText
-                                android:id="@+id/etProfileBio"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:hint="Nhập tiểu sử của bạn..."
-                                android:inputType="textMultiLine"
-                                android:maxLines="3"
-                                android:padding="8dp"
-                                android:textSize="14sp" />
-
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btnSaveBio"
-                                android:layout_width="wrap_content"
-                                android:layout_height="36dp"
-                                android:layout_gravity="end"
-                                android:layout_marginTop="6dp"
-                                android:text="Lưu"
-                                android:textAllCaps="false"
-                                app:backgroundTint="#493373"
-                                app:cornerRadius="12dp" />
-                        </LinearLayout>
+                            android:maxLines="2"
+                            android:ellipsize="end" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/editProfileCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#E0DCF0"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-                    android:background="#FFFFFF">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Chỉnh sửa hồ sơ"
-                        android:textColor="#493373"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <EditText
-                        android:id="@+id/etProfileUsername"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:hint="Nhập tên hiển thị"
-                        android:inputType="textPersonName"
-                        android:maxLines="1"
-                        android:padding="12dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:orientation="horizontal">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnChangeAvatar"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Đổi avatar"
-                            android:textAllCaps="false"
-                            app:cornerRadius="12dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnChangeCover"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_weight="1"
-                            android:text="Đổi ảnh bìa"
-                            android:textAllCaps="false"
-                            app:cornerRadius="12dp" />
-
-                    </LinearLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSaveProfile"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Lưu hồ sơ"
-                        android:textAllCaps="false"
-                        app:backgroundTint="#2F2148"
-                        app:cornerRadius="12dp" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-
 
                 <!-- FAVORITE GENRES CARD -->
                 <com.google.android.material.card.MaterialCardView
@@ -511,6 +432,11 @@
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="GIỚI THIỆU" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text="POSTS" />
 
                     <com.google.android.material.tabs.TabItem
@@ -524,6 +450,102 @@
                         android:text="REVIEWS" />
 
                 </com.google.android.material.tabs.TabLayout>
+
+                <LinearLayout
+                    android:id="@+id/layoutIntroductionDetails"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:background="#FFFFFF"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Thông tin cá nhân"
+                        android:textColor="#493373"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:paddingBottom="12dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Tên hiển thị"
+                        android:textStyle="bold"
+                        android:textColor="#777777" />
+
+                    <TextView
+                        android:id="@+id/tvIntroUsername"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Chưa cập nhật"
+                        android:textColor="#333333"
+                        android:paddingBottom="12dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Email"
+                        android:textStyle="bold"
+                        android:textColor="#777777" />
+
+                    <TextView
+                        android:id="@+id/tvIntroEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Chưa cập nhật"
+                        android:textColor="#333333"
+                        android:paddingBottom="12dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Giới tính"
+                        android:textStyle="bold"
+                        android:textColor="#777777" />
+
+                    <TextView
+                        android:id="@+id/tvIntroGender"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Chưa cập nhật"
+                        android:textColor="#333333"
+                        android:paddingBottom="12dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ngày sinh"
+                        android:textStyle="bold"
+                        android:textColor="#777777" />
+
+                    <TextView
+                        android:id="@+id/tvIntroBirthDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Chưa cập nhật"
+                        android:textColor="#333333"
+                        android:paddingBottom="12dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Giới thiệu bản thân"
+                        android:textStyle="bold"
+                        android:textColor="#777777" />
+
+                    <TextView
+                        android:id="@+id/tvIntroBio"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Chưa có giới thiệu"
+                        android:textColor="#333333"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="16dp" />
+
+                </LinearLayout>
 
                 <!-- DANH SÁCH BÀI VIẾT -->
                 <androidx.recyclerview.widget.RecyclerView

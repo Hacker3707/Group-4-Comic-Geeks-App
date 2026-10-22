@@ -10,6 +10,14 @@
         <item>Settings</item>
     </array>
 
+    <string-array name="profile_gender_options">
+        <item>Chưa chọn</item>
+        <item>Nam</item>
+        <item>Nữ</item>
+        <item>Khác</item>
+        <item>Không muốn tiết lộ</item>
+    </string-array>
+
     <string-array name="search_comic_options">
         <item>Name</item>
         <item>Genre</item>
