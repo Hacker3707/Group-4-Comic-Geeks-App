@@ -72,22 +72,23 @@ public class PostRepository {
         }
     }
 
-    // Hàm đẩy Post lên Firestore 1 lần duy nhất khi bấm Đăng
     public void uploadPostToFirestore(Post post, OnFirestoreUploadListener listener) {
         Map<String, Object> postMap = new HashMap<>();
         postMap.put("postId", post.getPostId());
         postMap.put("userId", post.getUserId());
         postMap.put("groupId", post.getGroupId());
         postMap.put("comicId", post.getComicId());
+        postMap.put("comicTitle", post.getComicTitle());
+        postMap.put("hashtag", post.getHashtag());
         postMap.put("content", post.getContent());
-        postMap.put("imageUris", post.getImageUris()); // 👉 Sửa thành imageUris (số nhiều) để khớp với danh sách ảnh
+        postMap.put("imageUris", post.getImageUris());
         postMap.put("timestamp", post.getTimestamp());
         postMap.put("commentCount", post.getCommentCount());
 
         firestore.collection("posts").document(post.getPostId())
                 .set(postMap)
                 .addOnSuccessListener(aVoid -> {
-                    insert(post);
+                    insert(post); // Lưu cục bộ Room
                     if (listener != null) listener.onSuccess();
                 })
                 .addOnFailureListener(e -> {
