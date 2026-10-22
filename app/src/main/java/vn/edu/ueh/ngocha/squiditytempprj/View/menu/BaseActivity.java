@@ -34,6 +34,8 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ComicListActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.GroupActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.MainActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ProfileActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
+import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
@@ -62,6 +64,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         navigationView = findViewById(R.id.navigationView);
         activityContent = findViewById(R.id.activityContent);
 
+        NtfChannel.setup(this);
+        NotificationPopup.attach(this, findViewById(R.id.btnNotification));
 
         View mainContainer = findViewById(R.id.mainContainer);
 
