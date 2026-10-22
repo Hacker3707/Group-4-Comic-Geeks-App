@@ -19,6 +19,7 @@
             android:name=".View.activity.AuthActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".View.activity.WelcomeActivity"
             android:exported="true">
@@ -56,6 +57,8 @@
             android:name=".View.activity.SearchActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+
         <activity
             android:name=".View.activity.GroupActivity"
             android:exported="false"
@@ -74,6 +77,10 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".View.activity.AppSettingActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".View.activity.ZoomImageActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>

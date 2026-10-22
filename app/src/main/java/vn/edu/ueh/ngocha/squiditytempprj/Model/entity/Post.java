@@ -15,7 +15,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.Converters;
 public class Post {
     @PrimaryKey
     @NonNull
-    @ColumnInfo (name = "post_id")
+    @ColumnInfo(name = "post_id")
     private String postId;
 
     @ColumnInfo(name = "user_id")
@@ -33,16 +33,23 @@ public class Post {
     @ColumnInfo(name = "timestamp")
     @TypeConverters(Converters.class)
     private Date timestamp;
+
     @ColumnInfo(name = "comment_count")
     private int commentCount = 0;
+
     @ColumnInfo(name = "image_uris")
     private List<String> imageUris;
+
     @ColumnInfo(name = "hashtag")
     private String hashtag;
+
     @ColumnInfo(name = "comic_title")
     private String comicTitle;
 
-    public Post(@NonNull String postId, String userId, String comicId, String content, List <String> imageUris) {
+    public Post() {
+    }
+
+    public Post(@NonNull String postId, String userId, String comicId, String content, List<String> imageUris) {
         this.postId = postId;
         this.userId = userId;
         this.comicId = comicId;
@@ -51,8 +58,8 @@ public class Post {
         this.timestamp = new Date();
     }
 
-
-    @NonNull public String getPostId() { return postId; }
+    @NonNull
+    public String getPostId() { return postId; }
     public String getUserId() { return userId; }
     public String getGroupId() { return groupId; }
     public String getComicId() { return comicId; }
@@ -61,7 +68,7 @@ public class Post {
     public String getComicTitle() { return comicTitle; }
     public String getHashtag() { return hashtag; }
     public int getCommentCount() { return commentCount; }
-
+    public List<String> getImageUris() { return imageUris; }
 
     public void setPostId(@NonNull String postId) { this.postId = postId; }
     public void setUserId(String userId) { this.userId = userId; }
@@ -72,8 +79,8 @@ public class Post {
     public void setHashtag(String hashtag) { this.hashtag = hashtag; }
     public void setComicTitle(String comicTitle) { this.comicTitle = comicTitle; }
     public void setCommentCount(int count) { this.commentCount = count; }
-    public List<String> getImageUris() { return imageUris; }
     public void setImageUris(List<String> imageUris) { this.imageUris = imageUris; }
+
     public void editContent(String newContent) {
         this.content = newContent;
     }
