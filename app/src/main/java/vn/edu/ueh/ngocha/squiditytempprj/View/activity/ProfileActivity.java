@@ -42,10 +42,11 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.StampType;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends BaseActivity {
 
     private UserProfileViewModel profileViewModel;
     private ShapeableImageView imgProfileAvatar;
@@ -88,12 +89,10 @@ public class ProfileActivity extends AppCompatActivity {
                     }
             );
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_profile);
-
 
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileEmail = findViewById(R.id.tvProfileEmail);
@@ -237,15 +236,6 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        View rootLayout = findViewById(R.id.profileRoot);
-        if (rootLayout != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (view, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                return insets;
-            });
-        }
-
         recyclerViewProfilePosts = findViewById(R.id.recyclerViewProfilePosts);
         recyclerViewProfilePosts.setLayoutManager(new LinearLayoutManager(this));
 
@@ -341,6 +331,11 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         profileViewModel.loadCurrentProfile();
+    }
+
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.activity_profile;
     }
 
     @Override

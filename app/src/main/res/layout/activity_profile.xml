@@ -7,8 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F4FA"
-    android:fitsSystemWindows="true">
-
+    android:fitsSystemWindows="false">
 
     <LinearLayout
         android:id="@+id/profileContent"
@@ -16,14 +15,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:background="#F5F4FA">
-
-
-        <include
-            android:id="@+id/toolbar"
-            layout="@layout/layout_app_bar"
-            android:layout_width="match_parent"
-            android:layout_height="70dp" />
-
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/profileScrollView"
@@ -43,7 +34,7 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#D1C4E9"
+                    android:background="#B18FF0"
                     android:paddingBottom="16dp">
 
                     <ImageView
@@ -51,28 +42,28 @@
                         android:layout_width="0dp"
                         android:layout_height="140dp"
                         android:background="#FFB3C6"
-                        android:scaleType="centerCrop"
                         android:contentDescription="Ảnh bìa hồ sơ"
-                        app:layout_constraintTop_toTopOf="parent"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <!-- AVATAR CHỒNG LÊN BANNER -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/imgProfileAvatar"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
                         android:layout_marginTop="90dp"
                         android:background="#FFFFFF"
+                        android:contentDescription="Ảnh đại diện"
                         android:padding="3dp"
                         android:scaleType="centerCrop"
-                        android:contentDescription="Ảnh đại diện"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
                         app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
                         app:strokeColor="#FFFFFF"
-                        app:strokeWidth="3dp"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
+                        app:strokeWidth="3dp" />
 
                     <TextView
                         android:id="@+id/tvProfileName"
@@ -81,11 +72,12 @@
                         android:layout_marginTop="8dp"
                         android:text="🌸 Meilin Zhang 🌸"
                         android:textColor="#493373"
-                        android:textSize="20sp"
+                        android:textSize="25sp"
                         android:textStyle="bold"
-                        app:layout_constraintTop_toBottomOf="@id/imgProfileAvatar"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
+                        app:layout_constraintTop_toBottomOf="@id/imgProfileAvatar" />
+
                     <TextView
                         android:id="@+id/tvProfileEmail"
                         android:layout_width="wrap_content"
@@ -94,19 +86,19 @@
                         android:text="email@example.com"
                         android:textColor="#666666"
                         android:textSize="12sp"
-                        app:layout_constraintTop_toBottomOf="@id/tvProfileName"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
+                        app:layout_constraintTop_toBottomOf="@id/tvProfileName" />
 
                     <LinearLayout
                         android:id="@+id/statsLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="28dp"
                         android:orientation="horizontal"
-                        app:layout_constraintTop_toBottomOf="@id/tvProfileName"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
+                        app:layout_constraintTop_toBottomOf="@id/tvProfileName">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -127,10 +119,10 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:fontFamily="@font/jersey25_regular"
                                 android:text="128"
                                 android:textColor="#FFFFFF"
-                                android:textSize="20sp"
-                                android:textStyle="bold" />
+                                android:textSize="30sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -159,10 +151,10 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:fontFamily="@font/jersey25_regular"
                                 android:text="1000"
                                 android:textColor="#FFFFFF"
-                                android:textSize="20sp"
-                                android:textStyle="bold" />
+                                android:textSize="30sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -191,10 +183,10 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:fontFamily="@font/jersey25_regular"
                                 android:text="179"
                                 android:textColor="#FFFFFF"
-                                android:textSize="20sp"
-                                android:textStyle="bold" />
+                                android:textSize="30sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -208,31 +200,38 @@
 
                     <LinearLayout
                         android:id="@+id/profileActionButtons"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="75dp"
+                        android:layout_marginTop="20dp"
+                        android:background="#7441AF"
                         android:gravity="center"
                         android:orientation="horizontal"
-                        app:layout_constraintTop_toBottomOf="@id/statsLayout"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
+                        app:layout_constraintTop_toBottomOf="@id/statsLayout">
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnFollow"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/jersey25_regular"
                             android:text="+ Follow"
                             android:textColor="#FFFFFF"
-                            app:backgroundTint="#2F2148"
-                            app:cornerRadius="20dp" />
+                            android:textSize="20sp"
+                            app:backgroundTint="#7A6CFA"
+                            app:cornerRadius="20dp"
+                            tools:layout_marginRight="5dp" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnMessage"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
+                            android:layout_marginLeft="5dp"
+                            android:fontFamily="@font/jersey25_regular"
                             android:text="Message"
                             android:textColor="#493373"
+                            android:textSize="20sp"
                             app:backgroundTint="#FFFFFF"
                             app:cornerRadius="20dp" />
 
@@ -549,11 +548,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="20dp"
+        android:layout_marginRight="35dp"
+        android:layout_marginBottom="35dp"
         android:contentDescription="Tạo bài viết mới"
         android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="#493373"
-        app:tint="#FFFFFF"
-        app:elevation="6dp" />
+        app:backgroundTint="#786FF8"
+        app:elevation="6dp"
+        app:tint="#FFFFFF" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
