@@ -17,6 +17,7 @@ material = "1.14.0"
 activityKtx = "1.13.0"
 constraintlayout = "2.2.2"
 playServicesAuth = "22.0.0"
+preference = "1.2.1"
 roomRuntime = "2.8.5"
 roomCompiler = "2.8.5"
 recyclerview = "1.4.0"
@@ -33,6 +34,7 @@ googleid = "1.1.1"
 androidx-lifecycle-livedata-v270 = { module = "androidx.lifecycle:lifecycle-livedata", version.ref = "lifecycleLivedata" }
 androidx-lifecycle-runtime-v270 = { module = "androidx.lifecycle:lifecycle-runtime", version.ref = "lifecycleRuntime" }
 androidx-lifecycle-viewmodel-v270 = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycleViewmodel" }
+androidx-preference = { module = "androidx.preference:preference", version.ref = "preference" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }

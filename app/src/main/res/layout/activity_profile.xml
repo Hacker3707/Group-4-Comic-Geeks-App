@@ -30,17 +30,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#B18FF0"
+                    android:background="#A780EF"
                     android:paddingBottom="16dp">
 
                     <ImageView
                         android:id="@+id/imgProfileCover"
                         android:layout_width="0dp"
-                        android:layout_height="140dp"
+                        android:layout_height="180dp"
                         android:background="#FFB3C6"
                         android:contentDescription="Ảnh bìa hồ sơ"
                         android:scaleType="centerCrop"
@@ -49,85 +48,108 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <!-- AVATAR CHỒNG LÊN BANNER -->
+                    <ImageView
+                        android:id="@+id/imgCoverGraffiti"
+                        android:layout_width="0dp"
+                        android:layout_height="180dp"
+                        android:layout_marginTop="178dp"
+                        android:contentDescription="@null"
+                        android:elevation="1dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/avt_backcover"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/imgProfileAvatar"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
-                        android:layout_marginTop="90dp"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_marginTop="140dp"
                         android:background="#FFFFFF"
                         android:contentDescription="Ảnh đại diện"
+                        android:elevation="4dp"
+                        android:outlineSpotShadowColor="#035D62"
                         android:padding="3dp"
                         android:scaleType="centerCrop"
                         app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.498"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
                         app:strokeColor="#FFFFFF"
                         app:strokeWidth="3dp" />
 
-
                     <ImageButton
                         android:id="@+id/btnEditAvatarImage"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:background="@drawable/bg_profile_edit_button"
                         android:contentDescription="Đổi ảnh đại diện"
                         android:src="@android:drawable/ic_menu_edit"
                         android:visibility="gone"
-                        app:tint="#493373"
+                        android:elevation="5dp"
+                        app:layout_constraintBottom_toBottomOf="@id/imgProfileAvatar"
                         app:layout_constraintStart_toEndOf="@id/imgProfileAvatar"
-                        app:layout_constraintBottom_toBottomOf="@id/imgProfileAvatar" />
+                        app:tint="#493373" />
 
                     <ImageButton
                         android:id="@+id/btnEditCoverImage"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_margin="8dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_margin="12dp"
                         android:background="@drawable/bg_profile_edit_button"
                         android:contentDescription="Đổi ảnh bìa"
                         android:src="@android:drawable/ic_menu_edit"
                         android:visibility="gone"
-                        app:tint="#493373"
                         app:layout_constraintEnd_toEndOf="@id/imgProfileCover"
-                        app:layout_constraintTop_toTopOf="@id/imgProfileCover" />
-
-
+                        app:layout_constraintTop_toTopOf="@id/imgProfileCover"
+                        app:tint="#493373" />
 
                     <LinearLayout
                         android:id="@+id/profileNameRow"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="22dp"
                         android:gravity="center"
                         android:orientation="horizontal"
-                        app:layout_constraintTop_toBottomOf="@id/imgProfileAvatar"
+                        android:background="@drawable/bg_name_chip"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:elevation="3dp"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
+                        app:layout_constraintTop_toBottomOf="@id/imgProfileAvatar">
 
                         <TextView
                             android:id="@+id/tvProfileName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Tên tài khoản"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="#493373"
-                            android:maxLines="1" />
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:padding="10dp"
+                            android:text="User Name"
+                            android:textColor="#FFFFFF"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnEditProfile"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_marginStart="4dp"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_marginStart="8dp"
                             android:minWidth="0dp"
                             android:minHeight="0dp"
                             android:padding="0dp"
                             android:text="✎"
-                            android:textSize="20sp"
-                            android:textColor="#493373"
-                            android:backgroundTint="#D1C4E9"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
                             android:visibility="gone"
-                            app:cornerRadius="18dp" />
+                            app:backgroundTint="#8F69D8"
+                            app:cornerRadius="15dp" />
 
                     </LinearLayout>
 
@@ -135,10 +157,10 @@
                         android:id="@+id/tvProfileEmail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="7dp"
                         android:text="email@example.com"
                         android:textColor="#666666"
-                        android:textSize="12sp"
+                        android:textSize="15sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/profileNameRow" />
@@ -146,108 +168,144 @@
                     <LinearLayout
                         android:id="@+id/statsLayout"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="0dp"
                         android:layout_marginTop="28dp"
                         android:orientation="horizontal"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/tvProfileEmail">
 
-                        <LinearLayout
+                        <FrameLayout
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="4dp">
+                            android:layout_height="120dp"
+                            android:layout_weight="1">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Manga Lover"
-                                android:textColor="#FFFFFF"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
+                            <ImageView
+                                android:layout_width="160dp"
+                                android:layout_height="160dp"
+                                android:layout_gravity="center"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/paint_left" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:fontFamily="@font/jersey25_regular"
-                                android:text="128"
-                                android:textColor="#FFFFFF"
-                                android:textSize="30sp" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:orientation="vertical">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Posts"
-                                android:textColor="#FFFFFF"
-                                android:textSize="12sp" />
-                        </LinearLayout>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Manga Lover"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
 
-                        <LinearLayout
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/jersey25_regular"
+                                    android:text="128"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="30sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Posts"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+
+                        </FrameLayout>
+
+                        <FrameLayout
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="4dp">
+                            android:layout_height="120dp"
+                            android:layout_weight="1">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Mystery Addict"
-                                android:textColor="#FFFFFF"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
+                            <ImageView
+                                android:layout_width="160dp"
+                                android:layout_height="160dp"
+                                android:layout_gravity="center"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/paint_splash_transp" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:fontFamily="@font/jersey25_regular"
-                                android:text="1000"
-                                android:textColor="#FFFFFF"
-                                android:textSize="30sp" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:orientation="vertical">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Followers"
-                                android:textColor="#FFFFFF"
-                                android:textSize="12sp" />
-                        </LinearLayout>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Mystery Addict"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
 
-                        <LinearLayout
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/jersey25_regular"
+                                    android:text="1000"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="30sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Followers"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+
+                        </FrameLayout>
+
+                        <FrameLayout
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="4dp">
+                            android:layout_height="120dp"
+                            android:layout_weight="1">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Level 12"
-                                android:textColor="#FFEB3B"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
+                            <ImageView
+                                android:layout_width="160dp"
+                                android:layout_height="160dp"
+                                android:layout_gravity="center"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/splash_right" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:fontFamily="@font/jersey25_regular"
-                                android:text="179"
-                                android:textColor="#FFFFFF"
-                                android:textSize="30sp" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:orientation="vertical">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Following"
-                                android:textColor="#FFFFFF"
-                                android:textSize="12sp" />
-                        </LinearLayout>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Level 12"
+                                    android:textColor="#FFEB3B"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/jersey25_regular"
+                                    android:text="179"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="30sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Following"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+
+                        </FrameLayout>
 
                     </LinearLayout>
 
@@ -293,11 +351,11 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="22dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
                 app:strokeColor="#E0DCF0"
@@ -576,6 +634,8 @@
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="#786FF8"
         app:elevation="6dp"
+        app:fabCustomSize="65dp"
+        app:fabSize="normal"
         app:tint="#FFFFFF" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
