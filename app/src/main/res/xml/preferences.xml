@@ -1,90 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- ACCOUNT -->
     <PreferenceCategory
-        android:title="General">
-
-        <ListPreference
-            android:key="language"
-            android:title="Language"
-            android:entries="@array/language_entries"
-            android:entryValues="@array/language_values"
-            android:defaultValue="vi" />
-
-        <ListPreference
-            android:key="theme"
-            android:title="App Theme"
-            android:entries="@array/theme_entries"
-            android:entryValues="@array/theme_values"
-            android:defaultValue="system" />
-
-        <Preference
-            android:key="clear_cache"
-            android:title="Clear cache" />
-
-        <Preference
-            android:key="logout"
-            android:title="Log out" />
-
-        <Preference
-            android:key="delete_account"
-            android:title="Delete account" />
+        android:key="category_account"
+        android:layout="@layout/preference_setting_category"
+        android:title="Account">
 
         <Preference
             android:key="reset_password"
+            android:icon="@drawable/ic_setting_lock"
+            android:layout="@layout/preference_setting_item"
+            android:summary="Send a reset link to your email"
             android:title="Reset password" />
 
         <Preference
-            android:key="help"
-            android:title="Help" />
-
-
+            android:key="logout"
+            android:icon="@drawable/ic_setting_logout"
+            android:layout="@layout/preference_setting_item"
+            android:summary="Sign out of this device"
+            android:title="Log out" />
 
     </PreferenceCategory>
 
+    <!-- PREFERENCES -->
     <PreferenceCategory
-        android:title="Notifications">
+        android:key="category_general"
+        android:layout="@layout/preference_setting_category"
+        android:title="Preferences">
+
+        <ListPreference
+            android:key="language"
+            android:defaultValue="vi"
+            android:entries="@array/language_entries"
+            android:entryValues="@array/language_values"
+            android:icon="@drawable/ic_setting_language"
+            android:layout="@layout/preference_setting_item"
+            android:title="Language"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:key="theme"
+            android:defaultValue="system"
+            android:entries="@array/theme_entries"
+            android:entryValues="@array/theme_values"
+            android:icon="@drawable/ic_setting_palette"
+            android:layout="@layout/preference_setting_item"
+            android:title="App Theme"
+            app:useSimpleSummaryProvider="true" />
 
         <SwitchPreferenceCompat
             android:key="notifications_enabled"
+            android:defaultValue="true"
+            android:icon="@drawable/ic_setting_notifications"
+            android:layout="@layout/preference_setting_plain"
+            android:summary="Get alerts about new activity"
             android:title="Enable notifications"
-            android:defaultValue="true" />
+            android:widgetLayout="@layout/preference_setting_switch_widget" />
+
+        <Preference
+            android:key="clear_cache"
+            android:icon="@drawable/ic_setting_cache"
+            android:layout="@layout/preference_setting_item"
+            android:summary="Free up space used by images and temporary data"
+            android:title="Clear cache" />
 
     </PreferenceCategory>
 
+    <!-- PRIVACY -->
     <PreferenceCategory
+        android:key="category_privacy"
+        android:layout="@layout/preference_setting_category"
         android:title="Privacy">
 
         <Preference
             android:key="blocked_users"
+            android:icon="@drawable/ic_setting_block"
+            android:layout="@layout/preference_setting_item"
+            android:summary="Manage people you have blocked"
             android:title="Blocked users" />
 
         <Preference
             android:key="privacy_policy"
+            android:icon="@drawable/ic_setting_shield"
+            android:layout="@layout/preference_setting_item"
             android:title="Privacy Policy" />
 
     </PreferenceCategory>
 
+    <!-- ABOUT -->
     <PreferenceCategory
+        android:key="category_about"
+        android:layout="@layout/preference_setting_category"
         android:title="About">
 
         <Preference
+            android:key="help"
+            android:icon="@drawable/ic_setting_help"
+            android:layout="@layout/preference_setting_item"
+            android:title="Help" />
+
+        <Preference
             android:key="app_version"
-            android:title="App version"
-            android:summary="1.0.0" />
+            android:icon="@drawable/ic_setting_version"
+            android:layout="@layout/preference_setting_plain"
+            android:selectable="false"
+            android:summary="1.0.0"
+            android:title="App version" />
 
         <Preference
             android:key="app_info"
+            android:icon="@drawable/ic_setting_info"
+            android:layout="@layout/preference_setting_item"
             android:title="App info" />
 
         <Preference
             android:key="app_license"
+            android:icon="@drawable/ic_setting_license"
+            android:layout="@layout/preference_setting_item"
             android:title="App license" />
 
         <Preference
             android:key="app_credits"
+            android:icon="@drawable/ic_setting_credits"
+            android:layout="@layout/preference_setting_item"
             android:title="App credits" />
+
+    </PreferenceCategory>
+
+    <!-- DANGER ZONE: tách riêng, nằm cuối để tránh bấm nhầm -->
+    <PreferenceCategory
+        android:key="category_danger"
+        android:layout="@layout/preference_setting_category"
+        android:title="Danger zone">
+
+        <Preference
+            android:key="delete_account"
+            android:icon="@drawable/ic_setting_delete_account"
+            android:layout="@layout/preference_setting_danger"
+            android:summary="Permanently delete your account and data"
+            android:title="Delete account" />
 
     </PreferenceCategory>
 

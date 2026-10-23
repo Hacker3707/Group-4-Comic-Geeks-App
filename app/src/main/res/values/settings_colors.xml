@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Màu của màn App Settings, bám theo bảng màu tím của app -->
+    <color name="setting_bg">#F5F4FA</color>
+    <color name="setting_card_bg">#FFFFFF</color>
+    <color name="setting_card_stroke">#E5E5F5</color>
+    <color name="setting_category">#493373</color>
+    <color name="setting_title">#36366F</color>
+    <color name="setting_summary">#6A68A0</color>
+    <color name="setting_icon">#6C49D9</color>
+    <color name="setting_icon_bg">#EEEEFE</color>
+    <color name="setting_chevron">#B1B1D4</color>
+    <color name="setting_ripple">#1A6C49D9</color>
+    <color name="setting_danger">#D93A55</color>
+    <color name="setting_danger_bg">#FDECEF</color>
+    <color name="setting_danger_stroke">#F6C9D0</color>
+</resources>

@@ -442,7 +442,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
     private void loadCurrentUserProfile() {
         ShapeableImageView imgAvatar =
-                findViewById(R.id.imgvAvatar);
+                findViewById(R.id.imgMainAvatar);
         TextView tvUsername =
                 findViewById(R.id.tvMainUsername);
 

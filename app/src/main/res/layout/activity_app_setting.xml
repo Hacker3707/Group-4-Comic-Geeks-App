@@ -1,10 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/setting_bg"
+    android:orientation="vertical"
     tools:context=".View.activity.AppSettingActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Thanh tiêu đề: cùng kiểu với Edit Profile (gradient tím + font Jersey25) -->
+    <LinearLayout
+        android:id="@+id/settingsToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_app_bar_gradient"
+        android:gravity="center_vertical"
+        android:minHeight="70dp"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="16dp">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Quay lại"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="#FFFFFF" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:fontFamily="@font/jersey25_regular"
+            android:maxLines="1"
+            android:text="@string/settings"
+            android:textColor="#FFFFFF"
+            android:textSize="32sp" />
+    </LinearLayout>
+
+    <!-- Chỗ chứa SettingsFragment (đọc từ preferences.xml) -->
+    <FrameLayout
+        android:id="@+id/settingsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

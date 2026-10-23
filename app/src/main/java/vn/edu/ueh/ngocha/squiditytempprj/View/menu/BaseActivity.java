@@ -29,6 +29,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseUser;
 
 import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.AppSettingActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.AuthActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ChatListActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ComicListActivity;
@@ -238,6 +239,9 @@ public abstract class BaseActivity extends AppCompatActivity {
                                     ComicListActivity.class
                             );
                             startActivity(intent);
+                        }
+                        else if (id == R.id.action_setting) {
+                            startActivity(new Intent(BaseActivity.this, AppSettingActivity.class));
                         }
 
                         drawerLayout.closeDrawers();
