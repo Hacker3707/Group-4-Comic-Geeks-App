@@ -9,6 +9,12 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.bumptech.glide.Glide;
+import com.google.android.material.imageview.ShapeableImageView;
+import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -50,6 +56,9 @@ public class CreatePostActivity extends AppCompatActivity {
     private MaterialButton btnPublish;
     private ImageButton btnCancelPost;
     private PostViewModel postViewModel;
+    private String currentUserId = "";
+    private String currentUsername = "Khách";
+    private String currentAvatarUrl = "";
 
     private View btnAddImage;
     private RecyclerView rvImagePreview;
@@ -62,12 +71,16 @@ public class CreatePostActivity extends AppCompatActivity {
     private final String[] selectedComicInfo = {"Discussion", ""}; // [0]: comicId, [1]: comicTitle
 
     private boolean isEditMode = false;
+    // Có giá trị khi đăng bài từ trang group (bài sẽ thuộc group này)
+    private String groupId = null;
     private String editPostId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
+
+        loadCurrentUserProfile();
 
         edtPostContent = findViewById(R.id.edtPostContent);
         edtPostHashtag = findViewById(R.id.edtPostHashtag);
@@ -92,6 +105,10 @@ public class CreatePostActivity extends AppCompatActivity {
         setupComicAutoComplete();
 
         isEditMode = getIntent().getBooleanExtra("is_edit_mode", false);
+        groupId = getIntent().getStringExtra("group_id");
+        if (groupId != null && !groupId.isEmpty() && !isEditMode) {
+            edtPostHashtag.setHint("Chủ đề: #Anime, #Manga, #LightNovel, #Discussion, #Otaku");
+        }
         editPostId = getIntent().getStringExtra("post_id");
         String oldContent = getIntent().getStringExtra("post_content");
         String oldComicId = getIntent().getStringExtra("post_comic_id");
@@ -169,6 +186,13 @@ public class CreatePostActivity extends AppCompatActivity {
                 String currentComicId = selectedComicInfo[0];
                 String currentComicTitle = selectedComicInfo[1];
                 String finalHashtag = hashtag;
+                // Bài trong group lưu hashtag ngay trong nội dung để lọc theo chủ đề
+                String finalContent = content;
+                if (groupId != null && !groupId.isEmpty() && !isEditMode
+                        && !hashtag.isEmpty() && !content.contains(hashtag)) {
+                    finalContent = content.isEmpty() ? hashtag : content + " " + hashtag;
+                }
+                final String postContent = finalContent;
 
                 if (isEditMode && editPostId != null) {
                     progressDialog.setMessage("Đang cập nhật bài viết...");
@@ -203,7 +227,8 @@ public class CreatePostActivity extends AppCompatActivity {
                         progressDialog.show();
 
                         uploadMultipleImagesToStorage(newPostId, imageUrls -> {
-                            Post newPost = new Post(newPostId, currentUid(), currentComicId, content, imageUrls);
+                            Post newPost = new Post(newPostId, currentUid(), currentComicId, postContent, imageUrls);
+                            if (groupId != null && !groupId.isEmpty()) newPost.setGroupId(groupId);
                             newPost.setComicTitle(currentComicTitle);
                             newPost.setHashtag(finalHashtag);
                             uploadPostToCloud(newPost, progressDialog);
@@ -212,7 +237,8 @@ public class CreatePostActivity extends AppCompatActivity {
                         progressDialog.setMessage("Đang đăng bài viết...");
                         progressDialog.show();
 
-                        Post newPost = new Post(newPostId, currentUid(), currentComicId, content, null);
+                        Post newPost = new Post(newPostId, currentUid(), currentComicId, postContent, null);
+                        if (groupId != null && !groupId.isEmpty()) newPost.setGroupId(groupId);
                         newPost.setComicTitle(currentComicTitle);
                         newPost.setHashtag(finalHashtag);
                         uploadPostToCloud(newPost, progressDialog);
@@ -353,6 +379,7 @@ public class CreatePostActivity extends AppCompatActivity {
         Post updatedPost = new Post(postId, currentUid(), comicId, content, imageUrls);
         updatedPost.setComicTitle(comicTitle);
         updatedPost.setHashtag(hashtag);
+        if (groupId != null && !groupId.isEmpty()) updatedPost.setGroupId(groupId);
 
         if (postViewModel != null) {
             postViewModel.updatePost(updatedPost);
@@ -366,5 +393,100 @@ public class CreatePostActivity extends AppCompatActivity {
             progressDialog.dismiss();
             Toast.makeText(CreatePostActivity.this, "Lỗi: PostViewModel bị null!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void loadCurrentUserProfile() {
+        ShapeableImageView imgAvatar =
+                findViewById(R.id.imgvAvatar);
+        TextView tvUsername =
+                findViewById(R.id.tvMainUsername);
+
+        FirebaseUser user =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user == null) {
+            currentUserId = "";
+            currentUsername = "Khách";
+
+            if (tvUsername != null) {
+                tvUsername.setText(currentUsername);
+            }
+            return;
+        }
+
+        currentUserId = user.getUid();
+
+        // Hiển thị tên tạm từ Firebase Authentication
+        String name = user.getDisplayName();
+
+        if (name == null || name.trim().isEmpty()) {
+            name = user.getEmail();
+        }
+
+        if (name != null && !name.trim().isEmpty()) {
+            currentUsername = name.trim();
+        }
+
+        if (tvUsername != null) {
+            tvUsername.setText(currentUsername);
+        }
+
+        // Hiển thị avatar từ Firebase Authentication
+        if (imgAvatar != null && user.getPhotoUrl() != null) {
+            Glide.with(this)
+                    .load(user.getPhotoUrl())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .error(R.drawable.ic_launcher_background)
+                    .into(imgAvatar);
+        }
+
+        // Đồng bộ theo hồ sơ đã lưu trên Firestore
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(currentUserId)
+                .addSnapshotListener(this, (document, error) -> {
+                    if (isFinishing() || isDestroyed()
+                            || error != null
+                            || document == null
+                            || !document.exists()) {
+                        return;
+                    }
+
+                    String username =
+                            document.getString("username");
+
+                    if (username == null || username.trim().isEmpty()) {
+                        username = document.getString("displayName");
+                    }
+
+                    if (username != null && !username.trim().isEmpty()) {
+                        currentUsername = username.trim();
+
+                        if (tvUsername != null) {
+                            tvUsername.setText(currentUsername);
+                        }
+                    }
+
+                    String avatarUrl =
+                            document.getString("avatarUrl");
+
+                    if (avatarUrl == null || avatarUrl.trim().isEmpty()) {
+                        avatarUrl = document.getString("photoUrl");
+                    }
+
+                    if (avatarUrl != null && !avatarUrl.trim().isEmpty()) {
+                        currentAvatarUrl = avatarUrl.trim();
+
+                        if (imgAvatar != null) {
+                            Glide.with(CreatePostActivity.this)
+                                    .load(currentAvatarUrl)
+                                    .circleCrop()
+                                    .placeholder(R.drawable.ic_launcher_background)
+                                    .error(R.drawable.ic_launcher_background)
+                                    .into(imgAvatar);
+                        }
+                    }
+                });
     }
 }

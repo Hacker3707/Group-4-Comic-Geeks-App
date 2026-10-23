@@ -16,7 +16,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,11 +35,12 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.FollowRemoteRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ComicDetailActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.CreatePostActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.GroupViewActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ProfileActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.SearchActivity;
-import vn.edu.ueh.ngocha.squiditytempprj.View.holder.GroupPostViewHolder;
 import vn.edu.ueh.ngocha.squiditytempprj.View.holder.PostViewHolder;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.GroupHashtagUtils;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.UserDisplayUtils;
 
@@ -52,8 +52,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.util.UserDisplayUtils;
  *     Bài thuộc group sẽ có header riêng: avatar nhóm + avatar người đăng nhỏ,
  *     dòng đậm là tên nhóm, dòng nhạt bên dưới là người gửi (cần gọi setGroups + setUsers).
  *
- *  2) Kiểu trang chi tiết group (group_post_item.xml, bình luận hiện ngay trong khung bài) -
- *     tạo bằng {@link #forGroupPage(Context)} (thay cho GroupPostAdapter cũ).
+ *  2) Trang chi tiết group: dùng chung layout activity_post, tạo bằng {@link #forGroupPage(Context, OnPostInteractionListener)}.
  */
 public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -105,15 +104,16 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.groupPageMode = false;
     }
 
-    private PostAdapter(Context context) {
+    private PostAdapter(Context context, OnPostInteractionListener listener) {
         this.context = context;
         this.postList = new ArrayList<>();
+        this.listener = listener;
         this.groupPageMode = true;
     }
 
-    // Adapter cho màn hình chi tiết group (thay cho GroupPostAdapter)
-    public static PostAdapter forGroupPage(Context context) {
-        return new PostAdapter(context);
+    // Adapter cho màn hình chi tiết group: dùng chung layout + chức năng với bài trang chủ
+    public static PostAdapter forGroupPage(Context context, OnPostInteractionListener listener) {
+        return new PostAdapter(context, listener);
     }
 
     // =================================
@@ -185,7 +185,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
         FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
-        if (groupPageMode || me == null || followRegistration != null) {
+        if (me == null || followRegistration != null) {
             return;
         }
         followRepository = new FollowRemoteRepository((Application) context.getApplicationContext());
@@ -263,125 +263,26 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return groupPageMode ? TYPE_GROUP_PAGE_POST : TYPE_POST;
+        return TYPE_POST;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        if (viewType == TYPE_GROUP_PAGE_POST) {
-            return new GroupPostViewHolder(inflater.inflate(R.layout.group_post_item, parent, false));
-        }
         return new PostViewHolder(inflater.inflate(R.layout.activity_post, parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof GroupPostViewHolder) {
-            bindGroupPagePost((GroupPostViewHolder) holder, postList.get(position));
-        } else {
-            bindPost((PostViewHolder) holder, postList.get(position), position);
-        }
+        bindPost((PostViewHolder) holder, postList.get(position), position);
     }
 
-    // ---------- Kiểu trang chi tiết group (code của GroupPostAdapter cũ) ----------
-
-    private void bindGroupPagePost(@NonNull final GroupPostViewHolder holder, final Post post) {
-        User user = users.get(post.getUserId());
-        String fallbackName = fallbackName();
-        String name = UserDisplayUtils.displayName(user, fallbackName);
-        // Chưa biết tài khoản thì không hiện @handle cho khỏi lạ
-        String handle = "";
-        String avatarUrl = null;
-        if (user != null) {
-            handle = "@" + name.replace(" ", "").toLowerCase();
-            avatarUrl = user.getAvatarUrl();
-        }
-        holder.bind(post, name, handle, avatarUrl);
-        holder.bindComments(commentsByPost.get(post.getPostId()), users, fallbackName);
-
-        // Ô nhập bình luận
-        boolean open = post.getPostId().equals(commentingPostId);
-        holder.bindCommentInput(open, commentDraft, new GroupPostViewHolder.OnDraftChangedListener() {
-            @Override
-            public void onDraftChanged(String text) {
-                commentDraft = text;
-            }
-        });
-        if (open) {
-            holder.focusCommentInput();
-        }
-
-        // Bấm "Say something..." để mở ô nhập
-        holder.getSayView().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String previousPostId = commentingPostId;
-                commentingPostId = post.getPostId();
-                commentDraft = "";
-                if (previousPostId != null) {
-                    int previousIndex = indexOfPost(previousPostId);
-                    if (previousIndex >= 0) {
-                        notifyItemChanged(previousIndex);
-                    }
-                }
-                int index = indexOfPost(post.getPostId());
-                if (index >= 0) {
-                    notifyItemChanged(index);
-                }
-            }
-        });
-
-        // Bấm nút gửi
-        holder.getSendCommentView().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String text = holder.getCommentText();
-                if (text.isEmpty()) {
-                    return;
-                }
-                holder.hideKeyboard();
-                if (commentSendListener != null) {
-                    commentSendListener.onCommentSend(post, text);
-                }
-                // Gửi xong thì thu ô nhập lại thành "Say something..."
-                commentingPostId = null;
-                commentDraft = "";
-                int index = indexOfPost(post.getPostId());
-                if (index >= 0) {
-                    notifyItemChanged(index);
-                }
-            }
-        });
-    }
-
-        holder.tvUserName.setText(post.getUserId());
-
-        // Lắng nghe và hiển thị chính xác số lượng comment thực tế từ cơ sở dữ liệu
-        if (context instanceof AppCompatActivity) {
-            AppCompatActivity activity = (AppCompatActivity) context;
-            PostViewModel postViewModel = new ViewModelProvider(activity).get(PostViewModel.class);
-            if (post.getPostId() != null) {
-                postViewModel.getCommentsByPostId(post.getPostId()).observe(activity, comments -> {
-                    if (comments != null) {
-                        int realCount = comments.size();
-                        holder.tvCommentCount.setText(String.valueOf(realCount));
-                        post.setCommentCount(realCount);
-                    } else {
-                        holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
-                    }
-                });
-            } else {
-                holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
-            }
-        } else {
-            holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
-        }
     // ---------- Kiểu trang chủ / hồ sơ / tìm kiếm ----------
 
     private void bindHeader(PostViewHolder holder, Post post) {
-        Group group = isGroupPost(post) ? groups.get(post.getGroupId()) : null;
+        // Trong trang group thì luôn dùng header mực chảy với tên người đăng
+        Group group = (!groupPageMode && isGroupPost(post)) ? groups.get(post.getGroupId()) : null;
         String name = authorName(post);
         User user = users.get(post.getUserId());
         String posterAvatarUrl = user != null ? user.getAvatarUrl() : null;
@@ -415,6 +316,11 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             holder.groupHeaderLayout.setVisibility(View.GONE);
             holder.headerLayout.setVisibility(View.VISIBLE);
             holder.tvUserName.setText(name);
+            if (holder.tvHandle != null) {
+                holder.tvHandle.setText(user != null
+                        ? "@" + name.replace(" ", "").toLowerCase()
+                        : "");
+            }
             loadAvatar(holder.imgAvatar, posterAvatarUrl);
             bindFollowButton(holder, post);
         }
@@ -437,7 +343,26 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private void bindPost(@NonNull final PostViewHolder holder, final Post post, final int position) {
         bindHeader(holder, post);
-        holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
+        // Lắng nghe và hiển thị chính xác số lượng comment thực tế từ cơ sở dữ liệu
+        if (context instanceof AppCompatActivity) {
+            AppCompatActivity activity = (AppCompatActivity) context;
+            PostViewModel postViewModel = new ViewModelProvider(activity).get(PostViewModel.class);
+            if (post.getPostId() != null) {
+                postViewModel.getCommentsByPostId(post.getPostId()).observe(activity, comments -> {
+                    if (comments != null) {
+                        int realCount = comments.size();
+                        holder.tvCommentCount.setText(String.valueOf(realCount));
+                        post.setCommentCount(realCount);
+                    } else {
+                        holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
+                    }
+                });
+            } else {
+                holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
+            }
+        } else {
+            holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
+        }
 
         String content = post.getContent();
         String postId = post.getPostId() != null ? post.getPostId() : String.valueOf(position);
@@ -501,23 +426,9 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             } else {
                 holder.tvHashtag.setText("# Discussion");
             }
-
-        String hashtag = post.getHashtag();
-        if (hashtag != null && !hashtag.isEmpty()) {
-            holder.tvHashtag.setText(hashtag);
-        } else {
-            holder.tvHashtag.setText("# Discussion");
         }
 
         holder.tvHashtag.setOnClickListener(v -> {
-            String tagQuery = post.getHashtag();
-            Intent intent = new Intent(context, SearchActivity.class);
-            if (tagQuery != null && !tagQuery.isEmpty()) {
-                intent.putExtra("SEARCH_QUERY", tagQuery);
-            } else {
-                intent.putExtra("SEARCH_QUERY", "Discussion");
-            }
-            context.startActivity(intent);
             Intent intent = new Intent(context, SearchActivity.class);
             intent.putExtra("SEARCH_QUERY",
                     hashtag != null && !hashtag.isEmpty() ? hashtag : "Discussion");
@@ -559,30 +470,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         });
 
-        holder.btnOptions.setOnClickListener(v -> {
-            android.widget.PopupMenu popup = new android.widget.PopupMenu(context, holder.btnOptions);
-            popup.getMenuInflater().inflate(R.menu.post_options_menu, popup.getMenu());
-            popup.setOnMenuItemClickListener(item -> {
-                int id = item.getItemId();
-                if (id == R.id.action_edit) {
-                    Intent intent = new Intent(context, CreatePostActivity.class);
-                    intent.putExtra("is_edit_mode", true);
-                    intent.putExtra("post_id", post.getPostId());
-                    intent.putExtra("post_content", post.getContent());
-                    intent.putExtra("post_comic_id", post.getComicId());
-                    intent.putExtra("post_comic_title", post.getComicTitle());
-                    intent.putExtra("post_hashtag", post.getHashtag());
-                    intent.putStringArrayListExtra("post_image_urls", post.getImageUris() != null ? new ArrayList<>(post.getImageUris()) : new ArrayList<>());
-                    context.startActivity(intent);
-                    return true;
-                } else if (id == R.id.action_delete) {
-                    if (listener != null) listener.onDeletePost(post);
-                    return true;
-                }
-                return false;
-            });
-            popup.show();
-        });
         // Nút ⋮ có ở cả 2 kiểu header, mở cùng một menu
         View.OnClickListener openOptions = v -> showOptionsMenu(v, post);
         holder.btnOptions.setOnClickListener(openOptions);
@@ -599,7 +486,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             // Mặc định 2 cột; nếu chỉ có 1 ảnh thì ảnh chiếm cả 2 cột
             GridLayoutManager layoutManager = new GridLayoutManager(context, 2);
-            GridLayoutManager layoutManager = new GridLayoutManager(context, 2);
 
             // 👉 Đã sửa từ spanSize thành getSpanSize đúng chuẩn Android
             layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -613,8 +499,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             });
 
             holder.rvPostImages.setLayoutManager(layoutManager);
-            PostImageAdapter imageAdapter = new PostImageAdapter(context, imageUris);
-            holder.rvPostImages.setAdapter(imageAdapter);
             holder.rvPostImages.setAdapter(new PostImageAdapter(context, imageUris));
 
         } else {
@@ -628,7 +512,16 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         popup.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
             if (id == R.id.action_edit) {
-                if (listener != null) listener.onEditPost(post);
+                Intent intent = new Intent(context, CreatePostActivity.class);
+                intent.putExtra("is_edit_mode", true);
+                intent.putExtra("post_id", post.getPostId());
+                if (post.getGroupId() != null) intent.putExtra("group_id", post.getGroupId());
+                intent.putExtra("post_content", post.getContent());
+                intent.putExtra("post_comic_id", post.getComicId());
+                intent.putExtra("post_comic_title", post.getComicTitle());
+                intent.putExtra("post_hashtag", post.getHashtag());
+                intent.putStringArrayListExtra("post_image_urls", post.getImageUris() != null ? new ArrayList<>(post.getImageUris()) : new ArrayList<>());
+                context.startActivity(intent);
                 return true;
             } else if (id == R.id.action_delete) {
                 if (listener != null) listener.onDeletePost(post);

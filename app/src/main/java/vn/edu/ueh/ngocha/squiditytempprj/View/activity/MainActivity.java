@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import android.widget.LinearLayout;
@@ -49,7 +50,6 @@ import vn.edu.ueh.ngocha.squiditytempprj.R;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
-import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.Observer;
@@ -264,6 +264,9 @@ public class MainActivity extends AppCompatActivity {
                         );
                         startActivity(intent);
                     }
+                    else if (id == R.id.action_admin) {
+                        startActivity(new Intent(MainActivity.this, AdminActivity.class));
+                    }
                     else if (id == R.id.action_comic) {
                         Intent intent = new Intent(
                                 MainActivity.this,
@@ -278,6 +281,36 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
             };
+
+    // Hiện mục Admin trong menu nếu là admin; tài khoản bị cấm thì đăng xuất
+    private void checkAdminAndBan() {
+        if (navigationView == null) {
+            return;
+        }
+        final android.view.MenuItem adminItem = navigationView.getMenu().findItem(R.id.action_admin);
+        FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
+        if (me == null) {
+            if (adminItem != null) adminItem.setVisible(false);
+            return;
+        }
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("users").document(me.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    if (doc == null || !doc.exists()) {
+                        return;
+                    }
+                    if (Boolean.TRUE.equals(doc.getBoolean("banned"))) {
+                        FirebaseAuth.getInstance().signOut();
+                        Toast.makeText(MainActivity.this,
+                                "Tài khoản của bạn đã bị khóa bởi admin", Toast.LENGTH_LONG).show();
+                        startActivity(new Intent(MainActivity.this, AuthActivity.class));
+                        return;
+                    }
+                    if (adminItem != null) {
+                        adminItem.setVisible(AdminActivity.ROLE_ADMIN.equals(doc.getString("role")));
+                    }
+                });
+    }
 
     // Id của tài khoản đang đăng nhập, chưa đăng nhập thì dùng "guest"
     private String currentUid() {
@@ -427,20 +460,33 @@ public class MainActivity extends AppCompatActivity {
         imgvAvatar.setOnClickListener(onProfileClickListener);
         navigationView.setNavigationItemSelectedListener(onAvatarsClickListener);
 
+        // Nút tạo bài viết ở trang chủ
+        FloatingActionButton fabCreatePost = findViewById(R.id.fabCreatePost);
+        if (fabCreatePost != null) {
+            fabCreatePost.setOnClickListener(v -> {
+                if (authViewModel.getCurrentUser() == null) {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Yêu cầu đăng nhập")
+                            .setMessage("Bạn cần đăng nhập để đăng bài.")
+                            .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
+                            .setPositiveButton("Đăng nhập", (dialog, which) ->
+                                    startActivity(new Intent(MainActivity.this, AuthActivity.class)))
+                            .show();
+                } else {
+                    startActivity(new Intent(MainActivity.this, CreatePostActivity.class));
+                }
+            });
+        }
+
         rcvpostlist.setLayoutManager(new LinearLayoutManager(this));
 
         postAdapter = new PostAdapter(this, new ArrayList<>(), new PostAdapter.OnPostInteractionListener() {
             @Override
             public void onStampClick(Post post) {
                 String randomStampId = UUID.randomUUID().toString();
-                String myId = GroupActivity.currentUserId();
-                Stamp newStamp = new Stamp(randomStampId, myId, StampType.LIKE);
+                Stamp newStamp = new Stamp(randomStampId, currentUid(), StampType.LIKE);
                 newStamp.setPostId(post.getPostId());
-                if (myId.equals(post.getUserId())) {
-                    postViewModel.addStamp(newStamp);
-                } else {
-                    postViewModel.addStamp(newStamp, post);
-                }
+                postViewModel.addStamp(newStamp, post);
                 Toast.makeText(MainActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
             }
 
@@ -448,13 +494,6 @@ public class MainActivity extends AppCompatActivity {
             public void onCommentSend(Post post, String commentText) {
                 if (commentText != null && !commentText.trim().isEmpty()) {
                     String randomCommentId = UUID.randomUUID().toString();
-                    String myId = GroupActivity.currentUserId();
-                    Comment newComment = new Comment(randomCommentId, myId, post.getPostId(), commentText.trim());
-                    if (myId.equals(post.getUserId())) {
-                        postViewModel.addComment(newComment);
-                    } else {
-                        postViewModel.addComment(newComment, post);
-                    }
                     Comment newComment = new Comment(randomCommentId, currentUid(), post.getPostId(), commentText.trim());
                     postViewModel.addComment(newComment, post);
                     Toast.makeText(MainActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
@@ -599,6 +638,7 @@ public class MainActivity extends AppCompatActivity {
         if (profileViewModel != null) {
             profileViewModel.loadCurrentProfile();
         }
+        checkAdminAndBan();
         // Đăng nhập / đăng xuất / đổi tài khoản thì lọc lại feed
         if (homeFeedViewModel != null) {
             homeFeedViewModel.refreshUser();

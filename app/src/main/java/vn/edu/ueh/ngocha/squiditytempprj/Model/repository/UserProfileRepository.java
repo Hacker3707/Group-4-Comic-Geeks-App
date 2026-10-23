@@ -159,4 +159,50 @@ public class UserProfileRepository {
                             );
                 });
     }
+    public Task<Void> updateProfileInfo(
+            String uid,
+            String username,
+            String bio,
+            String gender,
+            String birthDate
+    ) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user == null || !uid.equals(user.getUid())) {
+            throw new IllegalStateException(
+                    "Không tìm thấy tài khoản đang đăng nhập."
+            );
+        }
+
+        UserProfileChangeRequest request =
+                new UserProfileChangeRequest.Builder()
+                        .setDisplayName(username)
+                        .build();
+
+        return user.updateProfile(request)
+                .continueWithTask(task -> {
+                    if (!task.isSuccessful()) {
+                        Exception error = task.getException();
+                        if (error != null) throw error;
+
+                        throw new IllegalStateException(
+                                "Không thể cập nhật tên tài khoản."
+                        );
+                    }
+
+                    java.util.Map<String, Object> data =
+                            new java.util.HashMap<>();
+
+                    data.put("username", username);
+                    data.put("bio", bio);
+                    data.put("gender", gender);
+                    data.put("birthDate", birthDate);
+                    data.put("email",
+                            user.getEmail() == null ? "" : user.getEmail());
+
+                    return firestore.collection("users")
+                            .document(uid)
+                            .set(data, SetOptions.merge());
+                });
+    }
 }

@@ -108,6 +108,8 @@ public class GroupViewActivity extends AppCompatActivity {
     private TextView txtEmpty;
     private LinearLayout composerLayout;
     private EditText edtComposer;
+    private View fabGroupPost;
+    private boolean composerOpen = false;
     private EditText edtSearchMember;
     private RecyclerView rcvContent;
     private TabLayout tabLayout;
@@ -255,6 +257,16 @@ public class GroupViewActivity extends AppCompatActivity {
         txtEmpty = findViewById(R.id.txtEmpty);
         composerLayout = findViewById(R.id.composerLayout);
         edtComposer = findViewById(R.id.edtComposer);
+        fabGroupPost = findViewById(R.id.fabGroupPost);
+        // Nút + mở màn Tạo bài viết (cùng giao diện với trang chủ), bài sẽ thuộc group này
+        fabGroupPost.setOnClickListener(v -> {
+            if (groupId == null) {
+                return;
+            }
+            Intent intent = new Intent(GroupViewActivity.this, CreatePostActivity.class);
+            intent.putExtra("group_id", groupId);
+            startActivity(intent);
+        });
         edtSearchMember = findViewById(R.id.edtSearchMember);
         rcvContent = findViewById(R.id.rcvGroupContent);
         tabLayout = findViewById(R.id.tabLayout);
@@ -265,19 +277,15 @@ public class GroupViewActivity extends AppCompatActivity {
     }
 
     private void setupRecycler() {
-        postAdapter = PostAdapter.forGroupPage(this);
+        postAdapter = PostAdapter.forGroupPage(this,
+                new vn.edu.ueh.ngocha.squiditytempprj.View.util.SharedPostInteraction(this,
+                        new ViewModelProvider(this).get(PostViewModel.class)));
         memberAdapter = new GroupMemberAdapter();
         memberAdapter.setCurrentUserId(CURRENT_USER_ID);
         memberAdapter.setOnMemberClickListener(new GroupMemberAdapter.OnMemberClickListener() {
             @Override
             public void onMemberClick(GroupMember member) {
                 onMemberClicked(member);
-            }
-        });
-        postAdapter.setOnCommentSendListener(new PostAdapter.OnCommentSendListener() {
-            @Override
-            public void onCommentSend(Post post, String content) {
-                sendComment(post, content);
             }
         });
         rcvContent.setLayoutManager(new LinearLayoutManager(this));
@@ -656,8 +664,8 @@ public class GroupViewActivity extends AppCompatActivity {
             }
         }
         if (selectedTab == TAB_POSTS) {
-            composerLayout.setVisibility(View.VISIBLE);
-            txtTagHelp.setVisibility(View.VISIBLE);
+            fabGroupPost.setVisibility(View.VISIBLE);
+            updateComposerVisibility();
             buildVisiblePosts();
             rcvContent.setAdapter(postAdapter);
             postAdapter.setPosts(visiblePosts);
@@ -707,7 +715,16 @@ public class GroupViewActivity extends AppCompatActivity {
         }
     }
 
+    // Ô soạn bài chỉ hiện khi bấm nút +, bấm lần nữa (hoặc đăng xong) thì thu lại
+    private void updateComposerVisibility() {
+        // Không còn ô soạn bài nhanh trong group, đăng bài qua nút +
+        composerLayout.setVisibility(View.GONE);
+        txtTagHelp.setVisibility(View.GONE);
+        tagSuggestionBar.setVisibility(View.GONE);
+    }
+
     private void hideComposerExtras() {
+        fabGroupPost.setVisibility(View.GONE);
         composerLayout.setVisibility(View.GONE);
         txtTagHelp.setVisibility(View.GONE);
         tagSuggestionBar.setVisibility(View.GONE);
@@ -903,6 +920,8 @@ public class GroupViewActivity extends AppCompatActivity {
             public void onSuccess() {
                 btnSend.setEnabled(true);
                 edtComposer.setText("");
+                composerOpen = false;
+                updateComposerVisibility();
                 Toast.makeText(GroupViewActivity.this, "Đã đăng bài", Toast.LENGTH_SHORT).show();
             }
 

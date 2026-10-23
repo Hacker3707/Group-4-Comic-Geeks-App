@@ -109,45 +109,55 @@ public class ChatSyncManager {
         registrations.clear();
     }
 
+    // Follow do chức năng Follow ghi lên Firestore (followerId, followingId), không có "participants",
+    // nên nghe 2 truy vấn: mình là người follow, và mình là người được follow
     private void listenFollows(String uid) {
+        EventListener<QuerySnapshot> followListener = createFollowListener();
         registrations.add(firestore.collection(FOLLOWS)
-                .whereArrayContains("participants", uid)
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                .whereEqualTo("followerId", uid)
+                .addSnapshotListener(followListener));
+        registrations.add(firestore.collection(FOLLOWS)
+                .whereEqualTo("followingId", uid)
+                .addSnapshotListener(followListener));
+    }
+
+    private EventListener<QuerySnapshot> createFollowListener() {
+        return new EventListener<QuerySnapshot>() {
+        @Override
+        public void onEvent(@Nullable QuerySnapshot snapshots,
+                            @Nullable FirebaseFirestoreException error) {
+            if (error != null) {
+                Log.e(TAG, "Lỗi nhận follow: " + error.getMessage());
+                return;
+            }
+            if (snapshots == null) {
+                return;
+            }
+            for (DocumentChange change : snapshots.getDocumentChanges()) {
+                final String docId = change.getDocument().getId();
+                final String followerId = change.getDocument().getString("followerId");
+                final String followingId = change.getDocument().getString("followingId");
+                if (followerId == null || followingId == null) {
+                    continue;
+                }
+                final boolean removed = change.getType() == DocumentChange.Type.REMOVED;
+                executor.execute(new Runnable() {
                     @Override
-                    public void onEvent(@Nullable QuerySnapshot snapshots,
-                                        @Nullable FirebaseFirestoreException error) {
-                        if (error != null) {
-                            Log.e(TAG, "Lỗi nhận follow: " + error.getMessage());
-                            return;
-                        }
-                        if (snapshots == null) {
-                            return;
-                        }
-                        for (DocumentChange change : snapshots.getDocumentChanges()) {
-                            final String docId = change.getDocument().getId();
-                            final String followerId = change.getDocument().getString("followerId");
-                            final String followingId = change.getDocument().getString("followingId");
-                            if (followerId == null || followingId == null) {
-                                continue;
-                            }
-                            final boolean removed = change.getType() == DocumentChange.Type.REMOVED;
-                            executor.execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (removed) {
-                                        db.followDao().unfollow(followerId, followingId);
-                                    } else {
-                                        db.followDao().insert(new Follow(docId, followerId, followingId));
-                                    }
-                                }
-                            });
-                            if (!removed) {
-                                fetchUser(followerId);
-                                fetchUser(followingId);
-                            }
+                    public void run() {
+                        if (removed) {
+                            db.followDao().unfollow(followerId, followingId);
+                        } else {
+                            db.followDao().insert(new Follow(docId, followerId, followingId));
                         }
                     }
-                }));
+                });
+                if (!removed) {
+                    fetchUser(followerId);
+                    fetchUser(followingId);
+                }
+            }
+        }
+        };
     }
 
     private void listenChatRooms(String uid) {

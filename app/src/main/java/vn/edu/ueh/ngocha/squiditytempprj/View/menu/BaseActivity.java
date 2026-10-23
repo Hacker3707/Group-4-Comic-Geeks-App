@@ -151,6 +151,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         NotificationPopup.attach(this, findViewById(R.id.btnNotification));
 
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (profileViewModel != null) {
+            profileViewModel.loadCurrentProfile();
+        }
+    }
 
     // Mỗi Activity con tự cung cấp layout nội dung
     protected abstract int getContentLayoutId();

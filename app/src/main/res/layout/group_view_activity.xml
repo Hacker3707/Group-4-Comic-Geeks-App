@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/group_header"
-    android:orientation="vertical"
     tools:context=".View.activity.GroupViewActivity">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/group_header"
+    android:orientation="vertical">
 
     <!-- Thanh tiêu đề -->
     <LinearLayout
@@ -361,6 +366,7 @@
             <!-- Ô viết bài -->
             <LinearLayout
                 android:id="@+id/composerLayout"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="17dp"
@@ -417,6 +423,7 @@
             <!-- Dòng hướng dẫn hashtag (chỉ hiện ở tab Bài viết) -->
             <TextView
                 android:id="@+id/txtTagHelp"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
@@ -583,3 +590,20 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>
+
+    <!-- Nút + đăng bài trong group (bấm để mở / đóng ô soạn bài) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabGroupPost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="40dp"
+        android:contentDescription="Đăng bài trong nhóm"
+        android:src="@android:drawable/ic_input_add"
+        android:visibility="gone"
+        app:backgroundTint="#786FF8"
+        app:elevation="6dp"
+        app:fabCustomSize="60dp"
+        app:tint="#FFFFFF" />
+</FrameLayout>
