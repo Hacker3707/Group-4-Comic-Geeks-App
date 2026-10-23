@@ -10,7 +10,7 @@
         android:layout_height="180dp">
 
         <ImageView
-            android:id="@+id/imgvAvatar"
+            android:id="@+id/imgProfileCover"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:src="@drawable/ic_launcher_background"

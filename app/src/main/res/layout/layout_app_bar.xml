@@ -13,18 +13,18 @@
             android:id="@+id/btnBackHome"
             android:layout_width="36dp"
             android:layout_height="40dp"
-            android:padding="8dp"
             android:background="@android:color/transparent"
             android:contentDescription="Quay lại"
-            android:src="@drawable/ic_arrow_back"
+            android:padding="8dp"
             android:scaleType="fitCenter"
+            android:src="@drawable/ic_arrow_left"
             android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/imgvAvatar"
+            android:id="@+id/imgMainAvatar"
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_marginStart="4dp"
@@ -34,8 +34,8 @@
             app:layout_constraintStart_toEndOf="@id/btnBackHome"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
-            app:strokeColor="#FFFFFF"
 
+            app:strokeColor="#FFFFFF"
             app:strokeWidth="2dp" />
 
         <TextView
@@ -43,16 +43,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:maxWidth="110dp"
             android:ellipsize="end"
+            android:maxWidth="110dp"
             android:maxLines="1"
             android:text="Khách"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/imgvAvatar"
-            app:layout_constraintTop_toTopOf="@id/imgvAvatar"
-            app:layout_constraintBottom_toBottomOf="@id/imgvAvatar" />
+            app:layout_constraintBottom_toBottomOf="@id/imgMainAvatar"
+            app:layout_constraintStart_toEndOf="@id/imgMainAvatar"
+            app:layout_constraintTop_toTopOf="@id/imgMainAvatar" />
 
         <ImageView
             android:id="@+id/imageView"
@@ -84,7 +84,7 @@
             android:id="@+id/btnNotification"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Thông báo"
             android:scaleType="centerInside"

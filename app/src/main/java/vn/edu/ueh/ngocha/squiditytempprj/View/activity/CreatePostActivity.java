@@ -46,6 +46,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.PostRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ImagePreviewAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ComicViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
 public class CreatePostActivity extends AppCompatActivity {
@@ -55,6 +56,11 @@ public class CreatePostActivity extends AppCompatActivity {
     private MaterialAutoCompleteTextView edtComicSearch;
     private MaterialButton btnPublish;
     private ImageButton btnCancelPost;
+    private ComicViewModel comicViewModel;
+    private ArrayAdapter<String> mangaAdapter;
+
+    private final Map<String, String> titleToIdMap = new HashMap<>();
+    private final String[] selectedComicInfo = new String[2];
     private PostViewModel postViewModel;
     private String currentUserId = "";
     private String currentUsername = "Khách";
@@ -67,8 +73,6 @@ public class CreatePostActivity extends AppCompatActivity {
     private ActivityResultLauncher<
             androidx.activity.result.PickVisualMediaRequest
             > imagePickerLauncher;
-
-    private final String[] selectedComicInfo = {"Discussion", ""}; // [0]: comicId, [1]: comicTitle
 
     private boolean isEditMode = false;
     // Có giá trị khi đăng bài từ trang group (bài sẽ thuộc group này)
@@ -91,6 +95,75 @@ public class CreatePostActivity extends AppCompatActivity {
         rvImagePreview = findViewById(R.id.rvImagePreview);
 
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
+        comicViewModel = new ViewModelProvider(this)
+                .get(ComicViewModel.class);
+
+        mangaAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                new ArrayList<>()
+        );
+
+        edtComicSearch.setAdapter(mangaAdapter);
+
+        comicViewModel.getSearchResults().observe(this, mangaList -> {
+            if (mangaList == null) return;
+
+            List<String> titles = new ArrayList<>();
+            Map<String, String> newTitleToIdMap = new HashMap<>();
+
+            for (MangaData manga : mangaList) {
+                if (manga == null
+                        || manga.getId() == null
+                        || manga.getAttributes() == null
+                        || manga.getAttributes().getTitle() == null) {
+                    continue;
+                }
+
+                Map<String, String> titleMap =
+                        manga.getAttributes().getTitle();
+
+                String title = titleMap.get("en");
+
+                if (title == null || title.trim().isEmpty()) {
+                    if (!titleMap.isEmpty()) {
+                        title = titleMap.values().iterator().next();
+                    }
+                }
+
+                if (title != null && !title.trim().isEmpty()) {
+                    titles.add(title);
+                    newTitleToIdMap.put(title, manga.getId());
+                }
+            }
+
+            titleToIdMap.clear();
+            titleToIdMap.putAll(newTitleToIdMap);
+
+            mangaAdapter.clear();
+            mangaAdapter.addAll(titles);
+            mangaAdapter.notifyDataSetChanged();
+
+            if (!titles.isEmpty() && edtComicSearch.hasFocus()) {
+                edtComicSearch.showDropDown();
+            }
+        });
+
+        edtComicSearch.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedTitle = mangaAdapter.getItem(position);
+
+            if (selectedTitle != null
+                    && titleToIdMap.containsKey(selectedTitle)) {
+                selectedComicInfo[0] = titleToIdMap.get(selectedTitle);
+                selectedComicInfo[1] = selectedTitle;
+
+                Toast.makeText(
+                        CreatePostActivity.this,
+                        "Đã liên kết truyện: " + selectedTitle,
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
 
         rvImagePreview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         imagePreviewAdapter = new ImagePreviewAdapter(selectedImageUris, position -> {
@@ -270,49 +343,21 @@ public class CreatePostActivity extends AppCompatActivity {
         });
     }
 
-    private void searchMangaFromApi(String query, Map<String, String> titleToIdMap) {
-        MangaDexApi api = RetrofitClient.getInstance().create(MangaDexApi.class);
-        api.searchManga(query, 5, 0, "cover_art")
-                .enqueue(new Callback<MangaResponse>() {
-                    @Override
-                    public void onResponse(Call<MangaResponse> call, Response<MangaResponse> response) {
-                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                            List<MangaData> mangaList = response.body().getData();
-                            List<String> titles = new ArrayList<>();
-                            titleToIdMap.clear();
+    private void searchMangaFromApi(
+            String query,
+            Map<String, String> titleToIdMap
+    ) {
+        if (query == null || query.trim().isEmpty()) {
+            comicViewModel.searchManga("", 5, 0, "cover_art");
+            return;
+        }
 
-                            for (MangaData manga : mangaList) {
-                                if (manga.getAttributes() != null && manga.getAttributes().getTitle() != null) {
-                                    String title = manga.getAttributes().getTitle().get("en");
-                                    if (title == null && !manga.getAttributes().getTitle().isEmpty()) {
-                                        title = manga.getAttributes().getTitle().values().iterator().next();
-                                    }
-                                    if (title != null) {
-                                        titles.add(title);
-                                        titleToIdMap.put(title, manga.getId());
-                                    }
-                                }
-                            }
-
-                            ArrayAdapter<String> adapter = new ArrayAdapter<>(CreatePostActivity.this, android.R.layout.simple_dropdown_item_1line, titles);
-                            edtComicSearch.setAdapter(adapter);
-                            adapter.notifyDataSetChanged();
-                            edtComicSearch.showDropDown();
-
-                            edtComicSearch.setOnItemClickListener((parent, view, position, id) -> {
-                                String selectedTitle = adapter.getItem(position);
-                                if (selectedTitle != null && titleToIdMap.containsKey(selectedTitle)) {
-                                    selectedComicInfo[0] = titleToIdMap.get(selectedTitle); // Lưu ID chuẩn
-                                    selectedComicInfo[1] = selectedTitle;               // Lưu Tên hiển thị
-                                    Toast.makeText(CreatePostActivity.this, "Đã liên kết truyện: " + selectedTitle, Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<MangaResponse> call, Throwable t) {}
-                });
+        comicViewModel.searchManga(
+                query.trim(),
+                5,
+                0,
+                "cover_art"
+        );
     }
 
     private interface OnMultiImageUploadListener {

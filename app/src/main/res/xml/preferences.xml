@@ -74,6 +74,18 @@
             android:title="App version"
             android:summary="1.0.0" />
 
+        <Preference
+            android:key="app_info"
+            android:title="App info" />
+
+        <Preference
+            android:key="app_license"
+            android:title="App license" />
+
+        <Preference
+            android:key="app_credits"
+            android:title="App credits" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>
