@@ -11,25 +11,34 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
 
 public class CommentRepository {
     private CommentDao mCommentDao;
+    private final PostSyncManager syncManager;
 
     public CommentRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
+        syncManager = PostSyncManager.getInstance(application);
         mCommentDao = db.commentDao();
     }
     public LiveData<List<Comment>> getCommentsByPostId(String postId) {
         return mCommentDao.getCommentsByPostId(postId);
     }
 
+    public LiveData<List<Comment>> getAllComments() {
+        return mCommentDao.getAllComments();
+    }
+
     public void insert(Comment comment) {
         new insertAsyncTask(mCommentDao).execute(comment);
+        syncManager.pushComment(comment); // Để máy khác cũng thấy bình luận này
     }
 
     public void update(Comment comment) {
         new updateAsyncTask(mCommentDao).execute(comment);
+        syncManager.pushComment(comment);
     }
 
     public void delete(Comment comment) {
         new deleteAsyncTask(mCommentDao).execute(comment);
+        syncManager.deleteCommentRemote(comment.getCommentId());
     }
 
     private static class insertAsyncTask extends AsyncTask<Comment, Void, Void> {

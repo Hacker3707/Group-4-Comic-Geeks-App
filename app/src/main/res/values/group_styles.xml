@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Avatar nhóm hình vuông bo góc (header bài đăng group ở trang chủ) -->
+    <style name="PostGroupAvatarShape" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
     <!-- Bo tròn ảnh đại diện (dùng với ShapeableImageView) -->
     <style name="GroupCircleImage" parent="">
         <item name="cornerFamily">rounded</item>

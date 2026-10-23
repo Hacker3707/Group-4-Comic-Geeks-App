@@ -2,14 +2,20 @@ package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.SystemBarStyle;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -19,10 +25,13 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Group;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.GroupImageUploader;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.GroupPermissionUtils;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.GroupViewModel;
 
@@ -37,20 +46,63 @@ public class GroupSettingsActivity extends AppCompatActivity {
 
     public static final String EXTRA_GROUP_ID = "group_id";
 
+    private static final String STATE_COVER_URI = "cover_uri";
+    private static final String STATE_AVATAR_URI = "avatar_uri";
+    private static final String STATE_COVER_URL = "cover_url";
+    private static final String STATE_AVATAR_URL = "avatar_url";
+    private static final String STATE_FIELDS_FILLED = "fields_filled";
+
     private GroupViewModel groupViewModel;
     private String groupId;
     private Group currentGroup;
 
     private EditText edtGroupName;
     private EditText edtGroupDescription;
-    private EditText edtCoverUrl;
-    private EditText edtAvatarUrl;
+    private ImageView imgCoverPreview;
+    private ImageView imgAvatarPreview;
+    private TextView txtCoverHint;
+    private TextView txtAvatarHint;
+    private TextView btnRemoveCover;
+    private TextView btnRemoveAvatar;
     private TextView btnSaveSettings;
     private TextView btnDissolveGroup;
 
     private boolean permissionChecked = false;
     private boolean fieldsFilled = false;
     private boolean saving = false;
+    private boolean uploading = false;
+
+    // Link ảnh đang có của nhóm (rỗng nếu chưa có hoặc người dùng bấm "Xóa ảnh")
+    private String currentCoverUrl = "";
+    private String currentAvatarUrl = "";
+    // Ảnh mới vừa chọn từ thư viện (null nếu không đổi)
+    private Uri coverUri = null;
+    private Uri avatarUri = null;
+
+    // Photo Picker của Android: chọn ảnh mà không cần xin quyền đọc bộ nhớ
+    private final ActivityResultLauncher<PickVisualMediaRequest> pickCoverLauncher =
+            registerForActivityResult(new ActivityResultContracts.PickVisualMedia(),
+                    new ActivityResultCallback<Uri>() {
+                        @Override
+                        public void onActivityResult(Uri uri) {
+                            if (uri != null) {
+                                coverUri = uri;
+                                refreshCoverPreview();
+                            }
+                        }
+                    });
+
+    private final ActivityResultLauncher<PickVisualMediaRequest> pickAvatarLauncher =
+            registerForActivityResult(new ActivityResultContracts.PickVisualMedia(),
+                    new ActivityResultCallback<Uri>() {
+                        @Override
+                        public void onActivityResult(Uri uri) {
+                            if (uri != null) {
+                                avatarUri = uri;
+                                refreshAvatarPreview();
+                            }
+                        }
+                    });
     private boolean dissolving = false;
 
     @Override
@@ -73,9 +125,42 @@ public class GroupSettingsActivity extends AppCompatActivity {
         bindViews();
         setupListeners();
 
+        // Xoay màn hình thì giữ lại ảnh đã chọn/đã xóa và chữ đang sửa (không điền lại từ dữ liệu cũ)
+        if (savedInstanceState != null) {
+            fieldsFilled = savedInstanceState.getBoolean(STATE_FIELDS_FILLED, false);
+            currentCoverUrl = nonNull(savedInstanceState.getString(STATE_COVER_URL));
+            currentAvatarUrl = nonNull(savedInstanceState.getString(STATE_AVATAR_URL));
+            String savedCover = savedInstanceState.getString(STATE_COVER_URI);
+            if (savedCover != null) {
+                coverUri = Uri.parse(savedCover);
+            }
+            String savedAvatar = savedInstanceState.getString(STATE_AVATAR_URI);
+            if (savedAvatar != null) {
+                avatarUri = Uri.parse(savedAvatar);
+            }
+            if (fieldsFilled) {
+                refreshCoverPreview();
+                refreshAvatarPreview();
+            }
+        }
+
         groupViewModel = new ViewModelProvider(this).get(GroupViewModel.class);
         observeData();
         groupViewModel.loadGroup(groupId);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(STATE_FIELDS_FILLED, fieldsFilled);
+        outState.putString(STATE_COVER_URL, currentCoverUrl);
+        outState.putString(STATE_AVATAR_URL, currentAvatarUrl);
+        if (coverUri != null) {
+            outState.putString(STATE_COVER_URI, coverUri.toString());
+        }
+        if (avatarUri != null) {
+            outState.putString(STATE_AVATAR_URI, avatarUri.toString());
+        }
     }
 
     private void setupInsets() {
@@ -96,8 +181,12 @@ public class GroupSettingsActivity extends AppCompatActivity {
     private void bindViews() {
         edtGroupName = findViewById(R.id.edtGroupName);
         edtGroupDescription = findViewById(R.id.edtGroupDescription);
-        edtCoverUrl = findViewById(R.id.edtCoverUrl);
-        edtAvatarUrl = findViewById(R.id.edtAvatarUrl);
+        imgCoverPreview = findViewById(R.id.imgCoverPreview);
+        imgAvatarPreview = findViewById(R.id.imgAvatarPreview);
+        txtCoverHint = findViewById(R.id.txtCoverHint);
+        txtAvatarHint = findViewById(R.id.txtAvatarHint);
+        btnRemoveCover = findViewById(R.id.btnRemoveCover);
+        btnRemoveAvatar = findViewById(R.id.btnRemoveAvatar);
         btnSaveSettings = findViewById(R.id.btnSaveSettings);
         btnDissolveGroup = findViewById(R.id.btnDissolveGroup);
     }
@@ -107,6 +196,46 @@ public class GroupSettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 finish();
+            }
+        });
+
+        findViewById(R.id.layoutCoverPick).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!saving && !uploading) {
+                    pickCoverLauncher.launch(imageOnlyRequest());
+                }
+            }
+        });
+
+        findViewById(R.id.layoutAvatarPick).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!saving && !uploading) {
+                    pickAvatarLauncher.launch(imageOnlyRequest());
+                }
+            }
+        });
+
+        btnRemoveCover.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!saving && !uploading) {
+                    coverUri = null;
+                    currentCoverUrl = "";
+                    refreshCoverPreview();
+                }
+            }
+        });
+
+        btnRemoveAvatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!saving && !uploading) {
+                    avatarUri = null;
+                    currentAvatarUrl = "";
+                    refreshAvatarPreview();
+                }
             }
         });
 
@@ -180,8 +309,64 @@ public class GroupSettingsActivity extends AppCompatActivity {
     private void fillFields(Group group) {
         edtGroupName.setText(group.getGroupName());
         edtGroupDescription.setText(group.getDescription());
-        edtCoverUrl.setText(group.getCoverImageUrl());
-        edtAvatarUrl.setText(group.getAvatarUrl());
+        currentCoverUrl = nonNull(group.getCoverImageUrl());
+        currentAvatarUrl = nonNull(group.getAvatarUrl());
+        refreshCoverPreview();
+        refreshAvatarPreview();
+    }
+
+    private String nonNull(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    // Chỉ cho chọn ảnh (không chọn video)
+    private PickVisualMediaRequest imageOnlyRequest() {
+        return new PickVisualMediaRequest.Builder()
+                .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                .build();
+    }
+
+    // Ưu tiên ảnh vừa chọn, sau đó đến ảnh hiện có của nhóm, không có thì hiện nền tím mặc định
+    private void refreshCoverPreview() {
+        if (coverUri != null) {
+            Glide.with(this).load(coverUri).centerCrop().into(imgCoverPreview);
+            txtCoverHint.setVisibility(View.GONE);
+            btnRemoveCover.setVisibility(View.VISIBLE);
+        } else if (!currentCoverUrl.isEmpty()) {
+            Glide.with(this).load(currentCoverUrl)
+                    .placeholder(R.drawable.group_cover_placeholder)
+                    .error(R.drawable.group_cover_placeholder)
+                    .centerCrop()
+                    .into(imgCoverPreview);
+            txtCoverHint.setVisibility(View.GONE);
+            btnRemoveCover.setVisibility(View.VISIBLE);
+        } else {
+            Glide.with(this).clear(imgCoverPreview);
+            imgCoverPreview.setImageResource(R.drawable.group_cover_placeholder);
+            txtCoverHint.setVisibility(View.VISIBLE);
+            btnRemoveCover.setVisibility(View.GONE);
+        }
+    }
+
+    private void refreshAvatarPreview() {
+        if (avatarUri != null) {
+            Glide.with(this).load(avatarUri).centerCrop().into(imgAvatarPreview);
+            txtAvatarHint.setVisibility(View.GONE);
+            btnRemoveAvatar.setVisibility(View.VISIBLE);
+        } else if (!currentAvatarUrl.isEmpty()) {
+            Glide.with(this).load(currentAvatarUrl)
+                    .placeholder(R.drawable.group_cover_placeholder)
+                    .error(R.drawable.group_cover_placeholder)
+                    .centerCrop()
+                    .into(imgAvatarPreview);
+            txtAvatarHint.setVisibility(View.GONE);
+            btnRemoveAvatar.setVisibility(View.VISIBLE);
+        } else {
+            Glide.with(this).clear(imgAvatarPreview);
+            imgAvatarPreview.setImageResource(R.drawable.group_cover_placeholder);
+            txtAvatarHint.setVisibility(View.VISIBLE);
+            btnRemoveAvatar.setVisibility(View.GONE);
+        }
     }
 
     // =================================
@@ -189,13 +374,11 @@ public class GroupSettingsActivity extends AppCompatActivity {
     // =================================
 
     private void saveSettings() {
-        if (saving || dissolving || currentGroup == null) {
+        if (saving || uploading || dissolving || currentGroup == null) {
             return;
         }
-        String name = edtGroupName.getText().toString().trim();
-        String description = edtGroupDescription.getText().toString().trim();
-        String coverUrl = edtCoverUrl.getText().toString().trim();
-        String avatarUrl = edtAvatarUrl.getText().toString().trim();
+        final String name = edtGroupName.getText().toString().trim();
+        final String description = edtGroupDescription.getText().toString().trim();
 
         if (name.isEmpty()) {
             edtGroupName.setError(getString(R.string.create_group_error_name));
@@ -203,13 +386,39 @@ public class GroupSettingsActivity extends AppCompatActivity {
             return;
         }
 
-        saving = true;
+        // Tải ảnh mới lên trước (nếu có chọn), có link rồi mới lưu nhóm
+        uploading = true;
         btnSaveSettings.setEnabled(false);
-        groupViewModel.updateGroupInfo(currentGroup, name, description, coverUrl, avatarUrl);
+        btnSaveSettings.setText(R.string.group_image_uploading);
+        GroupImageUploader.uploadImages(this, coverUri, avatarUri, currentCoverUrl, currentAvatarUrl,
+                new GroupImageUploader.ResultListener() {
+                    @Override
+                    public void onDone(String coverUrl, String avatarUrl) {
+                        if (isFinishing() || isDestroyed()) {
+                            return;
+                        }
+                        uploading = false;
+                        saving = true;
+                        groupViewModel.updateGroupInfo(
+                                currentGroup, name, description, coverUrl, avatarUrl);
+                    }
+
+                    @Override
+                    public void onError(int messageResId) {
+                        if (isFinishing() || isDestroyed()) {
+                            return;
+                        }
+                        uploading = false;
+                        btnSaveSettings.setEnabled(true);
+                        btnSaveSettings.setText(R.string.group_settings_save);
+                        Toast.makeText(GroupSettingsActivity.this, messageResId,
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 
     private void confirmDissolve() {
-        if (saving || dissolving || currentGroup == null) {
+        if (saving || uploading || dissolving || currentGroup == null) {
             return;
         }
         new AlertDialog.Builder(this)

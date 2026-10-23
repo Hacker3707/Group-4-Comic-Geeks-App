@@ -13,6 +13,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Stamp;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.CommentRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.NotificationRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.PostRepository;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.PostSyncManager;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.StampRepository;
 
 public class PostViewModel extends AndroidViewModel {
@@ -30,6 +31,9 @@ public class PostViewModel extends AndroidViewModel {
         stampRepository = new StampRepository(application);
         notificationRepository = new NotificationRepository(application);
         allPosts = postRepository.getAllPosts();
+
+        // Lắng nghe bài viết và bình luận trên Firestore, chép về Room cho mọi màn hình dùng chung
+        PostSyncManager.getInstance(application).start();
     }
 
     public LiveData<List<Post>> getAllPosts() {
@@ -73,6 +77,10 @@ public class PostViewModel extends AndroidViewModel {
         notificationRepository.sendNotification(post.getUserId(), comment.getUserId(), actorName,
                 NotificationType.COMMENT, post.getPostId(),
                 actorName + " đã bình luận bài viết của bạn: " + text);
+    }
+
+    public LiveData<List<Comment>> getAllComments() {
+        return commentRepository.getAllComments();
     }
 
     public LiveData<List<Comment>> getCommentsByPostId(String postId) {

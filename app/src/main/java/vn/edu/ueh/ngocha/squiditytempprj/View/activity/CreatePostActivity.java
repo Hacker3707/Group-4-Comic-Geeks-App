@@ -202,7 +202,7 @@ public class CreatePostActivity extends AppCompatActivity {
                         progressDialog.show();
 
                         uploadMultipleImagesToStorage(newPostId, imageUrls -> {
-                            Post newPost = new Post(newPostId, "Meringoc_17", currentComicId, content, imageUrls);
+                            Post newPost = new Post(newPostId, GroupActivity.currentUserId(), currentComicId, content, imageUrls);
                             newPost.setComicTitle(currentComicTitle);
                             newPost.setHashtag(finalHashtag);
                             uploadPostToCloud(newPost, progressDialog);
@@ -211,7 +211,7 @@ public class CreatePostActivity extends AppCompatActivity {
                         progressDialog.setMessage("Đang đăng bài viết...");
                         progressDialog.show();
 
-                        Post newPost = new Post(newPostId, "Meringoc_17", currentComicId, content, null);
+                        Post newPost = new Post(newPostId, GroupActivity.currentUserId(), currentComicId, content, null);
                         newPost.setComicTitle(currentComicTitle);
                         newPost.setHashtag(finalHashtag);
                         uploadPostToCloud(newPost, progressDialog);
@@ -341,7 +341,7 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     private void updatePostOnCloud(String postId, String content, String comicId, String comicTitle, String hashtag, List<String> imageUrls, ProgressDialog progressDialog) {
-        Post updatedPost = new Post(postId, "Meringoc_17", comicId, content, imageUrls);
+        Post updatedPost = new Post(postId, GroupActivity.currentUserId(), comicId, content, imageUrls);
         updatedPost.setComicTitle(comicTitle);
         updatedPost.setHashtag(hashtag);
 

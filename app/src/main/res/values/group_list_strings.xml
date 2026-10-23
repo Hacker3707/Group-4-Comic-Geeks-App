@@ -13,9 +13,15 @@
     <string name="create_group_name_hint">Ví dụ: Manga Lovers</string>
     <string name="create_group_desc_label">Mô tả</string>
     <string name="create_group_desc_hint">Giới thiệu về nhóm...</string>
-    <string name="create_group_cover_label">Link ảnh bìa (không bắt buộc)</string>
+    <string name="create_group_cover_label">Ảnh bìa (không bắt buộc)</string>
     <string name="create_group_cover_hint">https://...</string>
     <string name="create_group_submit">Tạo nhóm</string>
+    <string name="group_image_pick_cover">Chạm để chọn ảnh bìa từ thư viện</string>
+    <string name="group_image_pick_avatar">Chọn ảnh</string>
+    <string name="group_image_remove">Xóa ảnh</string>
+    <string name="group_image_uploading">Đang tải ảnh lên...</string>
+    <string name="group_image_upload_failed">Không tải được ảnh lên. Kiểm tra kết nối mạng rồi thử lại.</string>
+    <string name="group_image_read_failed">Không đọc được ảnh đã chọn.</string>
     <string name="create_group_error_name">Vui lòng nhập tên nhóm</string>
     <string name="create_group_success">Đã tạo nhóm</string>
 </resources>

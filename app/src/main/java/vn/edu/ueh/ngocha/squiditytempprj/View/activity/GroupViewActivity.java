@@ -32,19 +32,24 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Group;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupMember;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupRole;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.PostRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.GroupMemberAdapter;
-import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.GroupPostAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.GroupHashtagUtils;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.GroupPermissionUtils;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.SearchTextUtils;
@@ -84,6 +89,7 @@ public class GroupViewActivity extends AppCompatActivity {
 
     private static final int TAB_POSTS = 0;
     private static final int TAB_MEMBERS = 1;
+    private static final String STATE_SELECTED_TAB = "selected_tab";
 
     private GroupViewModel groupViewModel;
     private PostViewModel postViewModel;
@@ -110,7 +116,7 @@ public class GroupViewActivity extends AppCompatActivity {
     private View tagSuggestionBar;
     private TextView txtTagHelp;
 
-    private GroupPostAdapter postAdapter;
+    private PostAdapter postAdapter;
     private GroupMemberAdapter memberAdapter;
 
     private String groupId;
@@ -125,6 +131,7 @@ public class GroupViewActivity extends AppCompatActivity {
     private int hashStart = -1;
 
     private final List<Post> allPosts = new ArrayList<>();
+    private final List<Comment> allComments = new ArrayList<>();
     private final List<Post> groupPosts = new ArrayList<>();
     private final List<Post> visiblePosts = new ArrayList<>();
     private final List<GroupMember> groupMembers = new ArrayList<>();
@@ -180,6 +187,21 @@ public class GroupViewActivity extends AppCompatActivity {
         };
         observeData();
         loadGroupData();
+
+        // Xoay màn hình thì mở lại đúng tab đang xem (Activity bị tạo lại nên selectedTab bị reset)
+        if (savedInstanceState != null) {
+            int savedTab = savedInstanceState.getInt(STATE_SELECTED_TAB, TAB_POSTS);
+            TabLayout.Tab tab = tabLayout.getTabAt(savedTab);
+            if (tab != null) {
+                tab.select();
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_SELECTED_TAB, selectedTab);
     }
 
     @Override
@@ -243,13 +265,19 @@ public class GroupViewActivity extends AppCompatActivity {
     }
 
     private void setupRecycler() {
-        postAdapter = new GroupPostAdapter();
+        postAdapter = PostAdapter.forGroupPage(this);
         memberAdapter = new GroupMemberAdapter();
         memberAdapter.setCurrentUserId(CURRENT_USER_ID);
         memberAdapter.setOnMemberClickListener(new GroupMemberAdapter.OnMemberClickListener() {
             @Override
             public void onMemberClick(GroupMember member) {
                 onMemberClicked(member);
+            }
+        });
+        postAdapter.setOnCommentSendListener(new PostAdapter.OnCommentSendListener() {
+            @Override
+            public void onCommentSend(Post post, String content) {
+                sendComment(post, content);
             }
         });
         rcvContent.setLayoutManager(new LinearLayoutManager(this));
@@ -433,6 +461,55 @@ public class GroupViewActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // Bình luận của các bài viết (hiện ngay trong khung bài)
+        postViewModel.getAllComments().observe(this, new Observer<List<Comment>>() {
+            @Override
+            public void onChanged(List<Comment> comments) {
+                allComments.clear();
+                if (comments != null) {
+                    allComments.addAll(comments);
+                }
+                postAdapter.setComments(groupCommentsByPost());
+                watchUsers();
+            }
+        });
+    }
+
+    // Gom bình luận theo bài viết, cũ trước mới sau
+    private Map<String, List<Comment>> groupCommentsByPost() {
+        Map<String, List<Comment>> result = new HashMap<>();
+        for (Comment comment : allComments) {
+            List<Comment> list = result.get(comment.getPostId());
+            if (list == null) {
+                list = new ArrayList<>();
+                result.put(comment.getPostId(), list);
+            }
+            list.add(comment);
+        }
+        for (List<Comment> list : result.values()) {
+            Collections.sort(list, new Comparator<Comment>() {
+                @Override
+                public int compare(Comment a, Comment b) {
+                    if (a.getTimestamp() == null || b.getTimestamp() == null) {
+                        return 0;
+                    }
+                    return a.getTimestamp().compareTo(b.getTimestamp());
+                }
+            });
+        }
+        return result;
+    }
+
+    private void sendComment(Post post, String content) {
+        Comment comment = new Comment(UUID.randomUUID().toString(), CURRENT_USER_ID,
+                post.getPostId(), content);
+        if (CURRENT_USER_ID.equals(post.getUserId())) {
+            // Bình luận bài của chính mình thì không cần báo cho mình
+            postViewModel.addComment(comment);
+        } else {
+            postViewModel.addComment(comment, post);
+        }
     }
 
     // Theo dõi tên + ảnh của mọi người đang xuất hiện trong nhóm (thành viên và tác giả bài viết).
@@ -444,9 +521,17 @@ public class GroupViewActivity extends AppCompatActivity {
                 ids.add(member.getUserId());
             }
         }
+        List<String> groupPostIds = new ArrayList<>();
         for (Post post : groupPosts) {
+            groupPostIds.add(post.getPostId());
             if (post.getUserId() != null && !post.getUserId().isEmpty()) {
                 ids.add(post.getUserId());
+            }
+        }
+        for (Comment comment : allComments) {
+            if (groupPostIds.contains(comment.getPostId())
+                    && comment.getUserId() != null && !comment.getUserId().isEmpty()) {
+                ids.add(comment.getUserId());
             }
         }
 
@@ -803,9 +888,30 @@ public class GroupViewActivity extends AppCompatActivity {
         if (content.isEmpty()) {
             return;
         }
-        //Post post = new Post(UUID.randomUUID().toString(), CURRENT_USER_ID, null, content);
-        //post.setGroupId(groupId);
-        //postViewModel.insertPost(post);
-        edtComposer.setText("");
+
+        // Chống bấm gửi nhiều lần trong lúc đang đăng
+        final View btnSend = findViewById(R.id.btnSendPost);
+        btnSend.setEnabled(false);
+
+        // Bài trong nhóm = Post bình thường nhưng có groupId (không gắn truyện, không ảnh)
+        Post post = new Post(UUID.randomUUID().toString(), CURRENT_USER_ID, null, content, null);
+        post.setGroupId(groupId);
+
+        // Đẩy lên Firestore, thành công thì bài được lưu vào Room và tự hiện trong danh sách
+        postViewModel.uploadPostToFirestore(post, new PostRepository.OnFirestoreUploadListener() {
+            @Override
+            public void onSuccess() {
+                btnSend.setEnabled(true);
+                edtComposer.setText("");
+                Toast.makeText(GroupViewActivity.this, "Đã đăng bài", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Giữ nguyên nội dung để người dùng bấm gửi lại
+                btnSend.setEnabled(true);
+                Toast.makeText(GroupViewActivity.this, "Không đăng được bài: " + error, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

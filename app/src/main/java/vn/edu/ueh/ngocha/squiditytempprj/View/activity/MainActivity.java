@@ -60,6 +60,12 @@ import java.util.List;
 import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.HomeFeedViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.CommentUsersWatcher;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Group;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
+import java.util.Map;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.SearchViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
@@ -84,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rcvpostlist;
     private PostAdapter postAdapter;
     private PostViewModel postViewModel;
+    private HomeFeedViewModel homeFeedViewModel;
 
     private TextView tvMainUsername;
     private TextView tvDrawerUsername;
@@ -416,9 +423,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onStampClick(Post post) {
                 String randomStampId = UUID.randomUUID().toString();
-                Stamp newStamp = new Stamp(randomStampId, "Meringoc_17", StampType.LIKE);
+                String myId = GroupActivity.currentUserId();
+                Stamp newStamp = new Stamp(randomStampId, myId, StampType.LIKE);
                 newStamp.setPostId(post.getPostId());
-                postViewModel.addStamp(newStamp);
+                if (myId.equals(post.getUserId())) {
+                    postViewModel.addStamp(newStamp);
+                } else {
+                    postViewModel.addStamp(newStamp, post);
+                }
                 Toast.makeText(MainActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
             }
 
@@ -426,8 +438,13 @@ public class MainActivity extends AppCompatActivity {
             public void onCommentSend(Post post, String commentText) {
                 if (commentText != null && !commentText.trim().isEmpty()) {
                     String randomCommentId = UUID.randomUUID().toString();
-                    Comment newComment = new Comment(randomCommentId, "Meringoc_17", post.getPostId(), commentText.trim());
-                    postViewModel.addComment(newComment);
+                    String myId = GroupActivity.currentUserId();
+                    Comment newComment = new Comment(randomCommentId, myId, post.getPostId(), commentText.trim());
+                    if (myId.equals(post.getUserId())) {
+                        postViewModel.addComment(newComment);
+                    } else {
+                        postViewModel.addComment(newComment, post);
+                    }
                     Toast.makeText(MainActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Vui lòng nhập nội dung bình luận!", Toast.LENGTH_SHORT).show();
@@ -448,11 +465,18 @@ public class MainActivity extends AppCompatActivity {
                 if (rvComments != null) {
                     rvComments.setAdapter(commentAdapter);
                 }
+                // Hiện đúng tên + ảnh tài khoản của người bình luận
+                CommentUsersWatcher usersWatcher = new CommentUsersWatcher(
+                        MainActivity.this,
+                        new ViewModelProvider(MainActivity.this).get(UserViewModel.class),
+                        commentAdapter);
+                bottomSheetDialog.setOnDismissListener(d -> usersWatcher.stop());
 
                 if (post.getPostId() != null) {
                     postViewModel.getCommentsByPostId(post.getPostId()).observe(MainActivity.this, realComments -> {
                         if (realComments != null) {
                             commentAdapter.setComments(realComments);
+                            usersWatcher.update(realComments);
                             if (!realComments.isEmpty() && rvComments != null) {
                                 rvComments.scrollToPosition(realComments.size() - 1);
                             }
@@ -485,11 +509,28 @@ public class MainActivity extends AppCompatActivity {
         rcvpostlist.setAdapter(postAdapter);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
-        postViewModel.getAllPosts().observe(this, new Observer<List<Post>>() {
+        // Trang chủ chỉ hiện bài của người đã follow, bài trong group đã join và bài của mình
+        homeFeedViewModel = new ViewModelProvider(this).get(HomeFeedViewModel.class);
+
+        homeFeedViewModel.getGroups().observe(this, new Observer<Map<String, Group>>() {
             @Override
-            public void onChanged(List<Post> realPosts) {
-                if (realPosts != null) {
-                    postAdapter.setPosts(realPosts);
+            public void onChanged(Map<String, Group> groups) {
+                postAdapter.setGroups(groups);
+            }
+        });
+
+        homeFeedViewModel.getUsers().observe(this, new Observer<Map<String, User>>() {
+            @Override
+            public void onChanged(Map<String, User> users) {
+                postAdapter.setUsers(users);
+            }
+        });
+
+        homeFeedViewModel.getFeed().observe(this, new Observer<List<Post>>() {
+            @Override
+            public void onChanged(List<Post> feedPosts) {
+                if (feedPosts != null) {
+                    postAdapter.setPosts(feedPosts);
                 }
             }
         });
@@ -545,6 +586,10 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if (profileViewModel != null) {
             profileViewModel.loadCurrentProfile();
+        }
+        // Đăng nhập / đăng xuất / đổi tài khoản thì lọc lại feed
+        if (homeFeedViewModel != null) {
+            homeFeedViewModel.refreshUser();
         }
     }
 

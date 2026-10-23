@@ -39,6 +39,8 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.StampType;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.CommentUsersWatcher;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.FollowViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
@@ -204,7 +206,7 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onStampClick(Post post) {
                 String randomStampId = UUID.randomUUID().toString();
-                Stamp newStamp = new Stamp(randomStampId, "Meringoc_17", StampType.LIKE);
+                Stamp newStamp = new Stamp(randomStampId, GroupActivity.currentUserId(), StampType.LIKE);
                 newStamp.setPostId(post.getPostId());
                 postViewModel.addStamp(newStamp, post);                Toast.makeText(ProfileActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
             }
@@ -213,7 +215,7 @@ public class ProfileActivity extends AppCompatActivity {
             public void onCommentSend(Post post, String commentText) {
                 if (commentText != null && !commentText.trim().isEmpty()) {
                     String randomCommentId = UUID.randomUUID().toString();
-                    Comment newComment = new Comment(randomCommentId, "Meringoc_17", post.getPostId(), commentText.trim());
+                    Comment newComment = new Comment(randomCommentId, GroupActivity.currentUserId(), post.getPostId(), commentText.trim());
                     postViewModel.addComment(newComment, post);
                     Toast.makeText(ProfileActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
                 } else {
@@ -235,11 +237,18 @@ public class ProfileActivity extends AppCompatActivity {
                 if (rvComments != null) {
                     rvComments.setAdapter(commentAdapter);
                 }
+                // Hiện đúng tên + ảnh tài khoản của người bình luận
+                CommentUsersWatcher usersWatcher = new CommentUsersWatcher(
+                        ProfileActivity.this,
+                        new ViewModelProvider(ProfileActivity.this).get(UserViewModel.class),
+                        commentAdapter);
+                bottomSheetDialog.setOnDismissListener(d -> usersWatcher.stop());
 
                 if (post.getPostId() != null) {
                     postViewModel.getCommentsByPostId(post.getPostId()).observe(ProfileActivity.this, realComments -> {
                         if (realComments != null) {
                             commentAdapter.setComments(realComments);
+                            usersWatcher.update(realComments);
                             if (!realComments.isEmpty() && rvComments != null) {
                                 rvComments.scrollToPosition(realComments.size() - 1);
                             }
