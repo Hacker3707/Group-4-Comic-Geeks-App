@@ -1,11 +1,11 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.app.Dialog;
@@ -34,9 +34,13 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
@@ -46,10 +50,11 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.StampType;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends BaseActivity {
 
     // ViewModel & UI Profile
     private UserProfileViewModel profileViewModel;
@@ -57,6 +62,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageView imgProfileCover;
     private EditText etProfileUsername;
     private TextView tvProfileName;
+    private LinearLayout profileActionButtons;
     private TextView tvProfileEmail;
     private androidx.constraintlayout.widget.ConstraintLayout appBarLayout;
     private RecyclerView recyclerViewProfilePosts;
@@ -98,35 +104,10 @@ public class ProfileActivity extends AppCompatActivity {
                     }
             );
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_profile);
-
-        View toolbar = findViewById(R.id.toolbar);
-
-        if (toolbar != null) {
-            ImageButton btnBackHome =
-                    toolbar.findViewById(R.id.btnBackHome);
-
-            if (btnBackHome != null) {
-                btnBackHome.setVisibility(View.VISIBLE);
-
-                btnBackHome.setOnClickListener(v -> {
-                    Intent intent = new Intent(
-                            ProfileActivity.this,
-                            MainActivity.class
-                    );
-                    intent.addFlags(
-                            Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    );
-                    startActivity(intent);
-                    finish();
-                });
-            }
-        }
 
         // Ánh xạ các view Profile
         appBarLayout = findViewById(R.id.appBar);
@@ -152,6 +133,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnMessage = findViewById(R.id.btnMessage);
 
         tabLayout = findViewById(R.id.tabLayout);
+        profileActionButtons = findViewById(R.id.profileActionButtons);
 
         btnEditProfile = findViewById(R.id.btnEditProfile);
 
@@ -278,35 +260,6 @@ public class ProfileActivity extends AppCompatActivity {
                 );
             }
 
-            View profileToolbar = findViewById(R.id.toolbar);
-
-            if (profileToolbar != null) {
-                TextView tvMainUsername =
-                        profileToolbar.findViewById(R.id.tvMainUsername);
-
-                ShapeableImageView imgMainAvatar =
-                        profileToolbar.findViewById(R.id.imgvAvatar);
-
-                if (tvMainUsername != null) {
-                    tvMainUsername.setText(username);
-                }
-
-                if (imgMainAvatar != null) {
-                    if (state.avatarUrl != null && !state.avatarUrl.isEmpty()) {
-                        Glide.with(ProfileActivity.this)
-                                .load(state.avatarUrl)
-                                .placeholder(R.drawable.ic_launcher_background)
-                                .error(R.drawable.ic_launcher_background)
-                                .circleCrop()
-                                .into(imgMainAvatar);
-                    } else {
-                        imgMainAvatar.setImageResource(
-                                R.drawable.ic_launcher_background
-                        );
-                    }
-                }
-            }
-
             tvProfileEmail.setText(email);
             tvProfileEmail.setVisibility(email.isEmpty() ? View.GONE : View.VISIBLE);
 
@@ -349,17 +302,13 @@ public class ProfileActivity extends AppCompatActivity {
                         isOwner ? View.VISIBLE : View.GONE
                 );
             }
-            if (btnFollow != null) {
-                btnFollow.setVisibility(
-                        isOwner ? View.GONE : View.VISIBLE
-                );
+            if (isOwner) {
+                profileActionButtons.setVisibility(View.GONE);
+            }
+            else {
+                profileActionButtons.setVisibility(View.VISIBLE);
             }
 
-            if (btnMessage != null) {
-                btnMessage.setVisibility(
-                        isOwner ? View.GONE : View.VISIBLE
-                );
-            }
             currentAvatarUrl = state.avatarUrl == null
                     ? "" : state.avatarUrl;
 
@@ -389,22 +338,6 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(ProfileActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         });
-
-        View rootLayout = findViewById(R.id.profileRoot);
-        if (rootLayout != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (view, insets) -> {
-                Insets systemBars = insets.getInsets(
-                        WindowInsetsCompat.Type.systemBars()
-                );
-                view.setPadding(
-                        systemBars.left,
-                        systemBars.top,
-                        systemBars.right,
-                        systemBars.bottom
-                );
-                return insets;
-            });
-        }
 
         recyclerViewProfilePosts = findViewById(R.id.recyclerViewProfilePosts);
 
@@ -557,6 +490,11 @@ public class ProfileActivity extends AppCompatActivity {
                     ViewGroup.LayoutParams.MATCH_PARENT
             );
         }
+    }
+
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.activity_profile;
     }
 
     @Override

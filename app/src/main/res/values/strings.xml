@@ -24,4 +24,27 @@
         <item>Ratings</item>
     </string-array>
 
+    <string-array name="language_entries">
+        <item>Vietnamese</item>
+        <item>English</item>
+    </string-array>
+
+    <string-array name="language_values">
+        <item>vi</item>
+        <item>en</item>
+    </string-array>
+
+    <string-array name="theme_entries">
+        <item>System</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+
+    <string-array name="theme_values">
+        <item>system</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+
+
 </resources>

@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.recyclerview)
     implementation(libs.flexbox)
     implementation(libs.core.splashscreen)
+    implementation(libs.androidx.preference)
 
     // FIREBASE
     implementation(platform(libs.firebase.bom.v3502))
