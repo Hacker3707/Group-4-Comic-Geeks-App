@@ -35,7 +35,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.ChatRoom;
@@ -48,6 +50,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.GenreViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.CommentUsersWatcher;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ChatViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
@@ -100,6 +103,9 @@ public class ProfileActivity extends BaseActivity {
     private View layoutIntroductionDetails;
     private com.google.android.material.tabs.TabLayout tabLayout;
     private ChipGroup chipGenreProfile;
+    private GenreViewModel genreViewModel;
+    private List<Genre> allGenres = new ArrayList<>();
+    private List<String> selectedGenreIds = new ArrayList<>();
     private final ActivityResultLauncher<String> avatarPicker =
             registerForActivityResult(
                     new ActivityResultContracts.GetContent(),
@@ -130,14 +136,67 @@ public class ProfileActivity extends BaseActivity {
     private Observer<List<Genre>> genreObserver = new Observer<List<Genre>>() {
         @Override
         public void onChanged(List<Genre> genres) {
-            if (chipGenreProfile != null) {
-                chipGenreProfile.removeAllViews();
-            }
-            if (genres != null) {
-                displayGenres(genres);
-            }
+            allGenres = genres == null
+                    ? new ArrayList<>()
+                    : new ArrayList<>(genres);
+
+            renderSelectedGenres();
         }
     };
+
+    private View.OnClickListener onclickGenreChip = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Chip chip = (Chip) v;
+            String genreId = (String) chip.getTag();
+            if (genreId == null) return;
+            Intent intent = new Intent(ProfileActivity.this, ComicListActivity.class);
+            intent.putExtra("genre_id", genreId);
+            startActivity(intent);
+        }
+    };
+
+    private void renderSelectedGenres() {
+        if (chipGenreProfile == null) {
+            return;
+        }
+
+        chipGenreProfile.setSingleSelection(false);
+        chipGenreProfile.setSelectionRequired(false);
+        chipGenreProfile.removeAllViews();
+
+        Set<String> selectedIds = new HashSet<>(selectedGenreIds);
+
+        for (Genre genre : allGenres) {
+            if (genre == null || genre.getGenreId() == null) {
+                continue;
+            }
+
+            // Chỉ hiển thị genre đã được người dùng chọn.
+            if (!selectedIds.contains(genre.getGenreId())) {
+                continue;
+            }
+
+            Chip chip = new Chip(this);
+            chip.setText(genre.getGenreName());
+            chip.setTag(genre.getGenreId());
+
+            // Chip trên Profile chỉ dùng để hiển thị.
+            chip.setCheckable(false);
+            chip.setClickable(false);
+            chip.setFocusable(false);
+
+            chip.setOnClickListener(onclickGenreChip);
+
+            chipGenreProfile.addView(chip);
+        }
+
+        chipGenreProfile.setVisibility(
+                selectedIds.isEmpty() || chipGenreProfile.getChildCount() == 0
+                        ? View.GONE
+                        : View.VISIBLE
+        );
+    }
 
     private void displayGenres(List<Genre> genres) {
         chipGenreProfile.setSingleSelection(false);
@@ -153,9 +212,6 @@ public class ProfileActivity extends BaseActivity {
             chipGenreProfile.addView(chip);
         }
     }
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -202,6 +258,11 @@ public class ProfileActivity extends BaseActivity {
             finish();
             return;
         }
+
+        genreViewModel = new ViewModelProvider(this)
+                .get(GenreViewModel.class);
+
+        genreViewModel.getAllGenres().observe(this, genreObserver);
 
         profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
         followViewModel = new ViewModelProvider(this).get(FollowViewModel.class);
@@ -305,6 +366,12 @@ public class ProfileActivity extends BaseActivity {
 
         profileViewModel.getProfile().observe(this, state -> {
             if (state == null) return;
+
+            selectedGenreIds = state.favGenres == null
+                    ? new ArrayList<>()
+                    : new ArrayList<>(state.favGenres);
+
+            renderSelectedGenres();
 
             String username = state.username == null ? "" : state.username.trim();
             if (username.isEmpty()) username = "Người dùng";
@@ -755,7 +822,7 @@ public class ProfileActivity extends BaseActivity {
                     if (tvProfileBio != null) {
                         tvProfileBio.setText(
                                 bio == null || bio.trim().isEmpty()
-                                        ? "Chưa có bio"
+                                        ? "No signature here~ Got nothing to say~.~"
                                         : bio.trim()
                         );
                     }

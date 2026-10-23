@@ -10,6 +10,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
+
+import java.util.Collections;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -96,6 +98,8 @@ public class UserProfileViewModel extends ViewModel {
         String avatarUrl = user.getPhotoUrl() == null
                 ? "" : user.getPhotoUrl().toString();
 
+        List<String> favGenres = null;
+
         ProfileUiState fallback = new ProfileUiState(
                 username,
                 email,
@@ -104,7 +108,8 @@ public class UserProfileViewModel extends ViewModel {
                 "",
                 "",
                 "",
-                true
+                true,
+                Collections.emptyList()
         );
 
         profile.setValue(fallback);
@@ -180,6 +185,17 @@ public class UserProfileViewModel extends ViewModel {
         String bio = document.getString("bio");
         String gender = document.getString("gender");
         String birthDate = document.getString("birthDate");
+        List<String> favGenres = new ArrayList<>();
+
+        Object rawGenres = document.get("favGenres");
+
+        if (rawGenres instanceof List<?>) {
+            for (Object item : (List<?>) rawGenres) {
+                if (item instanceof String) {
+                    favGenres.add((String) item);
+                }
+            }
+        }
 
         return new ProfileUiState(
                 isBlank(username) ? fallback.username : username,
@@ -189,7 +205,8 @@ public class UserProfileViewModel extends ViewModel {
                 bio == null ? "" : bio,
                 gender == null ? "" : gender,
                 birthDate == null ? "" : birthDate,
-                true
+                true,
+                favGenres
         );
     }
 
@@ -492,6 +509,7 @@ public class UserProfileViewModel extends ViewModel {
         public final String gender;
         public final String birthDate;
         public final boolean loggedIn;
+        public final List<String> favGenres;
 
         public ProfileUiState(
                 String username,
@@ -501,7 +519,8 @@ public class UserProfileViewModel extends ViewModel {
                 String bio,
                 String gender,
                 String birthDate,
-                boolean loggedIn
+                boolean loggedIn,
+                List<String> favGenres
         ) {
             this.username = username;
             this.email = email;
@@ -511,6 +530,7 @@ public class UserProfileViewModel extends ViewModel {
             this.gender = gender;
             this.birthDate = birthDate;
             this.loggedIn = loggedIn;
+            this.favGenres = favGenres;
         }
 
         public static ProfileUiState guest() {
@@ -522,7 +542,8 @@ public class UserProfileViewModel extends ViewModel {
                     "",
                     "",
                     "",
-                    false
+                    false,
+                    Collections.emptyList()
             );
         }
 

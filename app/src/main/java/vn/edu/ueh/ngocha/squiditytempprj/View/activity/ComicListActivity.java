@@ -52,6 +52,7 @@ public class ComicListActivity extends BaseActivity {
         return R.layout.comic_list_activity;
     }
 
+    private String pendingGenreId;
 
     private ComicAdapter comicAdapter;
     private final ActivityResultLauncher<Intent> detailLauncher =
@@ -225,32 +226,27 @@ public class ComicListActivity extends BaseActivity {
         @Override
         public void onChanged(List<Genre> genres) {
 
-            Log.d("GenreUI", "Observer received: "
-                    + (genres == null ? "null" : genres.size()));
+            if (genres == null) {
+                return;
+            }
 
-            chipGroupGenres.removeAllViews();
-
-            for (Genre tag : genres) {
-                String genreName =
-                        tag.getGenreName();
-
+            for (Genre genre : genres) {
                 Chip chip = new Chip(ComicListActivity.this);
-                chip.setText(genreName);
+                chip.setText(genre.getGenreName());
                 chip.setCheckable(true);
-                chip.setTag(tag.getGenreId());
+                chip.setTag(genre.getGenreId());
 
-                chip.setOnClickListener(
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                String tagId = (String) view.getTag();
-
-                                comicViewModel.selectGenre(tagId);
-                            }
-                        }
-                );
+                chip.setOnClickListener(view -> {
+                    String id = (String) view.getTag();
+                    comicViewModel.selectGenre(id);
+                });
 
                 chipGroupGenres.addView(chip);
+            }
+
+            // Chỉ chọn sau khi các Chip đã được tạo.
+            if (pendingGenreId != null) {
+                selectGenreChip(pendingGenreId);
             }
         }
     };
@@ -326,7 +322,6 @@ public class ComicListActivity extends BaseActivity {
         genreScrollView = findViewById(R.id.genreScrollView);
         chipGroupGenres = findViewById(R.id.chipGroupGenres);
         searchbar = findViewById(R.id.searchBar);
-
         spnSearchOpt.setOnItemSelectedListener(onSearchOptionSelectedListener);
         btnSearch.setOnClickListener(onSearchClickListener);
         rcvcomic.addOnScrollListener(scrollListener);
@@ -350,6 +345,14 @@ public class ComicListActivity extends BaseActivity {
         searchViewModel = new ViewModelProvider(this)
                 .get(SearchViewModel.class);
 
+        Intent intent = getIntent();
+        pendingGenreId = intent.getStringExtra("genre_id");
+
+        if (pendingGenreId != null && !pendingGenreId.trim().isEmpty()) {
+            isGenreMode = true;
+            spnSearchOpt.setSelection(1);
+            comicViewModel.selectGenre(pendingGenreId);
+        }
 
         comicViewModel.getMangaList().observe(this, mangaObserver);
         comicViewModel.getGenresLive().observe(this, genreObserver);

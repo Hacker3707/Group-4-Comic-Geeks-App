@@ -50,6 +50,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private TextView tvEmail;
     private MaterialButton btnSave;
     private ChipGroup chipGroupGenres;
+    private List<String> selectedFavoriteGenreIds = new ArrayList<>();
 
     private GenreViewModel genreViewModel;
     private FirebaseFirestore firestore;
@@ -140,6 +141,19 @@ public class EditProfileActivity extends AppCompatActivity {
                     String gender = document.getString("gender");
                     String birthDate = document.getString("birthDate");
                     String introduction = document.getString("introduction");
+                    selectedFavoriteGenreIds.clear();
+
+                    Object rawGenres = document.get("favGenres");
+
+                    if (rawGenres instanceof List<?>) {
+                        for (Object item : (List<?>) rawGenres) {
+                            if (item instanceof String) {
+                                selectedFavoriteGenreIds.add((String) item);
+                            }
+                        }
+                    }
+
+                    applySelectedGenres();
 
                     if (username == null || username.trim().isEmpty()) {
                         username = currentUser.getDisplayName();
@@ -260,6 +274,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 currentUser.getEmail() == null
                         ? ""
                         : currentUser.getEmail());
+        data.put("favGenres", getSelectedGenres());
 
         firestore.collection("users")
                 .document(currentUser.getUid())
@@ -269,6 +284,8 @@ public class EditProfileActivity extends AppCompatActivity {
                             new UserProfileChangeRequest.Builder()
                                     .setDisplayName(username)
                                     .build();
+
+
 
                     currentUser.updateProfile(request)
                             .addOnCompleteListener(task -> {
@@ -295,6 +312,7 @@ public class EditProfileActivity extends AppCompatActivity {
                                     + error.getLocalizedMessage(),
                             Toast.LENGTH_LONG).show();
                 });
+
     }
 
     private void styleGenreChip(Chip chip) {
@@ -340,20 +358,48 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void displayGenres(List<Genre> genres) {
-        ChipGroup chipGroup = findViewById(R.id.chipGroupGenres);
+        if (chipGroupGenres == null) {
+            return;
+        }
 
-        chipGroup.setSingleSelection(false);
-        chipGroup.setSelectionRequired(false);
-        chipGroup.removeAllViews();
+        chipGroupGenres.setSingleSelection(false);
+        chipGroupGenres.setSelectionRequired(false);
+        chipGroupGenres.removeAllViews();
 
         for (Genre genre : genres) {
             Chip chip = new Chip(this);
 
+            chip.setId(View.generateViewId());
             chip.setText(genre.getGenreName());
             styleGenreChip(chip);
             chip.setTag(genre.getGenreId());
 
-            chipGroup.addView(chip);
+            chip.setChecked(
+                    selectedFavoriteGenreIds.contains(genre.getGenreId())
+            );
+
+            chipGroupGenres.addView(chip);
+        }
+    }
+
+    private void applySelectedGenres() {
+        if (chipGroupGenres == null) {
+            return;
+        }
+
+        for (int i = 0; i < chipGroupGenres.getChildCount(); i++) {
+            View view = chipGroupGenres.getChildAt(i);
+
+            if (view instanceof Chip) {
+                Chip chip = (Chip) view;
+                Object tag = chip.getTag();
+
+                if (tag != null) {
+                    chip.setChecked(
+                            selectedFavoriteGenreIds.contains(tag.toString())
+                    );
+                }
+            }
         }
     }
 
