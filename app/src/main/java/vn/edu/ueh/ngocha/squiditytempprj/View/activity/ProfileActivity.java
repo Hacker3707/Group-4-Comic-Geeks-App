@@ -12,6 +12,7 @@ import android.app.Dialog;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.ListenerRegistration;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.MainActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,7 +35,6 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
@@ -69,6 +69,9 @@ public class ProfileActivity extends BaseActivity {
     private PostAdapter postAdapter;
     private PostViewModel postViewModel;
     private MaterialButton btnEditProfile;
+    private TextView tvProfilePostCount;
+    private String currentProfileUserId = "";
+    private String currentProfileUsername = "";
     private MaterialButton btnFollow;
     private MaterialButton btnMessage;
     private String currentAvatarUrl = "";
@@ -109,6 +112,13 @@ public class ProfileActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ImageButton btnBackHome = findViewById(R.id.btnBackHome);
+
+        if (btnBackHome != null) {
+            btnBackHome.setVisibility(View.VISIBLE);
+            btnBackHome.setOnClickListener(v -> finish());
+        }
+
         // Ánh xạ các view Profile
         appBarLayout = findViewById(R.id.appBar);
         tvProfileName = findViewById(R.id.tvProfileName);
@@ -145,6 +155,24 @@ public class ProfileActivity extends BaseActivity {
 
         profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
+
+        tvProfilePostCount = findViewById(R.id.tvProfilePostCount);
+
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser != null) {
+            currentProfileUserId = currentUser.getUid();
+
+            currentProfileUsername = currentUser.getDisplayName() == null
+                    ? ""
+                    : currentUser.getDisplayName();
+        }
+
+        if (tvProfilePostCount != null) {
+            tvProfilePostCount.setText("0");
+        }
+
         if (tabLayout != null) {
             tabLayout.addOnTabSelectedListener(
                     new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
@@ -428,12 +456,40 @@ public class ProfileActivity extends BaseActivity {
         if (recyclerViewProfilePosts != null) {
             recyclerViewProfilePosts.setAdapter(postAdapter);
         }
-        postViewModel.getAllPosts().observe(this, new Observer<List<Post>>() {
-            @Override
-            public void onChanged(List<Post> realPosts) {
-                if (realPosts != null) {
-                    postAdapter.setPosts(realPosts);
+
+        postViewModel.getAllPosts().observe(this, realPosts -> {
+            if (realPosts == null) {
+                if (tvProfilePostCount != null) {
+                    tvProfilePostCount.setText("0");
                 }
+                return;
+            }
+
+            // Giữ nguyên chức năng hiển thị bài viết hiện có
+            postAdapter.setPosts(realPosts);
+
+            // Đếm bài viết của tài khoản hiện tại
+            int postCount = 0;
+
+            for (Post post : realPosts) {
+                if (post == null || post.getUserId() == null) {
+                    continue;
+                }
+
+                String authorId = post.getUserId().trim();
+
+                boolean isCurrentUserPost =
+                        authorId.equals(currentProfileUserId)
+                                || (!currentProfileUsername.isEmpty()
+                                && authorId.equalsIgnoreCase(currentProfileUsername));
+
+                if (isCurrentUserPost) {
+                    postCount++;
+                }
+            }
+
+            if (tvProfilePostCount != null) {
+                tvProfilePostCount.setText(String.valueOf(postCount));
             }
         });
 

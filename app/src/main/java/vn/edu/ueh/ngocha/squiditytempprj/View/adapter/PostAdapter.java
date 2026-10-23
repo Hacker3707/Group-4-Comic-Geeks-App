@@ -7,6 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.bumptech.glide.Glide;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +35,8 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
 
     private List<Post> postList;
+    private String currentUid = "";
+    private String currentUsername = "";
     private Context context;
     private OnPostInteractionListener listener;
 
@@ -43,11 +50,35 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
         void onDeletePost(Post post);
     }
 
-    public PostAdapter(Context context, List<Post> postList, OnPostInteractionListener listener) {
+    public PostAdapter(Context context, List<Post> postList,
+                       OnPostInteractionListener listener) {
         this.context = context;
         this.postList = postList;
         this.listener = listener;
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user != null) {
+            currentUid = user.getUid();
+
+            // Lấy username thật của tài khoản đang đăng nhập
+            FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(currentUid)
+                    .get()
+                    .addOnSuccessListener(document -> {
+                        if (document.exists()) {
+                            String username = document.getString("username");
+
+                            if (username != null && !username.trim().isEmpty()) {
+                                currentUsername = username.trim();
+                                notifyDataSetChanged();
+                            }
+                        }
+                    });
+        }
     }
+
 
     @NonNull
     @Override
@@ -61,6 +92,34 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
         Post post = postList.get(position);
 
         holder.tvUserName.setText(post.getUserId());
+        loadPostAuthorAvatar(holder, post);
+
+
+        String postOwnerId = post.getUserId();
+
+        boolean isOwner = false;
+
+        if (postOwnerId != null) {
+            postOwnerId = postOwnerId.trim();
+
+            // Bài viết lưu UID
+            if (!currentUid.isEmpty()
+                    && currentUid.equals(postOwnerId)) {
+                isOwner = true;
+            }
+
+            // Bài viết cũ lưu username
+            if (!currentUsername.isEmpty()
+                    && currentUsername.equalsIgnoreCase(postOwnerId)) {
+                isOwner = true;
+            }
+        }
+
+        if (holder.btnFollow != null) {
+            holder.btnFollow.setVisibility(
+                    isOwner ? View.GONE : View.VISIBLE
+            );
+        }
 
         // Lắng nghe và hiển thị chính xác số lượng comment thực tế từ cơ sở dữ liệu
         if (context instanceof AppCompatActivity) {
@@ -244,5 +303,75 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
     public void setPosts(List<Post> posts) {
         this.postList = posts;
         notifyDataSetChanged();
+    }
+
+    private void loadPostAuthorAvatar(PostViewHolder holder, Post post) {
+        String authorId = post.getUserId();
+
+        // Đặt ảnh mặc định trước để tránh giữ avatar của bài trước
+        holder.imgAvatar.setImageResource(R.drawable.ic_launcher_background);
+
+        if (authorId == null || authorId.trim().isEmpty()) {
+            return;
+        }
+
+        // Đánh dấu bài đăng đang được gắn với ImageView này
+        String postKey = post.getPostId() != null
+                ? post.getPostId()
+                : authorId;
+
+        holder.imgAvatar.setTag(postKey);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Trường hợp userId lưu UID
+        db.collection("users")
+                .document(authorId)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (!postKey.equals(holder.imgAvatar.getTag())) {
+                        return;
+                    }
+
+                    if (document.exists()) {
+                        showAvatar(holder, document.getString("avatarUrl"));
+                    } else {
+                        // Trường hợp dữ liệu bài cũ lưu username
+                        db.collection("users")
+                                .whereEqualTo("username", authorId)
+                                .limit(1)
+                                .get()
+                                .addOnSuccessListener(snapshot -> {
+                                    if (!postKey.equals(holder.imgAvatar.getTag())) {
+                                        return;
+                                    }
+
+                                    if (!snapshot.isEmpty()) {
+                                        showAvatar(
+                                                holder,
+                                                snapshot.getDocuments()
+                                                        .get(0)
+                                                        .getString("avatarUrl")
+                                        );
+                                    }
+                                });
+                    }
+                });
+    }
+
+    private void showAvatar(PostViewHolder holder, String avatarUrl) {
+        if (avatarUrl == null || avatarUrl.trim().isEmpty()) {
+            holder.imgAvatar.setImageResource(
+                    R.drawable.ic_launcher_background
+            );
+            return;
+        }
+
+        Glide.with(holder.itemView.getContext())
+                .load(avatarUrl)
+                .placeholder(R.drawable.ic_launcher_background)
+                .error(R.drawable.ic_launcher_background)
+                .circleCrop()
+                .into(holder.imgAvatar);
     }
 }

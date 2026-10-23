@@ -202,10 +202,11 @@
                                     android:textStyle="bold" />
 
                                 <TextView
+                                    android:id="@+id/tvProfilePostCount"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/jersey25_regular"
-                                    android:text="128"
+                                    android:text="0"
                                     android:textColor="#FFFFFF"
                                     android:textSize="30sp" />
 
