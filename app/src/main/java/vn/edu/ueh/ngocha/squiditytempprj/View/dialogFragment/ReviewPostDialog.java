@@ -13,6 +13,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,14 +23,19 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
+
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Review;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ReviewViewModel;
 
 public class ReviewPostDialog extends DialogFragment {
 
     private RatingBar ratingBar;
     private TextView txtGuide;
+    private TextView txtUsername;
+    private ImageView imgProfileAvt;
     private EditText etReviewContent;
     private Button btnConfirm;
     private ImageButton btnExit;
@@ -37,6 +43,7 @@ public class ReviewPostDialog extends DialogFragment {
     private String userId;
 
     ReviewViewModel reviewViewModel;
+    AuthViewModel authViewModel;
 
     public View.OnClickListener onExitClickListener = new View.OnClickListener() {
         @Override
@@ -115,6 +122,8 @@ public class ReviewPostDialog extends DialogFragment {
         btnConfirm = view.findViewById(R.id.btnpostReview);
         btnExit = view.findViewById(R.id.btnexitReviewdg);
         txtGuide = view.findViewById(R.id.txtvGuide);
+        txtUsername = view.findViewById(R.id.txtReviewerName);
+        imgProfileAvt = view.findViewById(R.id.imgAvtReview_dg);
 
         // Nút đóng dialog
         btnExit.setOnClickListener(onExitClickListener);
@@ -124,7 +133,16 @@ public class ReviewPostDialog extends DialogFragment {
 
         // Khởi tạo ViewModel
         reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
+        String username = authViewModel.getCurrentUser().getDisplayName();
+        String avatarUrl = authViewModel.getCurrentUser().getPhotoUrl().toString();
+        Glide.with(this)
+                .load(avatarUrl)
+                .placeholder(R.drawable.no_image)
+                .into(imgProfileAvt);
+
+        txtUsername.setText(username);
     }
 
     @Override

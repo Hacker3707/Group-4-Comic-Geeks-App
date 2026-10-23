@@ -110,6 +110,10 @@ public class MainActivity extends BaseActivity {
         return false;
     }
 
+    @Override
+    protected boolean isHome() {
+        return true;
+    }
 
     private View.OnClickListener onSearchClickListener = new View.OnClickListener() {
         @Override

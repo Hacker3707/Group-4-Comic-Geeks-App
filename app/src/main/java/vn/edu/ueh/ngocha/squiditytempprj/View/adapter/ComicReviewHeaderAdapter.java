@@ -27,11 +27,11 @@ public class ComicReviewHeaderAdapter
     private String coverUrl;
     private float averageRating;
     private int reviewCount;
+    private boolean isSameUser;
 
     private final View.OnClickListener onReviewClickListener;
 
-    public ComicReviewHeaderAdapter(
-            View.OnClickListener onReviewClickListener) {
+    public ComicReviewHeaderAdapter(View.OnClickListener onReviewClickListener) {
         this.onReviewClickListener = onReviewClickListener;
     }
 
@@ -54,6 +54,12 @@ public class ComicReviewHeaderAdapter
         this.averageRating = averageRating;
         notifyItemChanged(0);
     }
+
+    public void setIsSameUser(boolean isSameUser) {
+        this.isSameUser = isSameUser;
+        notifyItemChanged(0);
+    }
+
 
     @NonNull
     @Override
@@ -91,6 +97,12 @@ public class ComicReviewHeaderAdapter
         }
 
         holder.ratingBar.setRating(averageRating);
+
+        if (isSameUser) {
+            holder.btnwriteReview.setText("View your review!");
+        } else {
+            holder.btnwriteReview.setText("Write a review!");
+        }
 
         if (reviewCount == 0) {
             holder.txtComicRating.setText("Not rated yet");

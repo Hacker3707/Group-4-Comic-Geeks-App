@@ -23,7 +23,7 @@ public class ComicReviewHolder extends RecyclerView.ViewHolder {
         super(itemView);
 
         imgvAvatar =
-                itemView.findViewById(R.id.imgProfileCover);
+                itemView.findViewById(R.id.imgAvtReview);
 
         txtReviewerName =
                 itemView.findViewById(R.id.txtReviewerName);

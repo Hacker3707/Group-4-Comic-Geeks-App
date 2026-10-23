@@ -36,11 +36,11 @@
                 <ImageView
                     android:id="@+id/imgHeaderWave"
                     android:layout_width="0dp"
-                    android:layout_height="150dp"
+                    android:layout_height="0dp"
                     android:importantForAccessibility="no"
                     android:scaleType="fitXY"
                     android:src="@drawable/post_card_wave"
-                    app:layout_constraintDimensionRatio="305:123"
+                    app:layout_constraintDimensionRatio="385:133"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -239,6 +239,7 @@
             android:fontFamily="@font/mozilla_headline"
             android:text="Opinion on this manga ..."
             android:textColor="#333333"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/headerContainer" />
@@ -348,12 +349,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="12dp"
             android:background="#F9F9F9"
-            app:layout_constraintTop_toBottomOf="@id/divider"
-            app:layout_constraintBottom_toBottomOf="parent">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="17dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider">
 
             <EditText
                 android:id="@+id/edtQuickComment"
@@ -363,7 +364,7 @@
                 android:background="@android:color/transparent"
                 android:fontFamily="@font/mozilla_headline"
                 android:hint="Say something...くコ:彡"
-                android:textSize="12sp" />
+                android:textSize="15sp" />
 
             <ImageView
                 android:id="@+id/btnSendComment"

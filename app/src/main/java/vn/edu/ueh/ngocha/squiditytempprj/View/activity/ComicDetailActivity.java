@@ -31,11 +31,12 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Relationship;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Tag;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ComicDetailViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ComicViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ReviewViewModel;
 
-public class ComicDetailActivity extends AppCompatActivity {
+public class ComicDetailActivity extends BaseActivity {
 
     TextView txtName;
     TextView txtAuthor;
@@ -64,6 +65,8 @@ public class ComicDetailActivity extends AppCompatActivity {
     String comic_cover;
 
     ReviewViewModel reviewViewModel;
+
+
 
     View.OnClickListener onBackClickListener = new View.OnClickListener() {
         @Override
@@ -99,13 +102,6 @@ public class ComicDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_comic_detail);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         comicId = getIntent().getStringExtra("comic_id");
         String searchOption = getIntent().getStringExtra("search_option");
@@ -160,6 +156,16 @@ public class ComicDetailActivity extends AppCompatActivity {
                     });
         }
 
+    }
+
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.activity_comic_detail;
+    }
+
+    @Override
+    protected boolean shouldShowBackHomeButton() {
+        return false;
     }
 
     private String getLocalizedText(Map<String, String> texts) {

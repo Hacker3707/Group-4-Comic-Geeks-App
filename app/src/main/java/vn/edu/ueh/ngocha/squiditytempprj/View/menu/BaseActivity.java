@@ -53,10 +53,22 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected ImageView imgnavProfileCover;
     protected FrameLayout activityContent;
     protected FrameLayout baseOverlayContainer;
+    protected TextView txtLogo;
     protected int statusBarInset = 0;
     protected AuthViewModel authViewModel;
     protected UserProfileViewModel profileViewModel;
     private MaterialButton btnAuthAction;
+
+    // Mỗi Activity con tự cung cấp layout nội dung
+    protected abstract int getContentLayoutId();
+
+    protected boolean shouldShowBackHomeButton() {
+        return true;
+    }
+
+    protected boolean isHome() {
+        return false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,9 +147,17 @@ public abstract class BaseActivity extends AppCompatActivity {
         tvMainUsername = findViewById(R.id.tvMainUsername);
         imgnavProfileCover = header.findViewById(R.id.imgnavCover);
         imgMainAvatar = findViewById(R.id.imgMainAvatar);
+        txtLogo = findViewById(R.id.tvAppBarTitle);
 
         btnAuthAction.setOnClickListener(onAuthClickListener);
-        if (imgMainAvatar != null) imgMainAvatar.setOnClickListener(onProfileClickListener);
+
+        if (!isHome()) {
+            txtLogo.setOnClickListener(onLogoClickListener);
+        }
+
+
+        if (imgMainAvatar != null)
+            imgMainAvatar.setOnClickListener(onProfileClickListener);
 
         ImageButton btnBackHome =
                     findViewById(R.id.btnBackHome);
@@ -189,13 +209,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (profileViewModel != null) {
             profileViewModel.loadCurrentProfile();
         }
-    }
-
-    // Mỗi Activity con tự cung cấp layout nội dung
-    protected abstract int getContentLayoutId();
-
-    protected boolean shouldShowBackHomeButton() {
-        return true;
     }
 
     private void setupDrawer() {
@@ -325,6 +338,14 @@ public abstract class BaseActivity extends AppCompatActivity {
                     && drawerLayout.getHeight() > 0) {
                 drawerLayout.openDrawer(GravityCompat.START);
             }
+        }
+    };
+
+    protected View.OnClickListener onLogoClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            startActivity(new Intent(BaseActivity.this, MainActivity.class));
+            finish();
         }
     };
 
