@@ -25,6 +25,14 @@
 
     </LinearLayout>
 
+    <!-- Overlay cấp Activity: cho phép Search của Main đè lên AppBar và content -->
+    <FrameLayout
+        android:id="@+id/baseOverlayContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false" />
+
     <!-- Navigation Drawer -->
     <LinearLayout
         android:layout_width="wrap_content"
@@ -55,6 +63,7 @@
             android:text="Đăng nhập / Đăng ký"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
+            android:textSize="16sp"
             app:backgroundTint="#8B70F5"
             app:cornerRadius="12dp" />
 

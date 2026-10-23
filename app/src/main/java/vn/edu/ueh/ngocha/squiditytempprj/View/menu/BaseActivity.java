@@ -30,6 +30,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.AppSettingActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.AdminActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.AuthActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ChatListActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ComicListActivity;
@@ -40,8 +41,6 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
 import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
-import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
-import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
 public abstract class BaseActivity extends AppCompatActivity {
 
     protected DrawerLayout drawerLayout;
@@ -53,6 +52,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected ShapeableImageView imgMainAvatar;
     protected ImageView imgnavProfileCover;
     protected FrameLayout activityContent;
+    protected FrameLayout baseOverlayContainer;
+    protected int statusBarInset = 0;
     protected AuthViewModel authViewModel;
     protected UserProfileViewModel profileViewModel;
     private MaterialButton btnAuthAction;
@@ -67,6 +68,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navigationView);
         activityContent = findViewById(R.id.activityContent);
+        baseOverlayContainer = findViewById(R.id.baseOverlayContainer);
 
         NtfChannel.setup(this);
         NotificationPopup.attach(this, findViewById(R.id.btnNotification));
@@ -78,7 +80,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         Log.d("BaseActivity", "mainContainer = " + mainContainer);
 
         if (drawerLayout == null || navigationView == null
-                || mainContainer == null || activityContent == null) {
+                || mainContainer == null || activityContent == null || baseOverlayContainer == null) {
             throw new IllegalStateException(
                     "Không tìm thấy View trong activity_base_drawer.xml"
             );
@@ -90,6 +92,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                     Insets systemBars = insets.getInsets(
                             WindowInsetsCompat.Type.systemBars()
                     );
+                    statusBarInset = systemBars.top;
 
                     mainContainer.setPadding(
                             mainContainer.getPaddingLeft(),
@@ -134,27 +137,32 @@ public abstract class BaseActivity extends AppCompatActivity {
         imgMainAvatar = findViewById(R.id.imgMainAvatar);
 
         btnAuthAction.setOnClickListener(onAuthClickListener);
-        imgMainAvatar.setOnClickListener(onProfileClickListener);
+        if (imgMainAvatar != null) imgMainAvatar.setOnClickListener(onProfileClickListener);
 
         ImageButton btnBackHome =
-                findViewById(R.id.btnBackHome);
+                    findViewById(R.id.btnBackHome);
 
         if (btnBackHome != null) {
-            btnBackHome.setVisibility(View.VISIBLE);
+            if (shouldShowBackHomeButton()) {
+                btnBackHome.setVisibility(View.VISIBLE);
 
-            btnBackHome.setOnClickListener(v -> {
-                Intent intent = new Intent(
-                        BaseActivity.this,
-                        MainActivity.class
-                );
-                intent.addFlags(
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                );
-                startActivity(intent);
-                finish();
-            });
+                btnBackHome.setOnClickListener(v -> {
+                    Intent intent = new Intent(
+                            BaseActivity.this,
+                            MainActivity.class
+                    );
+                    intent.addFlags(
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    );
+                    startActivity(intent);
+                    finish();
+                });
+            } else {
+                btnBackHome.setVisibility(View.GONE);
+            }
         }
+
 
 
         authViewModel = new ViewModelProvider(this)
@@ -172,8 +180,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         );
 
         setupDrawer();
-        NtfChannel.setup(this);
-        NotificationPopup.attach(this, findViewById(R.id.btnNotification));
 
     }
     @Override
@@ -187,6 +193,10 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     // Mỗi Activity con tự cung cấp layout nội dung
     protected abstract int getContentLayoutId();
+
+    protected boolean shouldShowBackHomeButton() {
+        return true;
+    }
 
     private void setupDrawer() {
         navigationView.setNavigationItemSelectedListener(
@@ -240,6 +250,9 @@ public abstract class BaseActivity extends AppCompatActivity {
                             );
                             startActivity(intent);
                         }
+                        else if (id == R.id.action_admin) {
+                            startActivity(new Intent(BaseActivity.this, AdminActivity.class));
+                        }
                         else if (id == R.id.action_setting) {
                             startActivity(new Intent(BaseActivity.this, AppSettingActivity.class));
                         }
@@ -261,7 +274,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
             tvDrawerUsername.setText(state.username);
             tvDrawerEmail.setText(state.email);
-            tvMainUsername.setText(state.username);
+            if (tvMainUsername != null) tvMainUsername.setText(state.username);
 
             btnAuthAction.setText(
                     state.loggedIn ? "Đăng xuất" : "Đăng nhập / Đăng ký"
@@ -272,7 +285,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                         R.drawable.ic_launcher_background
                 );
 
-                imgMainAvatar.setImageResource(
+                if (imgMainAvatar != null) imgMainAvatar.setImageResource(
                         R.drawable.ic_launcher_background
                 );
             } else {
@@ -283,12 +296,14 @@ public abstract class BaseActivity extends AppCompatActivity {
                         .circleCrop()
                         .into(imgDrawerAvatar);
 
-                Glide.with(BaseActivity.this)
-                        .load(state.avatarUrl)
-                        .placeholder(R.drawable.ic_launcher_background)
-                        .error(R.drawable.ic_launcher_background)
-                        .circleCrop()
-                        .into(imgMainAvatar);
+                if (imgMainAvatar != null) {
+                    Glide.with(BaseActivity.this)
+                            .load(state.avatarUrl)
+                            .placeholder(R.drawable.ic_launcher_background)
+                            .error(R.drawable.ic_launcher_background)
+                            .circleCrop()
+                            .into(imgMainAvatar);
+                }
             }
 
             if (state.coverUrl != null && !state.coverUrl.isEmpty()) {

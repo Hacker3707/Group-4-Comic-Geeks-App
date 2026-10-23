@@ -3,11 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_profile"
+        android:id="@+id/action_admin"
         android:fontFamily="@font/jersey25_regular"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@android:drawable/ic_menu_manage"
         android:layout_gravity="center"
         android:layout_margin="15dp"
+        android:orderInCategory="40"
+        android:title="Admin"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_profile"
+        android:layout_gravity="center"
+        android:layout_margin="15dp"
+        android:fontFamily="@font/jersey25_regular"
+        android:icon="@drawable/ic_user"
         android:orderInCategory="1"
         android:title="My Profile"
         app:showAsAction="ifRoom" />
@@ -24,33 +35,22 @@
 
     <item
         android:id="@+id/action_group"
-        android:fontFamily="@font/jersey25_regular"
-        android:icon="@drawable/ic_group"
-        android:orderInCategory="30"
         android:layout_gravity="center"
         android:layout_margin="15dp"
+        android:fontFamily="@font/jersey25_regular"
+        android:icon="@drawable/ic_group_new2"
+        android:orderInCategory="30"
         android:title="Groups"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_comic"
-        android:fontFamily="@font/jersey25_regular"
-        android:icon="@android:drawable/ic_menu_manage"
         android:layout_gravity="center"
         android:layout_margin="15dp"
+        android:fontFamily="@font/jersey25_regular"
+        android:icon="@drawable/ic_comic_new"
         android:orderInCategory="30"
         android:title="Comics"
-        app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/action_admin"
-        android:fontFamily="@font/jersey25_regular"
-        android:icon="@android:drawable/ic_menu_manage"
-        android:layout_gravity="center"
-        android:layout_margin="15dp"
-        android:orderInCategory="40"
-        android:title="Admin"
-        android:visible="false"
         app:showAsAction="ifRoom" />
 
     <item

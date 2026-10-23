@@ -32,7 +32,7 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:fontFamily="@font/jersey25_regular"
-            android:text="Quản trị Squidity"
+            android:text="Squidity Administration"
             android:textColor="#FFFFFF"
             android:textSize="22sp" />
     </LinearLayout>

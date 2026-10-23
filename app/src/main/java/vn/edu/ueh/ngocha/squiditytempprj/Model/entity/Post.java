@@ -3,6 +3,7 @@ package vn.edu.ueh.ngocha.squiditytempprj.Model.entity;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
@@ -46,6 +47,7 @@ public class Post {
     @ColumnInfo(name = "comic_title")
     private String comicTitle;
 
+    @Ignore
     public Post() {
     }
 
