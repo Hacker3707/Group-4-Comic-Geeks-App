@@ -12,6 +12,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -22,17 +23,18 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Message;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.ChatSyncManager;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.MessageAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ChatViewModel;
@@ -40,11 +42,13 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ChatViewModel;
 /**
  * Màn nhắn tin: danh sách tin nhắn, ô nhập chữ (có bàn phím), nút gửi và nút gửi hình ảnh.
  * Tin nhắn lấy từ ChatViewModel qua LiveData nên có tin mới là màn hình tự cập nhật.
+ * Ảnh được tải lên Firebase Storage, tin nhắn lưu đường dẫn ảnh để người kia xem được.
  */
 public class ChatActivity extends AppCompatActivity {
 
     public static final String EXTRA_CHAT_ROOM_ID = "extra_chat_room_id";
     public static final String EXTRA_CURRENT_USER_ID = "extra_current_user_id";
+    public static final String EXTRA_OTHER_USER_ID = "extra_other_user_id";
     public static final String EXTRA_CHAT_TITLE = "extra_chat_title";
 
     private ChatViewModel chatViewModel;
@@ -54,9 +58,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private String chatRoomId;
     private String currentUserId;
-
-    // Sao chép ảnh vào bộ nhớ app trên luồng nền để không làm đơ giao diện
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private String otherUserId;
 
     // Photo Picker của Android: chọn ảnh mà không cần xin quyền đọc bộ nhớ
     private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
@@ -65,7 +67,7 @@ public class ChatActivity extends AppCompatActivity {
                         @Override
                         public void onActivityResult(Uri uri) {
                             if (uri != null) {
-                                saveImageAndSend(uri);
+                                uploadImageAndSend(uri);
                             }
                         }
                     });
@@ -89,6 +91,7 @@ public class ChatActivity extends AppCompatActivity {
 
         chatRoomId = getIntent().getStringExtra(EXTRA_CHAT_ROOM_ID);
         currentUserId = getIntent().getStringExtra(EXTRA_CURRENT_USER_ID);
+        otherUserId = getIntent().getStringExtra(EXTRA_OTHER_USER_ID);
         String title = getIntent().getStringExtra(EXTRA_CHAT_TITLE);
 
         if (chatRoomId == null || currentUserId == null) {
@@ -96,6 +99,9 @@ public class ChatActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        // Đảm bảo đang nhận tin nhắn mới từ Firestore
+        ChatSyncManager.getInstance(this).start();
 
         TextView tvChatTitle = findViewById(R.id.tvChatTitle);
         tvChatTitle.setText(title != null ? title : "Chat");
@@ -154,9 +160,11 @@ public class ChatActivity extends AppCompatActivity {
         edtMessage.setText("");
     }
 
+    // Lưu tin, đẩy lên Firestore cho người nhận và gửi thông báo lên chuông của họ
     private void sendMessageContent(String content) {
         Message message = new Message(UUID.randomUUID().toString(), content, currentUserId, chatRoomId);
-        chatViewModel.sendMessage(message);
+        String preview = content.startsWith(MessageAdapter.IMAGE_PREFIX) ? "[Hình ảnh]" : content;
+        chatViewModel.sendMessage(message, otherUserId, preview);
     }
 
     // Tin của người kia mà mình chưa đọc thì đánh dấu đã đọc khi mở màn hình
@@ -168,56 +176,36 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    // Ảnh từ Photo Picker chỉ có quyền tạm thời, nên chép vào bộ nhớ app rồi mới lưu đường dẫn
-    private void saveImageAndSend(final Uri source) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    File dir = new File(getFilesDir(), "chat_images");
-                    if (!dir.exists() && !dir.mkdirs()) {
-                        throw new IOException("Không tạo được thư mục lưu ảnh");
-                    }
-                    File target = new File(dir, UUID.randomUUID().toString() + ".jpg");
+    // Tải ảnh lên Firebase Storage, lấy đường dẫn rồi gửi như một tin nhắn ảnh
+    private void uploadImageAndSend(Uri source) {
+        Toast.makeText(this, "Đang gửi ảnh...", Toast.LENGTH_SHORT).show();
 
-                    InputStream in = getContentResolver().openInputStream(source);
-                    if (in == null) {
-                        throw new IOException("Không mở được ảnh đã chọn");
-                    }
-                    OutputStream out = new FileOutputStream(target);
-                    try {
-                        byte[] buffer = new byte[8192];
-                        int read;
-                        while ((read = in.read(buffer)) != -1) {
-                            out.write(buffer, 0, read);
-                        }
-                    } finally {
-                        in.close();
-                        out.close();
-                    }
+        final StorageReference imageRef = FirebaseStorage.getInstance().getReference()
+                .child("chat_images")
+                .child(chatRoomId)
+                .child(UUID.randomUUID().toString() + ".jpg");
 
-                    final String content = MessageAdapter.IMAGE_PREFIX + Uri.fromFile(target).toString();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            sendMessageContent(content);
+        imageRef.putFile(source)
+                .continueWithTask(new Continuation<com.google.firebase.storage.UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<com.google.firebase.storage.UploadTask.TaskSnapshot> task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
                         }
-                    });
-                } catch (IOException e) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(ChatActivity.this, "Gửi ảnh thất bại", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            }
-        });
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        executor.shutdown();
+                        return imageRef.getDownloadUrl();
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri downloadUri) {
+                        sendMessageContent(MessageAdapter.IMAGE_PREFIX + downloadUri.toString());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(ChatActivity.this, "Gửi ảnh thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 }

@@ -1,7 +1,11 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -34,14 +38,19 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.NotificationType;
 /**
  * Thông báo lưu trên Firestore (collection "notifications") và đồng bộ về Room để hiện trong popup.
  *
- * Gửi:  khi có người thả stamp, bình luận hoặc follow, gọi sendNotification() để ghi 1 document lên Firestore.
+ * Gửi:  khi có người thả stamp, bình luận, follow hoặc nhắn tin, gọi sendNotification() để ghi 1 document lên Firestore.
  * Nhận: startListening() lắng nghe các document có recipientId là mình (addSnapshotListener như bài 10.1),
  *       document mới thì chép vào Room, NotificationPopup đang observe Room nên tự cập nhật.
+ *
+ * Bảng notifications trong Room không tách theo người dùng, nên khi đổi tài khoản
+ * thì xóa thông báo cũ rồi nhận lại từ Firestore theo tài khoản mới.
  */
 public class NotificationRepository {
 
     private static final String TAG = "NotificationRepository";
     private static final String COLLECTION = "notifications";
+    private static final String PREFS_NAME = "notification_prefs";
+    private static final String KEY_OWNER_UID = "owner_uid";
 
     // Chỉ để chạy thử khi chưa có 2 tài khoản:
     // - cho phép tự thông báo cho chính mình
@@ -50,6 +59,7 @@ public class NotificationRepository {
     private static final boolean TEST_MODE = false;
     private static final String TEST_POST_OWNER_ID = "Meringoc_17";
 
+    private final Application application;
     private NotificationDao mNotificationDao;
     private LiveData<List<Notification>> mAllNotifications;
     private LiveData<List<Notification>> mUnreadNotifications;
@@ -59,6 +69,7 @@ public class NotificationRepository {
     private ListenerRegistration snapshotRegistration;
 
     public NotificationRepository(Application application) {
+        this.application = application;
         AppDatabase db = AppDatabase.getDatabase(application);
         mNotificationDao = db.notificationDao();
         mAllNotifications = mNotificationDao.getAllNotifications();
@@ -104,11 +115,11 @@ public class NotificationRepository {
     // =================================
 
     /**
-     * @param recipientId id người nhận (chủ bài viết, hoặc người được follow)
+     * @param recipientId id người nhận (chủ bài viết, người được follow, hoặc người được nhắn tin)
      * @param actorId     id người thực hiện hành động
      * @param actorName   tên hiển thị của người thực hiện
-     * @param type        LIKE, COMMENT hoặc FOLLOW
-     * @param postId      bài viết liên quan (null nếu là FOLLOW)
+     * @param type        LIKE, COMMENT, FOLLOW hoặc MESSAGE
+     * @param postId      bài viết liên quan (null nếu là FOLLOW hoặc MESSAGE)
      * @param content     nội dung hiển thị
      */
     public void sendNotification(String recipientId, String actorId, String actorName,
@@ -167,7 +178,7 @@ public class NotificationRepository {
                 stopSnapshotListener();
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    listenForUser(user.getUid());
+                    prepareAndListen(user.getUid());
                 }
             }
         };
@@ -180,6 +191,36 @@ public class NotificationRepository {
             authStateListener = null;
         }
         stopSnapshotListener();
+    }
+
+    // Nếu máy đang giữ thông báo của tài khoản khác thì xóa đi rồi mới nghe tài khoản này
+    private void prepareAndListen(final String uid) {
+        final SharedPreferences prefs =
+                application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String owner = prefs.getString(KEY_OWNER_UID, null);
+        if (uid.equals(owner)) {
+            listenForUser(uid);
+            return;
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mNotificationDao.deleteAll();
+                prefs.edit().putString(KEY_OWNER_UID, uid).apply();
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Chỉ nghe nếu tài khoản vẫn là tài khoản này (tránh đổi tài khoản giữa chừng)
+                        FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
+                        if (authStateListener != null && current != null
+                                && uid.equals(current.getUid())) {
+                            stopSnapshotListener();
+                            listenForUser(uid);
+                        }
+                    }
+                });
+            }
+        }).start();
     }
 
     private void listenForUser(String uid) {

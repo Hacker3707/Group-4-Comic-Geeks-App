@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.ChatRoom;
 
 @Dao
 public interface ChatRoomDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertChatRoom(ChatRoom chatRoom);
 
     @Delete

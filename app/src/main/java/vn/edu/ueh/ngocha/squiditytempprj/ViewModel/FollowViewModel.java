@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.NotificationType;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.ChatSyncManager;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.FollowRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.NotificationRepository;
 
@@ -20,6 +21,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.NotificationRepository
  * ViewModel cho chức năng Follow.
  * Repository trả dữ liệu đồng bộ nên mọi thao tác chạy trên thread nền,
  * kết quả đẩy ra View qua LiveData (postValue).
+ * Follow/unfollow còn được ghi lên Firestore (ChatSyncManager) để máy của người kia nhận được.
  *
  * Cách dùng trong Activity/Fragment:
  *   FollowViewModel viewModel = new ViewModelProvider(this).get(FollowViewModel.class);
@@ -32,6 +34,7 @@ public class FollowViewModel extends AndroidViewModel {
 
     private final FollowRepository followRepository;
     private final NotificationRepository notificationRepository;
+    private final ChatSyncManager chatSyncManager;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private final MutableLiveData<List<User>> followers = new MutableLiveData<>();
@@ -44,6 +47,7 @@ public class FollowViewModel extends AndroidViewModel {
         super(application);
         followRepository = new FollowRepository(application);
         notificationRepository = new NotificationRepository(application);
+        chatSyncManager = ChatSyncManager.getInstance(application);
     }
 
     // =================================
@@ -126,6 +130,8 @@ public class FollowViewModel extends AndroidViewModel {
             @Override
             public void run() {
                 boolean followed = followRepository.follow(currentUserId, targetUserId);
+                // Ghi lên Firestore để máy của người được follow cũng biết (dùng cho danh sách chat)
+                chatSyncManager.pushFollow(currentUserId, targetUserId);
                 if (followed) {
                     // Follow mới thì báo cho người được follow
                     String actorName = notificationRepository.currentActorName(currentUserId);
@@ -142,6 +148,7 @@ public class FollowViewModel extends AndroidViewModel {
             @Override
             public void run() {
                 followRepository.unfollow(currentUserId, targetUserId);
+                chatSyncManager.pushUnfollow(currentUserId, targetUserId);
                 refresh(currentUserId, targetUserId);
             }
         });

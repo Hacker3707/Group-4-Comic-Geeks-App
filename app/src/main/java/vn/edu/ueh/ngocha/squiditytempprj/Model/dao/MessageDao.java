@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import java.util.List;
@@ -12,7 +13,8 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Message;
 
 @Dao
 public interface MessageDao {
-    @Insert
+    // Tin đã có (do Firestore gửi lại) thì bỏ qua, không crash
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertMessage(Message message);
 
     @Delete
