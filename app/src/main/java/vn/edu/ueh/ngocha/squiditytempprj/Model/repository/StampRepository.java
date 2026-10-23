@@ -3,7 +3,12 @@ package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 import android.app.Application;
 import android.os.AsyncTask;
 import androidx.lifecycle.LiveData;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.AppDatabase;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.StampDao;
@@ -60,5 +65,30 @@ public class StampRepository {
             mAsyncTaskDao.deleteStamp(params[0]);
             return null;
         }
+    }
+    public void uploadStampToFirestore(Stamp stamp, OnStampUploadListener listener) {
+        Map<String, Object> stampMap = new HashMap<>();
+        stampMap.put("stampId", stamp.getStampId());
+        stampMap.put("userId", stamp.getUserId());
+        stampMap.put("postId", stamp.getPostId());
+        stampMap.put("commentId", stamp.getCommentId());
+        stampMap.put("type", stamp.getType() != null ? stamp.getType().name() : "");
+        stampMap.put("timestamp", stamp.getTimestamp());
+
+        FirebaseFirestore.getInstance().collection("stamps")
+                .document(stamp.getStampId())
+                .set(stampMap)
+                .addOnSuccessListener(aVoid -> {
+                    insert(stamp); // Lưu vào Room cục bộ
+                    if (listener != null) listener.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    if (listener != null) listener.onFailure(e.getMessage());
+                });
+    }
+
+    public interface OnStampUploadListener {
+        void onSuccess();
+        void onFailure(String error);
     }
 }

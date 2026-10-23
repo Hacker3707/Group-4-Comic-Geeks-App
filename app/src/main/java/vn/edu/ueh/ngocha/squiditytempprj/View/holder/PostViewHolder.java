@@ -25,7 +25,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
     public ImageView btnStamp;
     public EditText edtQuickComment;
     public ImageView btnSendComment;
-    public Chip tvLinkedComic; // Biến toàn cục của lớp
+    public Chip tvLinkedComic;
 
     public PostViewHolder(@NonNull View itemView) {
         super(itemView);

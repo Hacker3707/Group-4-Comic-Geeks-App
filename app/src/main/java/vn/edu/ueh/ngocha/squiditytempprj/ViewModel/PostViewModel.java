@@ -4,6 +4,9 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.List;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
@@ -39,11 +42,13 @@ public class PostViewModel extends AndroidViewModel {
     public void insertPost(Post post) {
         postRepository.insert(post);
     }
+
     public void deletePost(Post post) {
         if (postRepository != null && post != null) {
             postRepository.deletePost(post, post.getPostId());
         }
     }
+
     public void updatePost(Post post) {
         if (postRepository != null && post != null) {
             postRepository.updatePostInFirestore(post, new PostRepository.OnFirestoreUploadListener() {
@@ -59,12 +64,33 @@ public class PostViewModel extends AndroidViewModel {
     }
 
     public void addComment(Comment comment) {
-        commentRepository.insert(comment);
+        commentRepository.uploadCommentToFirestore(comment, null);
     }
-
-    // Bình luận và báo cho chủ bài viết
     public void addComment(Comment comment, Post post) {
-        commentRepository.insert(comment);
+        commentRepository.uploadCommentToFirestore(comment, new CommentRepository.OnCommentUploadListener() {
+            @Override
+            public void onSuccess() {
+                if (post != null && post.getPostId() != null) {
+                    // Lấy tổng số lượng comment thực tế trên Firestore để cập nhật chính xác
+                    FirebaseFirestore.getInstance().collection("comments")
+                            .whereEqualTo("postId", post.getPostId())
+                            .get()
+                            .addOnSuccessListener(queryDocumentSnapshots -> {
+                                int actualCount = queryDocumentSnapshots.size();
+                                post.setCommentCount(actualCount);
+
+                                FirebaseFirestore.getInstance().collection("posts")
+                                        .document(post.getPostId())
+                                        .update("commentCount", actualCount);
+                            });
+                }
+            }
+
+            @Override
+            public void onFailure(String error) {
+            }
+        });
+
         String actorName = notificationRepository.currentActorName(comment.getUserId());
         String text = comment.getContent();
         if (text != null && text.length() > 40) {
@@ -80,12 +106,20 @@ public class PostViewModel extends AndroidViewModel {
     }
 
     public void addStamp(Stamp stamp) {
-        stampRepository.insert(stamp);
+        stampRepository.uploadStampToFirestore(stamp, null);
     }
 
-    // Thả stamp và báo cho chủ bài viết
     public void addStamp(Stamp stamp, Post post) {
-        stampRepository.insert(stamp);
+        stampRepository.uploadStampToFirestore(stamp, new StampRepository.OnStampUploadListener() {
+            @Override
+            public void onSuccess() {
+            }
+
+            @Override
+            public void onFailure(String error) {
+            }
+        });
+
         String actorName = notificationRepository.currentActorName(stamp.getUserId());
         notificationRepository.sendNotification(post.getUserId(), stamp.getUserId(), actorName,
                 NotificationType.LIKE, post.getPostId(),

@@ -191,15 +191,19 @@
             android:textColor="#493373"
             android:textSize="16sp"
             android:visibility="gone"
-            app:chipBackgroundColor="#EEE7FF"
-            app:chipCornerRadius="16dp"
-            app:chipIconVisible="false"
-            app:chipMinHeight="36dp"
-            app:chipStrokeColor="#D2C3FF"
-            app:chipStrokeWidth="1dp"
-            app:closeIconVisible="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/actionLayout" />
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:maxWidth="280dp"
+
+        app:chipBackgroundColor="#EEE7FF"
+        app:chipCornerRadius="16dp"
+        app:chipIconVisible="false"
+        app:chipMinHeight="36dp"
+        app:chipStrokeColor="#D2C3FF"
+        app:chipStrokeWidth="1dp"
+        app:closeIconVisible="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/actionLayout" />
 
         <!-- DIVIDER -->
         <View

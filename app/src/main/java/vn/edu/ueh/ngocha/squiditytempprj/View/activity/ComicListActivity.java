@@ -146,7 +146,7 @@ public class ComicListActivity extends BaseActivity {
                 SEARCH_QUERY = query;
 
                 rcvcomic.scrollToPosition(0);
-                searchViewModel.saveSearch(query);
+                searchViewModel.savecomicSearch(query);
                 loadComicwithMangaDex(query);
             }
         }
@@ -358,7 +358,7 @@ public class ComicListActivity extends BaseActivity {
         comicViewModel.getMangaByGenreResults().observe(this, genreMangaObserver);
         comicViewModel.getLoading().observe(this, loadingObserver);
 
-        searchViewModel.getHistory().observe(this, historyObserver);
+        searchViewModel.getcomicHistory().observe(this, historyObserver);
 
         comicAdapter = new ComicAdapter(
                 new ComicAdapter.OnComicClickListener() {

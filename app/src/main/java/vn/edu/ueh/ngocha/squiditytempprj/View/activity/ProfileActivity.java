@@ -1,7 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -27,9 +26,13 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
@@ -39,19 +42,26 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.StampType;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends BaseActivity {
 
-    // ViewModel & UI Profile (Phần của Nghĩa)
     private UserProfileViewModel profileViewModel;
     private ShapeableImageView imgProfileAvatar;
     private ImageView imgProfileCover;
     private EditText etProfileUsername;
     private TextView tvProfileName;
     private TextView tvProfileEmail;
-    private androidx.constraintlayout.widget.ConstraintLayout appBarLayout;
+
+    // Khai báo các biến cho phần Bio độc lập
+    private TextView tvProfileBio;
+    private EditText etProfileBio;
+    private ImageView btnEditBio;
+    private View layoutEditBio;
+    private MaterialButton btnSaveBio;
+
     private MaterialButton btnChangeAvatar;
     private MaterialButton btnChangeCover;
     private MaterialButton btnSaveProfile;
@@ -78,7 +88,6 @@ public class ProfileActivity extends AppCompatActivity {
                         }
                     }
             );
-
     // Id của tài khoản đang đăng nhập, chưa đăng nhập thì dùng "guest"
     private String currentUid() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
@@ -90,11 +99,7 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_profile);
 
-        // Ánh xạ các view Profile
-        appBarLayout = findViewById(R.id.appBar);
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileEmail = findViewById(R.id.tvProfileEmail);
         imgProfileAvatar = findViewById(R.id.imgProfileAvatar);
@@ -103,7 +108,11 @@ public class ProfileActivity extends AppCompatActivity {
         btnChangeAvatar = findViewById(R.id.btnChangeAvatar);
         btnChangeCover = findViewById(R.id.btnChangeCover);
         btnSaveProfile = findViewById(R.id.btnSaveProfile);
-
+        tvProfileBio = findViewById(R.id.tvProfileBio);
+        etProfileBio = findViewById(R.id.etProfileBio);
+        btnEditBio = findViewById(R.id.btnEditBio);
+        layoutEditBio = findViewById(R.id.layoutEditBio);
+        btnSaveBio = findViewById(R.id.btnSaveBio);
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             startActivity(new Intent(this, AuthActivity.class));
@@ -113,18 +122,64 @@ public class ProfileActivity extends AppCompatActivity {
 
         profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
+
         btnChangeAvatar.setOnClickListener(v -> avatarPicker.launch("image/*"));
         btnChangeCover.setOnClickListener(v -> coverPicker.launch("image/*"));
+
+        // 👉 Sự kiện bấm vào icon bút để mở/đóng ô nhập Bio riêng biệt
+        if (btnEditBio != null) {
+            btnEditBio.setOnClickListener(v -> {
+                if (layoutEditBio.getVisibility() == View.GONE) {
+                    layoutEditBio.setVisibility(View.VISIBLE);
+                    tvProfileBio.setVisibility(View.GONE);
+                    String currentText = tvProfileBio.getText().toString();
+                    etProfileBio.setText(currentText.equals("Chưa có tiểu sử...") ? "" : currentText);
+                    etProfileBio.requestFocus();
+                } else {
+                    layoutEditBio.setVisibility(View.GONE);
+                    tvProfileBio.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+
+        // 👉 Sự kiện bấm nút "Lưu" Bio riêng
+        if (btnSaveBio != null) {
+            btnSaveBio.setOnClickListener(v -> {
+                String newBio = etProfileBio.getText().toString().trim();
+                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                Map<String, Object> map = new HashMap<>();
+                map.put("bio", newBio);
+
+                FirebaseFirestore.getInstance().collection("Users").document(userId)
+                        .set(map, SetOptions.merge())
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(ProfileActivity.this, "Đã cập nhật Bio thành công!", Toast.LENGTH_SHORT).show();
+                            tvProfileBio.setText(newBio.isEmpty() ? "Chưa có tiểu sử..." : newBio);
+                            tvProfileBio.setVisibility(View.VISIBLE);
+                            layoutEditBio.setVisibility(View.GONE);
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(ProfileActivity.this, "Lỗi lưu Bio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+            });
+        }
+
+        // Nút lưu hồ sơ chung (Cập nhật tên hiển thị)
         btnSaveProfile.setOnClickListener(v -> {
             String username = etProfileUsername.getText().toString().trim();
+
             if (username.isEmpty()) {
                 etProfileUsername.setError("Vui lòng nhập tên hiển thị");
                 etProfileUsername.requestFocus();
                 return;
             }
+
             profileViewModel.updateUsername(username);
+            Toast.makeText(ProfileActivity.this, "Đã cập nhật tên hồ sơ!", Toast.LENGTH_SHORT).show();
         });
 
+        // Lắng nghe dữ liệu profile
         profileViewModel.getProfile().observe(this, state -> {
             if (state == null) return;
 
@@ -138,17 +193,32 @@ public class ProfileActivity extends AppCompatActivity {
             }
 
             tvProfileName.setText(username);
-
             tvProfileEmail.setText(email);
             tvProfileEmail.setVisibility(email.isEmpty() ? View.GONE : View.VISIBLE);
+
+            // Load bio từ Firestore lên giao diện khi mở trang
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                FirebaseFirestore.getInstance().collection("Users").document(userId)
+                        .get()
+                        .addOnSuccessListener(documentSnapshot -> {
+                            if (documentSnapshot.exists() && documentSnapshot.contains("bio")) {
+                                String bio = documentSnapshot.getString("bio");
+                                if (bio != null && !bio.isEmpty()) {
+                                    tvProfileBio.setText(bio);
+                                    if (etProfileBio.getText().toString().isEmpty()) {
+                                        etProfileBio.setText(bio);
+                                    }
+                                }
+                            }
+                        });
+            }
 
             if (state.avatarUrl != null && !state.avatarUrl.isEmpty()) {
                 Glide.with(this).load(state.avatarUrl)
                         .placeholder(R.drawable.ic_launcher_background)
                         .error(R.drawable.ic_launcher_background)
                         .circleCrop().into(imgProfileAvatar);
-            } else {
-                imgProfileAvatar.setImageResource(R.drawable.ic_launcher_background);
             }
 
             if (state.coverUrl != null && !state.coverUrl.isEmpty()) {
@@ -156,11 +226,8 @@ public class ProfileActivity extends AppCompatActivity {
                         .placeholder(R.drawable.ic_launcher_background)
                         .error(R.drawable.ic_launcher_background)
                         .centerCrop().into(imgProfileCover);
-            } else {
-                imgProfileCover.setImageResource(R.drawable.ic_launcher_background);
             }
         });
-
 
         profileViewModel.getSaving().observe(this, saving -> {
             boolean isSaving = Boolean.TRUE.equals(saving);
@@ -174,15 +241,6 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(ProfileActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         });
-
-        View rootLayout = findViewById(R.id.profileRoot);
-        if (rootLayout != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (view, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                return insets;
-            });
-        }
 
         recyclerViewProfilePosts = findViewById(R.id.recyclerViewProfilePosts);
         recyclerViewProfilePosts.setLayoutManager(new LinearLayoutManager(this));
@@ -261,6 +319,8 @@ public class ProfileActivity extends AppCompatActivity {
                 intent.putExtra("post_id", post.getPostId());
                 intent.putExtra("post_content", post.getContent());
                 intent.putExtra("post_comic_id", post.getComicId());
+                intent.putExtra("post_comic_title", post.getComicTitle());
+                intent.putExtra("post_hashtag", post.getHashtag());
                 intent.putStringArrayListExtra("post_image_urls", post.getImageUris() != null ? new ArrayList<>(post.getImageUris()) : new ArrayList<>());
                 startActivity(intent);
             }
@@ -277,6 +337,11 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         profileViewModel.loadCurrentProfile();
+    }
+
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.activity_profile;
     }
 
     @Override
