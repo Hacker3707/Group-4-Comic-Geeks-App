@@ -10,10 +10,41 @@
         <item>Settings</item>
     </array>
 
+    <string-array name="profile_gender_options">
+        <item>Chưa chọn</item>
+        <item>Nam</item>
+        <item>Nữ</item>
+        <item>Khác</item>
+        <item>Không muốn tiết lộ</item>
+    </string-array>
+
     <string-array name="search_comic_options">
         <item>Name</item>
         <item>Genre</item>
         <item>Ratings</item>
     </string-array>
+
+    <string-array name="language_entries">
+        <item>Vietnamese</item>
+        <item>English</item>
+    </string-array>
+
+    <string-array name="language_values">
+        <item>vi</item>
+        <item>en</item>
+    </string-array>
+
+    <string-array name="theme_entries">
+        <item>System</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+
+    <string-array name="theme_values">
+        <item>system</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+
 
 </resources>

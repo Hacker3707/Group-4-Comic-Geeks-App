@@ -147,6 +147,14 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         setupDrawer();
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (profileViewModel != null) {
+            profileViewModel.loadCurrentProfile();
+        }
+    }
 
     // Mỗi Activity con tự cung cấp layout nội dung
     protected abstract int getContentLayoutId();

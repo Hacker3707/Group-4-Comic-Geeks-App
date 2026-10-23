@@ -1,10 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
     <PreferenceCategory
-        android:title="App Settings">
+        android:title="General">
+
         <ListPreference
-            android:defaultValue="-1"
-            android:key="add_friends_key" />
+            android:key="language"
+            android:title="Language"
+            android:entries="@array/language_entries"
+            android:entryValues="@array/language_values"
+            android:defaultValue="vi" />
+
+        <ListPreference
+            android:key="theme"
+            android:title="App Theme"
+            android:entries="@array/theme_entries"
+            android:entryValues="@array/theme_values"
+            android:defaultValue="system" />
+
+        <Preference
+            android:key="clear_cache"
+            android:title="Clear cache" />
+
+        <Preference
+            android:key="logout"
+            android:title="Log out" />
+
+        <Preference
+            android:key="delete_account"
+            android:title="Delete account" />
+
+        <Preference
+            android:key="reset_password"
+            android:title="Reset password" />
+
+        <Preference
+            android:key="help"
+            android:title="Help" />
+
 
 
     </PreferenceCategory>
@@ -12,21 +46,34 @@
     <PreferenceCategory
         android:title="Notifications">
 
+        <SwitchPreferenceCompat
+            android:key="notifications_enabled"
+            android:title="Enable notifications"
+            android:defaultValue="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="Chat &amp; Message">
+        android:title="Privacy">
+
+        <Preference
+            android:key="blocked_users"
+            android:title="Blocked users" />
+
+        <Preference
+            android:key="privacy_policy"
+            android:title="Privacy Policy" />
 
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="Search">
+        android:title="About">
+
+        <Preference
+            android:key="app_version"
+            android:title="App version"
+            android:summary="1.0.0" />
 
     </PreferenceCategory>
-
-
-
-
-
 
 </PreferenceScreen>
