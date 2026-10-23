@@ -154,7 +154,7 @@ public class UserProfileViewModel extends ViewModel {
         }
 
         final ProfileUiState fallback = new ProfileUiState(
-                "Người dùng", "", "", "", "", "", "", true);
+                "Người dùng", "", "", "", "", "", "", true, Collections.emptyList());
         profile.setValue(fallback);
 
         repository.getProfile(uid)
@@ -164,7 +164,7 @@ public class UserProfileViewModel extends ViewModel {
                     profile.setValue(new ProfileUiState(
                             state.username, "", state.avatarUrl,
                             state.coverUrl, state.bio, state.gender,
-                            state.birthDate, true));
+                            state.birthDate, true, state.favGenres));
                 })
                 .addOnFailureListener(error -> profile.setValue(fallback));
     }
