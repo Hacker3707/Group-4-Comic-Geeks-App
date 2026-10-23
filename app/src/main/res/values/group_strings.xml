@@ -21,6 +21,10 @@
     <string name="group_composer_hint">Viết bài, chia sẻ điều gì đó...</string>
     <string name="group_empty_posts">Chưa có bài viết nào</string>
     <string name="group_empty_members">Chưa có thành viên nào</string>
+    <string name="group_member_search_hint">Tìm thành viên...</string>
+    <string name="group_empty_member_search">Không tìm thấy thành viên nào</string>
+    <string name="group_member_unknown_name">Người dùng</string>
+    <string name="group_member_you">%1$s (Bạn)</string>
     <string name="group_empty_other">Chưa có nội dung</string>
 
     <string name="group_post_dots">•••</string>
