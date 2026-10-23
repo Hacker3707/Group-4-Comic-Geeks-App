@@ -24,6 +24,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaResponse;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaSingleResponse;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaTagResponse;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Tag;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
 
 public class MangaDexRepository {
     private final MangaDexApi api;
@@ -108,8 +109,8 @@ public class MangaDexRepository {
         return mangaLiveData;
     }
 
-    public LiveData<List<Tag>> getGenresLive() {
-        MutableLiveData<List<Tag>> genresLiveData =
+    public LiveData<List<Genre>> getGenresLive() {
+        MutableLiveData<List<Genre>> genresLiveData =
                 new MutableLiveData<>();
 
         api.getMangaTags().enqueue(
@@ -119,60 +120,61 @@ public class MangaDexRepository {
                             Call<MangaTagResponse> call,
                             Response<MangaTagResponse> response) {
 
-                        Log.d("GenreAPI", "HTTP code: " + response.code());
+                        if (!response.isSuccessful()
+                                || response.body() == null
+                                || response.body().getData() == null) {
+                            Log.e("GenreAPI",
+                                    "Cannot load genres. HTTP "
+                                            + response.code());
+                            return;
+                        }
 
-                        if (response.isSuccessful()
-                                && response.body() != null
-                                && response.body().getData() != null) {
+                        List<Genre> genres = new ArrayList<>();
 
-                            List<Tag> genres =
-                                    new ArrayList<>();
-
-                            for (Tag tag :
-                                    response.body().getData()) {
-
-                                if (tag.getAttributes() == null) {
-                                    continue;
-                                }
-
-                                if (!"genre".equals(
-                                        tag.getAttributes().getGroup())) {
-                                    continue;
-                                }
-
-                                Map<String, String> names =
-                                        tag.getAttributes().getName();
-
-                                if (names != null
-                                        && names.get("en") != null) {
-                                    genres.add(tag);
-                                }
+                        for (Tag tag : response.body().getData()) {
+                            if (tag.getAttributes() == null) {
+                                continue;
                             }
 
-                            Log.d("GenreAPI",
-                                    "Number of genres: " + genres.size());
+                            if (!"genre".equals(
+                                    tag.getAttributes().getGroup())) {
+                                continue;
+                            }
 
-                            genresLiveData.setValue(genres);
+                            Map<String, String> names =
+                                    tag.getAttributes().getName();
 
-                        } else {
-                            Log.e(
-                                    "MangaDexRepository",
-                                    "Cannot load genres. HTTP "
-                                            + response.code()
+                            if (names == null) {
+                                continue;
+                            }
+
+                            String name = names.get("en");
+
+                            if (name == null || name.trim().isEmpty()) {
+                                continue;
+                            }
+
+                            // Chuyển DTO Tag thành Room entity Genre
+                            Genre genre = new Genre(
+                                    tag.getId(),
+                                    name
                             );
+
+                            genres.add(genre);
                         }
+
+                        genresLiveData.setValue(genres);
+
+                        Log.d("GenreAPI",
+                                "Number of genres: " + genres.size());
                     }
 
                     @Override
                     public void onFailure(
                             Call<MangaTagResponse> call,
                             Throwable t) {
-
-                        Log.e(
-                                "MangaDexRepository",
-                                "Failed to load genres",
-                                t
-                        );
+                        Log.e("GenreAPI",
+                                "Failed to load genres", t);
                     }
                 }
         );
@@ -233,54 +235,6 @@ public class MangaDexRepository {
 
         return mangaLiveData;
     }
-
-    public LiveData<List<MangaData>> searchManga(
-            String searchQuery,
-            int limit,
-            int offset,
-            String include) {
-        MutableLiveData<List<MangaData>> mangaLiveData =
-                new MutableLiveData<>();
-
-        api.searchManga(searchQuery, limit, offset, include)
-                .enqueue(
-                new Callback<MangaResponse>() {
-                    @Override
-                    public void onResponse(
-                            Call<MangaResponse> call,
-                            Response<MangaResponse> response) {
-                        if (response.isSuccessful()
-                                && response.body() != null
-                                && response.body().getData() != null) {
-                            mangaLiveData.setValue(
-                                    response.body().getData()
-                            );
-                        } else {
-                            Log.e(
-                                    "MangaDexRepository",
-                                    "Cannot search manga. HTTP "
-                                            + response.code()
-                            );
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(
-                            Call<MangaResponse> call,
-                            Throwable t) {
-                        Log.e(
-                                "MangaDexRepository",
-                                "Failed to search manga",
-                                t
-                        );
-                    }
-
-
-                }
-        );
-        return mangaLiveData;
-    }
-
     public void loadNextPage() {
         if (isLoading || isLastPage) {
             return;
@@ -348,6 +302,96 @@ public class MangaDexRepository {
 
                 Log.e("MangaDexRepository",
                         "Failed to load manga", t);
+            }
+        });
+    }
+
+    private final MutableLiveData<List<MangaData>> searchResults =
+            new MutableLiveData<>();
+
+    private Call<MangaResponse> currentSearchCall;
+    private int searchRequestVersion = 0;
+
+    public LiveData<List<MangaData>> getSearchResults() {
+        return searchResults;
+    }
+
+    public synchronized void searchManga(
+            String query,
+            int limit,
+            int offset,
+            String include
+    ) {
+        final int requestVersion = ++searchRequestVersion;
+
+        // Hủy request trước đó nếu vẫn còn đang chạy.
+        if (currentSearchCall != null) {
+            currentSearchCall.cancel();
+            currentSearchCall = null;
+        }
+
+        if (query == null || query.trim().isEmpty()) {
+            searchResults.setValue(new ArrayList<>());
+            return;
+        }
+
+        final String requestedQuery = query.trim();
+
+        Call<MangaResponse> call = api.searchManga(
+                requestedQuery,
+                limit,
+                offset,
+                include
+        );
+
+        currentSearchCall = call;
+
+        call.enqueue(new Callback<MangaResponse>() {
+            @Override
+            public void onResponse(
+                    Call<MangaResponse> call,
+                    Response<MangaResponse> response
+            ) {
+                synchronized (MangaDexRepository.this) {
+                    // Bỏ qua kết quả của request cũ.
+                    if (requestVersion != searchRequestVersion) {
+                        return;
+                    }
+
+                    if (currentSearchCall == call) {
+                        currentSearchCall = null;
+                    }
+                }
+
+                if (!response.isSuccessful()
+                        || response.body() == null
+                        || response.body().getData() == null) {
+                    Log.e("MangaSearch",
+                            "Search failed. HTTP " + response.code());
+                    return;
+                }
+
+                searchResults.postValue(response.body().getData());
+            }
+
+            @Override
+            public void onFailure(
+                    Call<MangaResponse> call,
+                    Throwable t
+            ) {
+                synchronized (MangaDexRepository.this) {
+                    if (requestVersion != searchRequestVersion) {
+                        return;
+                    }
+
+                    if (currentSearchCall == call) {
+                        currentSearchCall = null;
+                    }
+                }
+
+                if (!call.isCanceled()) {
+                    Log.e("MangaSearch", "Search request failed", t);
+                }
             }
         });
     }

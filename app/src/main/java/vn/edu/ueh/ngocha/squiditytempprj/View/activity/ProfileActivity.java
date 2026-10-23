@@ -12,17 +12,14 @@ import android.app.Dialog;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.firestore.ListenerRegistration;
-import vn.edu.ueh.ngocha.squiditytempprj.View.activity.MainActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,16 +31,13 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Stamp;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.StampType;
@@ -84,6 +78,7 @@ public class ProfileActivity extends BaseActivity {
     private ListenerRegistration profileDetailsListener;
     private View layoutIntroductionDetails;
     private com.google.android.material.tabs.TabLayout tabLayout;
+    private ChipGroup chipGenreProfile;
     private final ActivityResultLauncher<String> avatarPicker =
             registerForActivityResult(
                     new ActivityResultContracts.GetContent(),
@@ -104,6 +99,35 @@ public class ProfileActivity extends BaseActivity {
                     }
             );
 
+    private Observer<List<Genre>> genreObserver = new Observer<List<Genre>>() {
+        @Override
+        public void onChanged(List<Genre> genres) {
+            if (chipGenreProfile != null) {
+                chipGenreProfile.removeAllViews();
+            }
+            if (genres != null) {
+                displayGenres(genres);
+            }
+        }
+    };
+
+    private void displayGenres(List<Genre> genres) {
+        chipGenreProfile.setSingleSelection(false);
+        chipGenreProfile.setSelectionRequired(false);
+        chipGenreProfile.removeAllViews();
+
+        for (Genre genre : genres) {
+            Chip chip = new Chip(this);
+
+            chip.setText(genre.getGenreName());
+            chip.setTag(genre.getGenreId());
+
+            chipGenreProfile.addView(chip);
+        }
+    }
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,11 +139,11 @@ public class ProfileActivity extends BaseActivity {
         tvProfileEmail = findViewById(R.id.tvProfileEmail);
         imgProfileAvatar = findViewById(R.id.imgProfileAvatar);
         imgProfileCover = findViewById(R.id.imgProfileCover);
-
         btnEditProfile = findViewById(R.id.btnEditProfile);
         btnEditAvatarImage = findViewById(R.id.btnEditAvatarImage);
         btnEditCoverImage = findViewById(R.id.btnEditCoverImage);
         tvProfileBio = findViewById(R.id.tvProfileBio);
+        chipGenreProfile = findViewById(R.id.chipGroupProfile);
 
         layoutIntroductionDetails =
                 findViewById(R.id.layoutIntroductionDetails);
@@ -131,6 +155,7 @@ public class ProfileActivity extends BaseActivity {
         tvIntroBio = findViewById(R.id.tvIntroBio);
         btnFollow = findViewById(R.id.btnFollow);
         btnMessage = findViewById(R.id.btnMessage);
+
 
         tabLayout = findViewById(R.id.tabLayout);
         profileActionButtons = findViewById(R.id.profileActionButtons);

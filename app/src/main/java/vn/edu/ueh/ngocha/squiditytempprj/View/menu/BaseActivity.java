@@ -5,8 +5,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +49,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected TextView tvMainUsername;
     protected ShapeableImageView imgDrawerAvatar;
     protected ShapeableImageView imgMainAvatar;
+    protected ImageView imgnavProfileCover;
     protected FrameLayout activityContent;
     protected AuthViewModel authViewModel;
     protected UserProfileViewModel profileViewModel;
@@ -125,11 +127,33 @@ public abstract class BaseActivity extends AppCompatActivity {
         tvDrawerUsername = header.findViewById(R.id.tvDrawerUsername);
         tvDrawerEmail = header.findViewById(R.id.tvDrawerEmail);
         imgDrawerAvatar = header.findViewById(R.id.imageView4);
-        imgMainAvatar = findViewById(R.id.imgvAvatar);
         tvMainUsername = findViewById(R.id.tvMainUsername);
+        imgnavProfileCover = header.findViewById(R.id.imgnavCover);
+        imgMainAvatar = findViewById(R.id.imgMainAvatar);
 
         btnAuthAction.setOnClickListener(onAuthClickListener);
         imgMainAvatar.setOnClickListener(onProfileClickListener);
+
+        ImageButton btnBackHome =
+                findViewById(R.id.btnBackHome);
+
+        if (btnBackHome != null) {
+            btnBackHome.setVisibility(View.VISIBLE);
+
+            btnBackHome.setOnClickListener(v -> {
+                Intent intent = new Intent(
+                        BaseActivity.this,
+                        MainActivity.class
+                );
+                intent.addFlags(
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                );
+                startActivity(intent);
+                finish();
+            });
+        }
+
 
         authViewModel = new ViewModelProvider(this)
                 .get(AuthViewModel.class);
@@ -258,6 +282,15 @@ public abstract class BaseActivity extends AppCompatActivity {
                         .circleCrop()
                         .into(imgMainAvatar);
             }
+
+            if (state.coverUrl != null && !state.coverUrl.isEmpty()) {
+                Glide.with(BaseActivity.this).load(state.coverUrl)
+                        .placeholder(R.drawable.ic_launcher_background)
+                        .error(R.drawable.ic_launcher_background)
+                        .centerCrop().into(imgnavProfileCover);
+            } else {
+                imgnavProfileCover.setImageResource(R.drawable.ic_launcher_background);
+            }
         }
     };
 
@@ -265,17 +298,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected View.OnClickListener onProfileClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (imgMainAvatar == null) {
-                Log.e("DrawerDebug", "Avatar is NULL");
-                return;
-            }
-
-
-            Log.d("DrawerDebug",
-                    "Drawer width after layout = " + drawerLayout.getWidth());
-            Log.d("DrawerDebug",
-                    "Drawer height after layout = " + drawerLayout.getHeight());
-
             if (drawerLayout.getWidth() > 0
                     && drawerLayout.getHeight() > 0) {
                 drawerLayout.openDrawer(GravityCompat.START);

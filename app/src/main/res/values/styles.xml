@@ -5,4 +5,17 @@
     <item name="android:textSize">30sp</item>
     <item name="android:textColor">@color/white</item>
 </style>
+
+    <style name="GenreChip"
+        parent="Widget.MaterialComponents.Chip.Choice">
+
+        <item name="android:checkable">true</item>
+        <item name="chipBackgroundColor">@color/genre_chip_bg</item>
+        <item name="android:textColor">@color/genre_chip_text</item>
+        <item name="chipStrokeColor">#D8CBEA</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipCornerRadius">20dp</item>
+        <item name="checkedIconVisible">false</item>
+
+    </style>
 </resources>

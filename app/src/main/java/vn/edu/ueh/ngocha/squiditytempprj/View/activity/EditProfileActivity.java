@@ -1,7 +1,10 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import android.app.DatePickerDialog;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -9,20 +12,33 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Tag;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.GenreViewModel;
 
 public class EditProfileActivity extends AppCompatActivity {
 
@@ -33,7 +49,9 @@ public class EditProfileActivity extends AppCompatActivity {
     private EditText etIntroduction;
     private TextView tvEmail;
     private MaterialButton btnSave;
+    private ChipGroup chipGroupGenres;
 
+    private GenreViewModel genreViewModel;
     private FirebaseFirestore firestore;
     private FirebaseUser currentUser;
 
@@ -49,6 +67,15 @@ public class EditProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.editProfile), new OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
+                Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+                return insets;
+            }
+        });
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -84,7 +111,20 @@ public class EditProfileActivity extends AppCompatActivity {
         loadProfile();
 
         btnSave.setOnClickListener(v -> saveProfile());
+
+        chipGroupGenres = findViewById(R.id.chipGroupGenres);
+        genreViewModel = new ViewModelProvider(this).get(GenreViewModel.class);
+        genreViewModel.getAllGenres().observe(this, genresObserver);
+
     }
+
+    private Observer<List<Genre>> genresObserver = new Observer<List<Genre>>() {
+        @Override
+        public void onChanged(List<Genre> genres) {
+            if (genres == null) return;
+            displayGenres(genres);
+        }
+    };
 
     private void loadProfile() {
         String uid = currentUser.getUid();
@@ -255,5 +295,79 @@ public class EditProfileActivity extends AppCompatActivity {
                                     + error.getLocalizedMessage(),
                             Toast.LENGTH_LONG).show();
                 });
+    }
+
+    private void styleGenreChip(Chip chip) {
+        int purple = Color.parseColor("#493373");
+        int white = Color.WHITE;
+        int border = Color.parseColor("#D8CBEA");
+
+        int[][] states = new int[][] {
+                new int[] { android.R.attr.state_checked },
+                new int[] {}
+        };
+
+        chip.setCheckable(true);
+        chip.setEnsureMinTouchTargetSize(false);
+
+        chip.setChipCornerRadius(dp(20));
+        chip.setChipStrokeWidth(dp(1));
+        chip.setChipMinHeight(dp(38));
+        chip.setTextSize(14);
+        chip.setPadding(dp(4), 0, dp(4), 0);
+
+        chip.setChipStrokeColor(new ColorStateList(
+                states,
+                new int[] { purple, border }
+        ));
+
+        chip.setChipBackgroundColor(new ColorStateList(
+                states,
+                new int[] { purple, white }
+        ));
+
+        chip.setTextColor(new ColorStateList(
+                states,
+                new int[] { white, purple }
+        ));
+
+        chip.setCheckedIconVisible(false);
+    }
+
+    private int dp(float value) {
+        return (int) (value * getResources()
+                .getDisplayMetrics().density + 0.5f);
+    }
+
+    private void displayGenres(List<Genre> genres) {
+        ChipGroup chipGroup = findViewById(R.id.chipGroupGenres);
+
+        chipGroup.setSingleSelection(false);
+        chipGroup.setSelectionRequired(false);
+        chipGroup.removeAllViews();
+
+        for (Genre genre : genres) {
+            Chip chip = new Chip(this);
+
+            chip.setText(genre.getGenreName());
+            styleGenreChip(chip);
+            chip.setTag(genre.getGenreId());
+
+            chipGroup.addView(chip);
+        }
+    }
+
+    private List<String> getSelectedGenres() {
+        List<String> selected = new ArrayList<>();
+
+        for (int id : chipGroupGenres.getCheckedChipIds()) {
+            Chip chip = chipGroupGenres.findViewById(id);
+
+            if (chip != null) {
+                selected.add(chip.getTag().toString());
+            }
+        }
+
+        return selected;
     }
 }

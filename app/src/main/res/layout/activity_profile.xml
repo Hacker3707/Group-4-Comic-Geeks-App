@@ -51,7 +51,7 @@
                     <ImageView
                         android:id="@+id/imgCoverGraffiti"
                         android:layout_width="0dp"
-                        android:layout_height="180dp"
+                        android:layout_height="250dp"
                         android:layout_marginTop="178dp"
                         android:contentDescription="@null"
                         android:elevation="1dp"
@@ -158,9 +158,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="7dp"
+                        android:fontFamily="@font/jersey25_regular"
                         android:text="email@example.com"
                         android:textColor="#666666"
-                        android:textSize="15sp"
+                        android:textSize="19sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/profileNameRow" />
@@ -169,7 +170,7 @@
                         android:id="@+id/statsLayout"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_marginTop="28dp"
+                        android:layout_marginTop="24dp"
                         android:orientation="horizontal"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -177,7 +178,7 @@
 
                         <FrameLayout
                             android:layout_width="0dp"
-                            android:layout_height="120dp"
+                            android:layout_height="135dp"
                             android:layout_weight="1">
 
                             <ImageView
@@ -185,43 +186,37 @@
                                 android:layout_height="160dp"
                                 android:layout_gravity="center"
                                 android:scaleType="fitCenter"
-                                android:src="@drawable/paint_left" />
+                                android:src="@drawable/paint_splash_left_newest" />
 
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Manga Lover"
-                                    android:textColor="#FFFFFF"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
+                                android:gravity="center_horizontal"
+                                android:orientation="vertical"
+                                android:paddingVertical="35dp">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/jersey25_regular"
                                     android:text="128"
-                                    android:textColor="#FFFFFF"
+                                    android:textColor="#3246B4"
                                     android:textSize="30sp" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:fontFamily="@font/jersey25_regular"
                                     android:text="Posts"
-                                    android:textColor="#FFFFFF"
-                                    android:textSize="12sp" />
+                                    android:textColor="#3F51B5"
+                                    android:textSize="17sp" />
                             </LinearLayout>
 
                         </FrameLayout>
 
                         <FrameLayout
                             android:layout_width="0dp"
-                            android:layout_height="120dp"
+                            android:layout_height="135dp"
                             android:layout_weight="1">
 
                             <ImageView
@@ -229,21 +224,14 @@
                                 android:layout_height="160dp"
                                 android:layout_gravity="center"
                                 android:scaleType="fitCenter"
-                                android:src="@drawable/paint_splash_transp" />
+                                android:src="@drawable/paint_splash_mid" />
 
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Mystery Addict"
-                                    android:textColor="#FFFFFF"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
+                                android:gravity="center_horizontal"
+                                android:orientation="vertical"
+                                android:paddingVertical="35dp">
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -256,16 +244,17 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:fontFamily="@font/jersey25_regular"
                                     android:text="Followers"
                                     android:textColor="#FFFFFF"
-                                    android:textSize="12sp" />
+                                    android:textSize="17sp" />
                             </LinearLayout>
 
                         </FrameLayout>
 
                         <FrameLayout
                             android:layout_width="0dp"
-                            android:layout_height="120dp"
+                            android:layout_height="135dp"
                             android:layout_weight="1">
 
                             <ImageView
@@ -273,36 +262,30 @@
                                 android:layout_height="160dp"
                                 android:layout_gravity="center"
                                 android:scaleType="fitCenter"
-                                android:src="@drawable/splash_right" />
+                                android:src="@drawable/paint_splash_right_new" />
 
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Level 12"
-                                    android:textColor="#FFEB3B"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
+                                android:gravity="center_horizontal"
+                                android:orientation="vertical"
+                                android:paddingVertical="35dp">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/jersey25_regular"
                                     android:text="179"
-                                    android:textColor="#FFFFFF"
+                                    android:textColor="#3F51B5"
                                     android:textSize="30sp" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:fontFamily="@font/jersey25_regular"
                                     android:text="Following"
-                                    android:textColor="#FFFFFF"
-                                    android:textSize="12sp" />
+                                    android:textColor="#3F51B5"
+                                    android:textSize="17sp" />
                             </LinearLayout>
 
                         </FrameLayout>
@@ -371,19 +354,19 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="BIO"
-                            android:textStyle="bold"
-                            android:textColor="#333333" />
+                            android:text="Signature"
+                            android:textColor="#333333"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvProfileBio"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"
-                            android:text="Chưa có giới thiệu"
-                            android:textColor="#666666"
+                            android:ellipsize="end"
                             android:maxLines="2"
-                            android:ellipsize="end" />
+                            android:text="I have nothing to say~"
+                            android:textColor="#666666" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -424,55 +407,10 @@
                             <com.google.android.material.chip.ChipGroup
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:id="@+id/chipGroupProfile"
                                 app:singleLine="true"
-                                app:chipSpacingHorizontal="8dp">
+                                app:chipSpacingHorizontal="8dp"/>
 
-                                <com.google.android.material.chip.Chip
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Action"
-                                    android:textColor="#493373"
-                                    app:chipBackgroundColor="#E0DCF0"
-                                    app:chipStrokeWidth="0dp"
-                                    app:ensureMinTouchTargetSize="false" />
-
-                                <com.google.android.material.chip.Chip
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Manga"
-                                    android:textColor="#493373"
-                                    app:chipBackgroundColor="#E0DCF0"
-                                    app:chipStrokeWidth="0dp"
-                                    app:ensureMinTouchTargetSize="false" />
-
-                                <com.google.android.material.chip.Chip
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Mystery"
-                                    android:textColor="#493373"
-                                    app:chipBackgroundColor="#E0DCF0"
-                                    app:chipStrokeWidth="0dp"
-                                    app:ensureMinTouchTargetSize="false" />
-
-                                <com.google.android.material.chip.Chip
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Adventure"
-                                    android:textColor="#493373"
-                                    app:chipBackgroundColor="#E0DCF0"
-                                    app:chipStrokeWidth="0dp"
-                                    app:ensureMinTouchTargetSize="false" />
-
-                                <com.google.android.material.chip.Chip
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="+ 3 more"
-                                    android:textColor="#493373"
-                                    app:chipBackgroundColor="#E0DCF0"
-                                    app:chipStrokeWidth="0dp"
-                                    app:ensureMinTouchTargetSize="false" />
-
-                            </com.google.android.material.chip.ChipGroup>
                         </HorizontalScrollView>
 
                     </LinearLayout>
