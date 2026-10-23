@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -28,7 +29,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.firebase.auth.FirebaseUser;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
@@ -73,34 +74,19 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
 import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
-    private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
 
     private MaterialAutoCompleteTextView etMainSearch;
     private LinearLayout layoutSearchBar;
     private ImageButton btnSearch;
     private LinearLayout searchOverlay;
     private boolean isSearchAnimating = false;
-    private int statusBarInset = 0;
 
     private RecyclerView rcvpostlist;
     private PostAdapter postAdapter;
     private PostViewModel postViewModel;
     private HomeFeedViewModel homeFeedViewModel;
-
-    private TextView tvMainUsername;
-    private TextView tvDrawerUsername;
-    private TextView tvDrawerEmail;
-
-    private ShapeableImageView imgMainAvatar;
-    private ShapeableImageView imgDrawerAvatar;
-
-    private MaterialButton btnAuthAction;
-
-    private AuthViewModel authViewModel;
-    private UserProfileViewModel profileViewModel;
 
     private View searchDimOverlay;
 
@@ -114,23 +100,16 @@ public class MainActivity extends AppCompatActivity {
     private boolean isSearchOpen = false;
 
 
-    private View.OnClickListener onProfileClickListener =
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (drawerLayout != null) {
-                        // Portrait: mở menu
-                        drawerLayout.openDrawer(GravityCompat.START);
-                    } else {
-                        // Landscape: mở hồ sơ trực tiếp
-                        Intent intent = new Intent(
-                                MainActivity.this,
-                                ProfileActivity.class
-                        );
-                        startActivity(intent);
-                    }
-                }
-            };
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.activity_main_content;
+    }
+
+    @Override
+    protected boolean shouldShowBackHomeButton() {
+        return false;
+    }
+
 
     private View.OnClickListener onSearchClickListener = new View.OnClickListener() {
         @Override
@@ -218,66 +197,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private NavigationView.OnNavigationItemSelectedListener onAvatarsClickListener =
-            new NavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    int id = item.getItemId();
-
-                    if (id == R.id.action_profile) {
-                        if (authViewModel.getCurrentUser() == null) {
-
-                            new AlertDialog.Builder(MainActivity.this)
-                                    .setTitle("Yêu cầu đăng nhập")
-                                    .setMessage("Bạn cần đăng nhập để xem profile.")
-                                    .setNegativeButton("Hủy", (dialog, which) -> {
-                                        dialog.dismiss();
-                                    })
-                                    .setPositiveButton("Đăng nhập", (dialog, which) -> {
-                                        Intent intent = new Intent(
-                                                MainActivity.this,
-                                                AuthActivity.class
-                                        );
-                                        startActivity(intent);
-                                    })
-                                    .show();
-
-                        } else {
-                            Intent intent = new Intent(
-                                    MainActivity.this,
-                                    ProfileActivity.class
-                            );
-                            startActivity(intent);
-                        }
-
-                    } else if (id == R.id.action_chat) {
-                        startActivity(new Intent(MainActivity.this, ChatListActivity.class));
-                    } else if (id == R.id.action_group) {
-                        // Mở màn hình Groups
-                        Intent intent = new Intent(
-                                MainActivity.this,
-                                GroupActivity.class
-                        );
-                        startActivity(intent);
-                    }
-                    else if (id == R.id.action_admin) {
-                        startActivity(new Intent(MainActivity.this, AdminActivity.class));
-                    }
-                    else if (id == R.id.action_comic) {
-                        Intent intent = new Intent(
-                                MainActivity.this,
-                                ComicListActivity.class
-                        );
-                        startActivity(intent);
-                    }
-
-                    if (drawerLayout != null) {
-                        drawerLayout.closeDrawer(GravityCompat.START);
-                    }
-                    return true;
-                }
-            };
-
     // Hiện mục Admin trong menu nếu là admin; tài khoản bị cấm thì đăng xuất
     private void checkAdminAndBan() {
         if (navigationView == null) {
@@ -319,90 +238,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-
-        setContentView(R.layout.activity_main);
-
-        View mainView = findViewById(R.id.main);
-
-        ViewCompat.setOnApplyWindowInsetsListener(
-                mainView,
-                (v, insets) -> {
-                    Insets systemBars = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                    );
-
-                    statusBarInset = systemBars.top;
-
-                    v.setPadding(
-                            systemBars.left,
-                            systemBars.top,
-                            systemBars.right,
-                            systemBars.bottom
-                    );
-
-                    if (searchOverlay != null) {
-                        updateSearchOverlayPosition();
-                    }
-
-                    return insets;
-                }
-        );
-
-        NtfChannel.setup(this);
-        NotificationPopup.attach(this, findViewById(R.id.btnNotification));
-
-        authViewModel = new ViewModelProvider(this)
-                .get(AuthViewModel.class);
-
-        profileViewModel = new ViewModelProvider(this)
-                .get(UserProfileViewModel.class);
-
-        tvMainUsername = findViewById(R.id.tvMainUsername);
-        drawerLayout = findViewById(R.id.drawerLayout);
-        navigationView = findViewById(R.id.navigationView);
-
-
-        ViewCompat.setOnApplyWindowInsetsListener(
-                navigationView,
-                (v, insets) -> {
-
-                    Insets systemBars = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                    );
-
-                    v.setPadding(
-                            v.getPaddingLeft(),
-                            systemBars.top,
-                            v.getPaddingRight(),
-                            v.getPaddingBottom()
-                    );
-
-                    return insets;
-                }
-        );
+        // BaseActivity đã nạp AppBar, Drawer, profile và layout nội dung.
 
         rcvpostlist = findViewById(R.id.rcv_postlist);
-        View appBar = findViewById(R.id.appBar);
-        tvMainUsername = appBar.findViewById(R.id.tvMainUsername);
-        imgMainAvatar = appBar.findViewById(R.id.imgMainAvatar);
-
-        if (navigationView == null || navigationView.getHeaderCount() == 0) {
-            Toast.makeText(this, "Không tìm thấy phần header của menu", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        View header = navigationView.getHeaderView(0);
-        tvDrawerUsername = header.findViewById(R.id.tvDrawerUsername);
-        tvDrawerEmail = header.findViewById(R.id.tvDrawerEmail);
-        imgDrawerAvatar = header.findViewById(R.id.imageView4);
         etMainSearch = findViewById(R.id.etMainSearch);
         layoutSearchBar = findViewById(R.id.layoutSearchBar);
         btnSearch = findViewById(R.id.btnSearch);
-        btnAuthAction = findViewById(R.id.btnAuthAction);
         searchOverlay = findViewById(R.id.searchOverlay);
         searchDimOverlay = findViewById(R.id.searchDimOverlay);
         btnDoSearch = findViewById(R.id.btnDoSearch);
+
+        // Search overlay được đưa lên lớp phủ cấp Activity để không bị đẩy xuống dưới AppBar.
+        ViewGroup oldSearchParent = (ViewGroup) searchOverlay.getParent();
+        ViewGroup oldDimParent = (ViewGroup) searchDimOverlay.getParent();
+        if (oldSearchParent != null) oldSearchParent.removeView(searchOverlay);
+        if (oldDimParent != null) oldDimParent.removeView(searchDimOverlay);
+        baseOverlayContainer.addView(searchDimOverlay, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        baseOverlayContainer.addView(searchOverlay, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, android.view.Gravity.TOP));
+        updateSearchOverlayPosition();
 
         searchViewModel = new ViewModelProvider(this)
                 .get(SearchViewModel.class);
@@ -426,33 +281,6 @@ public class MainActivity extends AppCompatActivity {
         etMainSearch.setOnItemClickListener(onSearchHistoryClickListener);
         etMainSearch.setOnFocusChangeListener(onSearchFocusChangeListener);
         btnDoSearch.setOnClickListener(onSearchClickListener);
-
-        btnAuthAction.setOnClickListener(v -> {
-            FirebaseUser user = authViewModel.getCurrentUser();
-            if (user == null) {
-                openAuthActivity();
-            } else {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Đăng xuất")
-                        .setMessage("Bạn có chắc muốn đăng xuất không?")
-                        .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
-                        .setPositiveButton("Đăng xuất", (dialog, which) -> {
-                            authViewModel.logout();
-                            profileViewModel.loadCurrentProfile();
-                            Toast.makeText(
-                                    MainActivity.this,
-                                    "Đã đăng xuất",
-                                    Toast.LENGTH_SHORT
-                            ).show();
-                        })
-                        .show();
-            }
-        });
-
-
-
-        imgMainAvatar.setOnClickListener(onProfileClickListener);
-        navigationView.setNavigationItemSelectedListener(onAvatarsClickListener);
 
         // Nút tạo bài viết ở trang chủ
         FloatingActionButton fabCreatePost = findViewById(R.id.fabCreatePost);
@@ -580,40 +408,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        profileViewModel.getProfile().observe(this, state -> {
-            if (state == null) {
-                return;
-            }
-
-            tvMainUsername.setText(state.username);
-            tvDrawerUsername.setText(state.username);
-            tvDrawerEmail.setText(state.email);
-
-            btnAuthAction.setText(
-                    state.loggedIn ? "Đăng xuất" : "Đăng nhập / Đăng ký"
-            );
-
-            if (state.avatarUrl == null || state.avatarUrl.isEmpty()) {
-                imgMainAvatar.setImageResource(R.drawable.ic_launcher_background);
-                imgDrawerAvatar.setImageResource(R.drawable.ic_launcher_background);
-            } else {
-                Glide.with(this)
-                        .load(state.avatarUrl)
-                        .placeholder(R.drawable.ic_launcher_background)
-                        .error(R.drawable.ic_launcher_background)
-                        .circleCrop()
-                        .into(imgMainAvatar);
-
-                Glide.with(this)
-                        .load(state.avatarUrl)
-                        .placeholder(R.drawable.ic_launcher_background)
-                        .error(R.drawable.ic_launcher_background)
-                        .circleCrop()
-                        .into(imgDrawerAvatar);
-            }
-        });
-
-        profileViewModel.loadCurrentProfile();
     }
 
     private void openAuthActivity() {
@@ -738,7 +532,7 @@ public class MainActivity extends AppCompatActivity {
                 (FrameLayout.LayoutParams) searchOverlay.getLayoutParams();
 
         float density = getResources().getDisplayMetrics().density;
-        int topMargin = statusBarInset + (int) (72 * density);
+        int topMargin = statusBarInset + (int) (125 * density);
 
         params.topMargin = topMargin;
         searchOverlay.setLayoutParams(params);

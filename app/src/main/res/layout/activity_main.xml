@@ -108,7 +108,7 @@
                                     android:background="@drawable/bg_search"
                                     android:hint="Type in words to start searching..."
                                     android:paddingHorizontal="12dp"
-                                    android:textSize="14sp"
+                                    android:textSize="15.5sp"
                                     android:maxLines="1"
                                     android:singleLine="true" />
 
