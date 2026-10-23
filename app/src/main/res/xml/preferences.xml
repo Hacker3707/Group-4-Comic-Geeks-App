@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="App Settings">
+        <ListPreference
+            android:defaultValue="-1"
+            android:key="add_friends_key" />
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Notifications">
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Chat &amp; Message">
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Search">
+
+    </PreferenceCategory>
+
+
+
+
+
+
+</PreferenceScreen>

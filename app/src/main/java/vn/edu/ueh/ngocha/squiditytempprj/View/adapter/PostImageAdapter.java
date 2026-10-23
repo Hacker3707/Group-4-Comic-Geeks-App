@@ -1,6 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import java.util.List;
 
 import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.activity.ZoomImageActivity;
 
 public class PostImageAdapter extends RecyclerView.Adapter<PostImageAdapter.ImageViewHolder> {
 
@@ -30,7 +32,6 @@ public class PostImageAdapter extends RecyclerView.Adapter<PostImageAdapter.Imag
     @NonNull
     @Override
     public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Layout của từng item ảnh trong bài viết (ví dụ: item_post_image.xml)
         View view = LayoutInflater.from(context).inflate(R.layout.item_post_image_grid, parent, false);
         return new ImageViewHolder(view);
     }
@@ -44,6 +45,13 @@ public class PostImageAdapter extends RecyclerView.Adapter<PostImageAdapter.Imag
                 .placeholder(R.drawable.ic_launcher_background)
                 .error(R.drawable.ic_launcher_background)
                 .into(holder.imageView);
+        holder.itemView.setOnClickListener(v -> {
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                Intent intent = new Intent(context, ZoomImageActivity.class);
+                intent.putExtra("IMAGE_URL", imageUrl);
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
