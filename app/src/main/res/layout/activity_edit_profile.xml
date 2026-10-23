@@ -1,51 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
+    android:id="@+id/editProfile"
     android:background="#F5F4FA">
 
+    <!-- Thanh tiêu đề -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:id="@+id/editProfileToolbar"
+        android:layout_width="0dp"
+        android:layout_height="70dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="16dp"
+        android:background="@drawable/bg_app_bar_gradient"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="8dp"
-            android:paddingEnd="16dp"
-            android:background="@drawable/bg_app_bar_gradient">
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_arrow_back"
+            android:scaleType="fitCenter"
+            android:contentDescription="Quay lại"
+            app:tint="#FFFFFF" />
 
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_arrow_back"
-                android:scaleType="fitCenter"
-                android:contentDescription="Quay lại"
-                app:tint="#FFFFFF"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:fontFamily="@font/jersey25_regular"
+            android:maxLines="1"
+            android:text="Edit Profile"
+            android:textColor="#FFFFFF"
+            android:textSize="32sp" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="12dp"
-                android:text="Chỉnh sửa thông tin"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:maxLines="1" />
+    </LinearLayout>
 
-        </LinearLayout>
+    <!-- Khu vực nhập liệu có thể cuộn -->
+    <ScrollView
+        android:id="@+id/editProfileScroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="12dp"
+        app:layout_constraintTop_toBottomOf="@id/editProfileToolbar"
+        app:layout_constraintBottom_toTopOf="@id/btnSaveProfile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -72,10 +83,10 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:text="Email"
                 android:textStyle="bold"
-                android:textColor="#493373"
-                android:layout_marginTop="16dp" />
+                android:textColor="#493373" />
 
             <TextView
                 android:id="@+id/tvEditEmail"
@@ -89,10 +100,10 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:text="Giới tính"
                 android:textStyle="bold"
-                android:textColor="#493373"
-                android:layout_marginTop="16dp" />
+                android:textColor="#493373" />
 
             <Spinner
                 android:id="@+id/spEditGender"
@@ -103,10 +114,10 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:text="Ngày sinh"
                 android:textStyle="bold"
-                android:textColor="#493373"
-                android:layout_marginTop="16dp" />
+                android:textColor="#493373" />
 
             <EditText
                 android:id="@+id/etEditBirthDate"
@@ -122,14 +133,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Bio"
+                android:text="Signature"
                 android:textStyle="bold" />
 
             <EditText
                 android:id="@+id/etEditBio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Viết một câu ngắn về bạn..."
+                android:hint="Something like a unique catch phrase:D"
                 android:inputType="textCapSentences|textMultiLine"
                 android:maxLines="3"
                 android:minHeight="48dp" />
@@ -144,23 +155,64 @@
             <EditText
                 android:id="@+id/etEditIntroduction"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="120dp"
                 android:gravity="top|start"
                 android:hint="Giới thiệu chi tiết về bản thân..."
                 android:inputType="textCapSentences|textMultiLine"
                 android:minHeight="120dp"
                 android:padding="12dp" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSaveProfile"
+            <!-- Tiêu đề chọn thể loại -->
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Lưu thay đổi"
-                android:textAllCaps="false"
-                app:backgroundTint="#493373"
-                app:cornerRadius="16dp" />
+                android:layout_marginTop="20dp"
+                android:text="Genre yêu thích"
+                android:textColor="#493373"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Chọn những thể loại bạn yêu thích nhé"
+                android:textColor="#777080"
+                android:textSize="13sp" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupGenres"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:chipSpacingHorizontal="8dp"
+                app:chipSpacingVertical="8dp"
+                app:singleSelection="false"
+                app:selectionRequired="false"/>
 
         </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+
+
+
+    </ScrollView>
+
+    <!-- Nút lưu cố định ở dưới -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSaveProfile"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
+        android:text="Lưu thay đổi"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:backgroundTint="#493373"
+        app:cornerRadius="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

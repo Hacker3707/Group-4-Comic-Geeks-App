@@ -13,12 +13,13 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/imgvAvatar"
+            android:id="@+id/imgnavCover"
             android:layout_width="match_parent"
             android:layout_height="241dp"
-            android:src="@drawable/ic_launcher_background"
+            android:layout_marginBottom="10dp"
             android:contentDescription="Drawer header background"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_background" />
 
         <!-- Avatar nằm chính giữa hình nền -->
         <com.google.android.material.imageview.ShapeableImageView

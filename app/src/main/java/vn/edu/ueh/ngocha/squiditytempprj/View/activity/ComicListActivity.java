@@ -38,6 +38,7 @@ import java.util.List;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Tag;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
@@ -220,26 +221,23 @@ public class ComicListActivity extends BaseActivity {
 
     // --------------------- Observer --------------------------
 
-    Observer<List<Tag>> genreObserver = new Observer<List<Tag>>() {
+    Observer<List<Genre>> genreObserver = new Observer<List<Genre>>() {
         @Override
-        public void onChanged(List<Tag> genres) {
+        public void onChanged(List<Genre> genres) {
 
             Log.d("GenreUI", "Observer received: "
                     + (genres == null ? "null" : genres.size()));
 
             chipGroupGenres.removeAllViews();
 
-
-            for (Tag tag : genres) {
+            for (Genre tag : genres) {
                 String genreName =
-                        tag.getAttributes()
-                                .getName()
-                                .get("en");
+                        tag.getGenreName();
 
                 Chip chip = new Chip(ComicListActivity.this);
                 chip.setText(genreName);
                 chip.setCheckable(true);
-                chip.setTag(tag.getId());
+                chip.setTag(tag.getGenreId());
 
                 chip.setOnClickListener(
                         new View.OnClickListener() {

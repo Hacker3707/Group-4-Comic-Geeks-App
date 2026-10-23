@@ -10,6 +10,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
+
+import java.util.List;
+
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.UserProfileRepository;
 
 public class UserProfileViewModel extends ViewModel {
@@ -462,5 +465,7 @@ public class UserProfileViewModel extends ViewModel {
                     false
             );
         }
+
+
     }
 }

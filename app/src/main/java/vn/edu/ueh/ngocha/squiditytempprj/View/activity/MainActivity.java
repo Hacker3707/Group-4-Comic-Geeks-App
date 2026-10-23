@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -53,14 +52,12 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.Observer;
-import androidx.transition.TransitionManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
-import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.SearchViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
@@ -70,9 +67,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
-    private FrameLayout headerContainer;
     private NavigationView navigationView;
-    private ImageView imgvAvatar;
 
     private MaterialAutoCompleteTextView etMainSearch;
     private LinearLayout layoutSearchBar;
@@ -314,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
 
         tvMainUsername = findViewById(R.id.tvMainUsername);
         drawerLayout = findViewById(R.id.drawerLayout);
-        imgvAvatar = findViewById(R.id.imgvAvatar);
         navigationView = findViewById(R.id.navigationView);
 
 
@@ -340,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
         rcvpostlist = findViewById(R.id.rcv_postlist);
         View appBar = findViewById(R.id.appBar);
         tvMainUsername = appBar.findViewById(R.id.tvMainUsername);
-        imgMainAvatar = appBar.findViewById(R.id.imgvAvatar);
+        imgMainAvatar = appBar.findViewById(R.id.imgMainAvatar);
 
         if (navigationView == null || navigationView.getHeaderCount() == 0) {
             Toast.makeText(this, "Không tìm thấy phần header của menu", Toast.LENGTH_SHORT).show();
@@ -355,7 +349,6 @@ public class MainActivity extends AppCompatActivity {
         layoutSearchBar = findViewById(R.id.layoutSearchBar);
         btnSearch = findViewById(R.id.btnSearch);
         btnAuthAction = findViewById(R.id.btnAuthAction);
-        headerContainer = findViewById(R.id.headerContainer);
         searchOverlay = findViewById(R.id.searchOverlay);
         searchDimOverlay = findViewById(R.id.searchDimOverlay);
         btnDoSearch = findViewById(R.id.btnDoSearch);
@@ -407,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        imgvAvatar.setOnClickListener(onProfileClickListener);
+        imgMainAvatar.setOnClickListener(onProfileClickListener);
         navigationView.setNavigationItemSelectedListener(onAvatarsClickListener);
 
         rcvpostlist.setLayoutManager(new LinearLayoutManager(this));

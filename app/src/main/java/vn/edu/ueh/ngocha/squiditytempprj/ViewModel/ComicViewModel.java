@@ -104,7 +104,7 @@ public class ComicViewModel extends AndroidViewModel {
         mangaRepository.loadNextPage();
     }
 
-    public LiveData<List<Tag>> getGenresLive() {
+    public LiveData<List<Genre>> getGenresLive() {
         return mangaRepository.getGenresLive();
     }
 
@@ -128,6 +128,17 @@ public class ComicViewModel extends AndroidViewModel {
         mangaRepository.searchComics(query);
     }
 
+    public LiveData<List<MangaData>> getSearchResults() {
+        return mangaRepository.getSearchResults();
+    }
 
+    public void searchManga(
+            String query,
+            int limit,
+            int offset,
+            String include
+    ) {
+        mangaRepository.searchManga(query, limit, offset, include);
+    }
 
 }
