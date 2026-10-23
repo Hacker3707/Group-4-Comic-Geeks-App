@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -17,6 +18,10 @@ public interface UserDao {
 
     @Insert
     void insert(User user);
+
+    // Thêm mới hoặc ghi đè nếu đã có (dùng khi tải thông tin người dùng từ Firestore)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void upsert(User user);
 
     @Update
     void update(User user);

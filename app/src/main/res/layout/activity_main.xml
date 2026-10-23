@@ -52,6 +52,22 @@
 
                 </LinearLayout>
 
+                <!-- Nút tạo bài viết -->
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/fabCreatePost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginEnd="28dp"
+                    android:layout_marginBottom="48dp"
+                    android:contentDescription="Tạo bài viết mới"
+                    android:src="@android:drawable/ic_input_add"
+                    app:backgroundTint="#786FF8"
+                    app:elevation="6dp"
+                    app:fabCustomSize="65dp"
+                    app:fabSize="normal"
+                    app:tint="#FFFFFF" />
+
                 <View
                     android:id="@+id/searchDimOverlay"
                     android:layout_width="match_parent"

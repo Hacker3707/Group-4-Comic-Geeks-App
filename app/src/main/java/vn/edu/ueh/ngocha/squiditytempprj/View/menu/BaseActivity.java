@@ -39,7 +39,8 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
 import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
-
+import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
+import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
 public abstract class BaseActivity extends AppCompatActivity {
 
     protected DrawerLayout drawerLayout;
@@ -170,6 +171,9 @@ public abstract class BaseActivity extends AppCompatActivity {
         );
 
         setupDrawer();
+        NtfChannel.setup(this);
+        NotificationPopup.attach(this, findViewById(R.id.btnNotification));
+
     }
     @Override
     protected void onResume() {

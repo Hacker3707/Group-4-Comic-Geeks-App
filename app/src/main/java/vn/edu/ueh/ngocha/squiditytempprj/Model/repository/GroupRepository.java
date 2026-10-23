@@ -15,23 +15,28 @@ public class GroupRepository {
     private final AppDatabase db;
     private final GroupDao groupDao;
     private final GroupMemberDao groupMemberDao;
+    private final GroupSyncManager syncManager;
 
     public GroupRepository(Application application) {
         db = AppDatabase.getDatabase(application);
+        syncManager = GroupSyncManager.getInstance(application);
         groupDao = db.groupDao();
         groupMemberDao = db.groupMemberDao();
     }
 
     public void insert(Group group) {
         groupDao.insert(group);
+        syncManager.pushGroup(group);
     }
 
     public void update(Group group) {
         groupDao.update(group);
+        syncManager.pushGroup(group);
     }
 
     public void delete(Group group) {
         groupDao.delete(group);
+        syncManager.deleteGroupRemote(group.getGroupId());
     }
 
     public List<Group> getAll() {
@@ -64,6 +69,9 @@ public class GroupRepository {
                 groupMemberDao.insert(admin);
             }
         });
+        // Đưa lên Firestore để tài khoản/máy khác cũng thấy nhóm này
+        syncManager.pushGroup(group);
+        syncManager.pushMember(admin);
     }
 
     // Xoá toàn bộ thành viên rồi xoá group trong cùng 1 transaction
@@ -75,5 +83,6 @@ public class GroupRepository {
                 groupDao.delete(group);
             }
         });
+        syncManager.deleteGroupRemote(group.getGroupId());
     }
 }

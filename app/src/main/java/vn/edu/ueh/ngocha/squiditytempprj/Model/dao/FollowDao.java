@@ -47,6 +47,10 @@ public interface FollowDao {
     @Query("SELECT COUNT(*) FROM follows WHERE follower_id = :userId")
     int countFollowing(String userId);
 
+    // Chỉ lấy id những người userId đang follow (không cần bảng users)
+    @Query("SELECT following_id FROM follows WHERE follower_id = :userId")
+    List<String> getFollowingIds(String userId);
+
     @Query("DELETE FROM follows")
     void deleteAll();
 }

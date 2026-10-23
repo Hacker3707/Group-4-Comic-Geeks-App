@@ -196,10 +196,11 @@
                                 android:paddingVertical="35dp">
 
                                 <TextView
+                                    android:id="@+id/tvProfilePostCount"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/jersey25_regular"
-                                    android:text="128"
+                                    android:text="0"
                                     android:textColor="#3246B4"
                                     android:textSize="30sp" />
 
@@ -234,10 +235,11 @@
                                 android:paddingVertical="35dp">
 
                                 <TextView
+                                    android:id="@+id/tvFollowersCount"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/jersey25_regular"
-                                    android:text="1000"
+                                    android:text="0"
                                     android:textColor="#FFFFFF"
                                     android:textSize="30sp" />
 
@@ -272,10 +274,11 @@
                                 android:paddingVertical="35dp">
 
                                 <TextView
+                                    android:id="@+id/tvFollowingCount"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/jersey25_regular"
-                                    android:text="179"
+                                    android:text="0"
                                     android:textColor="#3F51B5"
                                     android:textSize="30sp" />
 

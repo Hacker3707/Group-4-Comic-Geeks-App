@@ -31,4 +31,8 @@ public interface NotificationDao {
 
     @Query("UPDATE notifications SET is_read = 1 WHERE notif_id = :notifId")
     void markAsRead(String notifId);
+
+    // Xóa hết thông báo trong máy (dùng khi đổi tài khoản)
+    @Query("DELETE FROM notifications")
+    void deleteAll();
 }

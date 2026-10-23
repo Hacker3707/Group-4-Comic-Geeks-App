@@ -18,9 +18,11 @@ public class PostRepository {
     private PostDao mPostDao;
     private LiveData<List<Post>> mAllPosts;
     private FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+    private final PostSyncManager syncManager;
 
     public PostRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
+        syncManager = PostSyncManager.getInstance(application);
         mPostDao = db.postDao();
         mAllPosts = mPostDao.getAllPosts();
     }
@@ -84,6 +86,8 @@ public class PostRepository {
         postMap.put("imageUris", post.getImageUris());
         postMap.put("timestamp", post.getTimestamp());
         postMap.put("commentCount", post.getCommentCount());
+        postMap.put("hashtag", post.getHashtag());
+        postMap.put("comicTitle", post.getComicTitle());
 
         firestore.collection("posts").document(post.getPostId())
                 .set(postMap)
@@ -98,6 +102,7 @@ public class PostRepository {
 
     public void deletePost(Post post, String postId) {
         firestore.collection("posts").document(postId).delete();
+        syncManager.deleteCommentsOfPostRemote(postId); // Xóa luôn bình luận của bài
         delete(post); // Xóa cục bộ
     }
 
@@ -107,6 +112,8 @@ public class PostRepository {
         updates.put("content", post.getContent());
         updates.put("comicId", post.getComicId());
         updates.put("imageUris", post.getImageUris()); // 👉 Sửa thành imageUris (số nhiều)
+        updates.put("hashtag", post.getHashtag());
+        updates.put("comicTitle", post.getComicTitle());
 
         firestore.collection("posts").document(post.getPostId())
                 .update(updates)

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import java.util.List;
@@ -11,7 +12,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
 
 @Dao
 public interface CommentDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertComment(Comment comment);
 
     @Update
@@ -26,4 +27,13 @@ public interface CommentDao {
     */
     @Query("SELECT * FROM comments WHERE post_id = :postId")
     LiveData<List<Comment>> getCommentsByPostId(String postId);
+
+    @Query("SELECT * FROM comments")
+    LiveData<List<Comment>> getAllComments();
+
+    @Query("SELECT * FROM comments")
+    List<Comment> getAllSync();
+
+    @Query("SELECT * FROM comments WHERE commentId = :commentId LIMIT 1")
+    Comment getByIdSync(String commentId);
 }
