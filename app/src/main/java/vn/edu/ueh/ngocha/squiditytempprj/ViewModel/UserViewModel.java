@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
+import java.util.Map;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.UserRepository;
@@ -35,6 +36,11 @@ public class UserViewModel extends AndroidViewModel {
     // Danh sách tất cả tài khoản
     public LiveData<List<User>> getAllUsers() {
         return allUsers;
+    }
+
+    // Theo dõi thời gian thực tên + ảnh của nhiều tài khoản (key = userId)
+    public LiveData<Map<String, User>> watchUsersByIds(List<String> userIds) {
+        return userRepository.watchUsersByIds(userIds);
     }
 
     // Danh sách User thường

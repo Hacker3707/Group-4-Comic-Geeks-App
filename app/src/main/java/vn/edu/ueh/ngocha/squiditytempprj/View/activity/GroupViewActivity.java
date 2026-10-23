@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,6 +22,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,19 +32,32 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Group;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupMember;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupRole;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.PostRepository;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.GroupMemberAdapter;
-import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.GroupPostAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.GroupHashtagUtils;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.GroupPermissionUtils;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.SearchTextUtils;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.UserDisplayUtils;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.GroupSyncManager;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.GroupViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
 
 /**
  * Màn xem chi tiết một group (theo Figma "Manga Readers"):
@@ -59,13 +74,26 @@ public class GroupViewActivity extends AppCompatActivity {
     public static final String EXTRA_GROUP_ID = "group_id";
 
     // TODO: user thử, dùng chung với GroupActivity. Thay bằng user đang đăng nhập khi có đăng nhập
-    private static final String CURRENT_USER_ID = GroupActivity.CURRENT_USER_ID;
+    private final String CURRENT_USER_ID = GroupActivity.currentUserId();
+
+    // Khi nhóm/thành viên thay đổi trên Firestore thì tải lại trang nhóm này
+    private final GroupSyncManager.OnSyncListener syncListener = new GroupSyncManager.OnSyncListener() {
+        @Override
+        public void onGroupsSynced() {
+            if (groupId != null && groupViewModel != null) {
+                groupViewModel.loadGroup(groupId);
+                groupViewModel.loadMembers(groupId);
+            }
+        }
+    };
 
     private static final int TAB_POSTS = 0;
     private static final int TAB_MEMBERS = 1;
+    private static final String STATE_SELECTED_TAB = "selected_tab";
 
     private GroupViewModel groupViewModel;
     private PostViewModel postViewModel;
+    private UserViewModel userViewModel;
 
     private ImageView imgCover;
     private TextView txtTitle;
@@ -80,6 +108,7 @@ public class GroupViewActivity extends AppCompatActivity {
     private TextView txtEmpty;
     private LinearLayout composerLayout;
     private EditText edtComposer;
+    private EditText edtSearchMember;
     private RecyclerView rcvContent;
     private TabLayout tabLayout;
     private LinearLayout chipContainer;
@@ -87,7 +116,7 @@ public class GroupViewActivity extends AppCompatActivity {
     private View tagSuggestionBar;
     private TextView txtTagHelp;
 
-    private GroupPostAdapter postAdapter;
+    private PostAdapter postAdapter;
     private GroupMemberAdapter memberAdapter;
 
     private String groupId;
@@ -102,9 +131,18 @@ public class GroupViewActivity extends AppCompatActivity {
     private int hashStart = -1;
 
     private final List<Post> allPosts = new ArrayList<>();
+    private final List<Comment> allComments = new ArrayList<>();
     private final List<Post> groupPosts = new ArrayList<>();
     private final List<Post> visiblePosts = new ArrayList<>();
     private final List<GroupMember> groupMembers = new ArrayList<>();
+    // Danh sách thành viên sau khi lọc theo ô tìm kiếm
+    private final List<GroupMember> visibleMembers = new ArrayList<>();
+
+    // Tên + ảnh của mọi người trong nhóm (key = userId), cập nhật theo thời gian thực từ Firestore
+    private final Map<String, User> userMap = new HashMap<>();
+    private LiveData<Map<String, User>> userLive = null;
+    private Observer<Map<String, User>> userObserver;
+    private String watchedUserKey = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,8 +171,37 @@ public class GroupViewActivity extends AppCompatActivity {
 
         groupViewModel = new ViewModelProvider(this).get(GroupViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        userObserver = new Observer<Map<String, User>>() {
+            @Override
+            public void onChanged(Map<String, User> users) {
+                userMap.clear();
+                if (users != null) {
+                    userMap.putAll(users);
+                }
+                memberAdapter.setUsers(userMap);
+                postAdapter.setUsers(userMap);
+                // Vẽ lại tab đang mở (tên mới cũng ảnh hưởng đến kết quả tìm kiếm)
+                showSelectedTab();
+            }
+        };
         observeData();
         loadGroupData();
+
+        // Xoay màn hình thì mở lại đúng tab đang xem (Activity bị tạo lại nên selectedTab bị reset)
+        if (savedInstanceState != null) {
+            int savedTab = savedInstanceState.getInt(STATE_SELECTED_TAB, TAB_POSTS);
+            TabLayout.Tab tab = tabLayout.getTabAt(savedTab);
+            if (tab != null) {
+                tab.select();
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_SELECTED_TAB, selectedTab);
     }
 
     @Override
@@ -144,6 +211,15 @@ public class GroupViewActivity extends AppCompatActivity {
         if (groupId != null && groupViewModel != null) {
             groupViewModel.loadGroup(groupId);
         }
+        GroupSyncManager syncManager = GroupSyncManager.getInstance(getApplication());
+        syncManager.addListener(syncListener);
+        syncManager.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GroupSyncManager.getInstance(getApplication()).removeListener(syncListener);
     }
 
     // =================================
@@ -179,6 +255,7 @@ public class GroupViewActivity extends AppCompatActivity {
         txtEmpty = findViewById(R.id.txtEmpty);
         composerLayout = findViewById(R.id.composerLayout);
         edtComposer = findViewById(R.id.edtComposer);
+        edtSearchMember = findViewById(R.id.edtSearchMember);
         rcvContent = findViewById(R.id.rcvGroupContent);
         tabLayout = findViewById(R.id.tabLayout);
         chipContainer = findViewById(R.id.chipContainer);
@@ -188,12 +265,19 @@ public class GroupViewActivity extends AppCompatActivity {
     }
 
     private void setupRecycler() {
-        postAdapter = new GroupPostAdapter();
+        postAdapter = PostAdapter.forGroupPage(this);
         memberAdapter = new GroupMemberAdapter();
+        memberAdapter.setCurrentUserId(CURRENT_USER_ID);
         memberAdapter.setOnMemberClickListener(new GroupMemberAdapter.OnMemberClickListener() {
             @Override
             public void onMemberClick(GroupMember member) {
                 onMemberClicked(member);
+            }
+        });
+        postAdapter.setOnCommentSendListener(new PostAdapter.OnCommentSendListener() {
+            @Override
+            public void onCommentSend(Post post, String content) {
+                sendComment(post, content);
             }
         });
         rcvContent.setLayoutManager(new LinearLayoutManager(this));
@@ -205,6 +289,41 @@ public class GroupViewActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 finish();
+            }
+        });
+
+        // Bấm kính lúp trên thanh tiêu đề: chuyển sang tab Thành viên và focus ô tìm kiếm
+        findViewById(R.id.imgSearch).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TabLayout.Tab membersTab = tabLayout.getTabAt(TAB_MEMBERS);
+                if (membersTab != null) {
+                    membersTab.select();
+                }
+                edtSearchMember.requestFocus();
+                InputMethodManager imm =
+                        (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.showSoftInput(edtSearchMember, InputMethodManager.SHOW_IMPLICIT);
+                }
+            }
+        });
+
+        // Gõ đến đâu lọc thành viên đến đó (không phân biệt hoa/thường, bỏ dấu)
+        edtSearchMember.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (selectedTab == TAB_MEMBERS) {
+                    showSelectedTab();
+                }
             }
         });
 
@@ -312,6 +431,7 @@ public class GroupViewActivity extends AppCompatActivity {
                     groupMembers.addAll(members);
                 }
                 updateMembership();
+                watchUsers();
                 groupViewModel.checkAdmin(CURRENT_USER_ID, groupId);
                 if (selectedTab == TAB_MEMBERS) {
                     showSelectedTab();
@@ -335,11 +455,102 @@ public class GroupViewActivity extends AppCompatActivity {
                     allPosts.addAll(posts);
                 }
                 filterPostsOfGroup();
+                watchUsers();
                 if (selectedTab == TAB_POSTS) {
                     showSelectedTab();
                 }
             }
         });
+
+        // Bình luận của các bài viết (hiện ngay trong khung bài)
+        postViewModel.getAllComments().observe(this, new Observer<List<Comment>>() {
+            @Override
+            public void onChanged(List<Comment> comments) {
+                allComments.clear();
+                if (comments != null) {
+                    allComments.addAll(comments);
+                }
+                postAdapter.setComments(groupCommentsByPost());
+                watchUsers();
+            }
+        });
+    }
+
+    // Gom bình luận theo bài viết, cũ trước mới sau
+    private Map<String, List<Comment>> groupCommentsByPost() {
+        Map<String, List<Comment>> result = new HashMap<>();
+        for (Comment comment : allComments) {
+            List<Comment> list = result.get(comment.getPostId());
+            if (list == null) {
+                list = new ArrayList<>();
+                result.put(comment.getPostId(), list);
+            }
+            list.add(comment);
+        }
+        for (List<Comment> list : result.values()) {
+            Collections.sort(list, new Comparator<Comment>() {
+                @Override
+                public int compare(Comment a, Comment b) {
+                    if (a.getTimestamp() == null || b.getTimestamp() == null) {
+                        return 0;
+                    }
+                    return a.getTimestamp().compareTo(b.getTimestamp());
+                }
+            });
+        }
+        return result;
+    }
+
+    private void sendComment(Post post, String content) {
+        Comment comment = new Comment(UUID.randomUUID().toString(), CURRENT_USER_ID,
+                post.getPostId(), content);
+        if (CURRENT_USER_ID.equals(post.getUserId())) {
+            // Bình luận bài của chính mình thì không cần báo cho mình
+            postViewModel.addComment(comment);
+        } else {
+            postViewModel.addComment(comment, post);
+        }
+    }
+
+    // Theo dõi tên + ảnh của mọi người đang xuất hiện trong nhóm (thành viên và tác giả bài viết).
+    // Chỉ đăng ký lại khi danh sách người thay đổi.
+    private void watchUsers() {
+        TreeSet<String> ids = new TreeSet<>();
+        for (GroupMember member : groupMembers) {
+            if (member.getUserId() != null && !member.getUserId().isEmpty()) {
+                ids.add(member.getUserId());
+            }
+        }
+        List<String> groupPostIds = new ArrayList<>();
+        for (Post post : groupPosts) {
+            groupPostIds.add(post.getPostId());
+            if (post.getUserId() != null && !post.getUserId().isEmpty()) {
+                ids.add(post.getUserId());
+            }
+        }
+        for (Comment comment : allComments) {
+            if (groupPostIds.contains(comment.getPostId())
+                    && comment.getUserId() != null && !comment.getUserId().isEmpty()) {
+                ids.add(comment.getUserId());
+            }
+        }
+
+        String key = String.join(",", ids);
+        if (userLive != null && key.equals(watchedUserKey)) {
+            return;
+        }
+        if (userLive != null) {
+            userLive.removeObserver(userObserver);
+        }
+        watchedUserKey = key;
+        userLive = userViewModel.watchUsersByIds(new ArrayList<String>(ids));
+        userLive.observe(this, userObserver);
+    }
+
+    // Tên hiển thị của một userId (chưa tải được thì hiện chữ dự phòng)
+    private String displayNameOf(String userId) {
+        return UserDisplayUtils.displayName(
+                userMap.get(userId), getString(R.string.group_member_unknown_name));
     }
 
     private void loadGroupData() {
@@ -437,6 +648,13 @@ public class GroupViewActivity extends AppCompatActivity {
     }
 
     private void showSelectedTab() {
+        if (selectedTab != TAB_MEMBERS) {
+            // Rời tab Thành viên thì ẩn và xoá ô tìm kiếm (selectedTab khác MEMBERS nên không lặp)
+            edtSearchMember.setVisibility(View.GONE);
+            if (edtSearchMember.length() > 0) {
+                edtSearchMember.setText("");
+            }
+        }
         if (selectedTab == TAB_POSTS) {
             composerLayout.setVisibility(View.VISIBLE);
             txtTagHelp.setVisibility(View.VISIBLE);
@@ -450,9 +668,15 @@ public class GroupViewActivity extends AppCompatActivity {
             }
         } else if (selectedTab == TAB_MEMBERS) {
             hideComposerExtras();
+            edtSearchMember.setVisibility(View.VISIBLE);
+            buildVisibleMembers();
             rcvContent.setAdapter(memberAdapter);
-            memberAdapter.setMembers(groupMembers);
-            showContent(!groupMembers.isEmpty(), R.string.group_empty_members);
+            memberAdapter.setMembers(visibleMembers);
+            if (groupMembers.isEmpty()) {
+                showContent(false, R.string.group_empty_members);
+            } else {
+                showContent(!visibleMembers.isEmpty(), R.string.group_empty_member_search);
+            }
         } else {
             // Sự kiện, File, Giới thiệu: chưa có dữ liệu
             hideComposerExtras();
@@ -468,6 +692,17 @@ public class GroupViewActivity extends AppCompatActivity {
             if (selectedTagKey == null
                     || GroupHashtagUtils.hasTag(post.getContent(), selectedTagKey)) {
                 visiblePosts.add(post);
+            }
+        }
+    }
+
+    // Lọc groupMembers theo từ khoá trong ô tìm kiếm (rỗng = hiện tất cả)
+    private void buildVisibleMembers() {
+        visibleMembers.clear();
+        String query = SearchTextUtils.normalize(edtSearchMember.getText().toString());
+        for (GroupMember member : groupMembers) {
+            if (query.isEmpty() || SearchTextUtils.contains(displayNameOf(member.getUserId()), query)) {
+                visibleMembers.add(member);
             }
         }
     }
@@ -620,7 +855,7 @@ public class GroupViewActivity extends AppCompatActivity {
         String[] options = new String[]{roleOption, getString(R.string.group_member_remove)};
 
         new AlertDialog.Builder(this)
-                .setTitle(member.getUserId())
+                .setTitle(displayNameOf(member.getUserId()))
                 .setItems(options, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -653,9 +888,30 @@ public class GroupViewActivity extends AppCompatActivity {
         if (content.isEmpty()) {
             return;
         }
-        //Post post = new Post(UUID.randomUUID().toString(), CURRENT_USER_ID, null, content);
-        //post.setGroupId(groupId);
-        //postViewModel.insertPost(post);
-        edtComposer.setText("");
+
+        // Chống bấm gửi nhiều lần trong lúc đang đăng
+        final View btnSend = findViewById(R.id.btnSendPost);
+        btnSend.setEnabled(false);
+
+        // Bài trong nhóm = Post bình thường nhưng có groupId (không gắn truyện, không ảnh)
+        Post post = new Post(UUID.randomUUID().toString(), CURRENT_USER_ID, null, content, null);
+        post.setGroupId(groupId);
+
+        // Đẩy lên Firestore, thành công thì bài được lưu vào Room và tự hiện trong danh sách
+        postViewModel.uploadPostToFirestore(post, new PostRepository.OnFirestoreUploadListener() {
+            @Override
+            public void onSuccess() {
+                btnSend.setEnabled(true);
+                edtComposer.setText("");
+                Toast.makeText(GroupViewActivity.this, "Đã đăng bài", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Giữ nguyên nội dung để người dùng bấm gửi lại
+                btnSend.setEnabled(true);
+                Toast.makeText(GroupViewActivity.this, "Không đăng được bài: " + error, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

@@ -18,90 +18,183 @@
         android:layout_height="wrap_content"
         android:background="#FFFFFF">
 
-        <!-- HEADER: THÔNG TIN USER & NÚT TÙY CHỌN -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/headerLayout"
+        <!-- HEADER: bọc 2 kiểu header, chỉ 1 kiểu hiện tại một thời điểm -->
+        <FrameLayout
+            android:id="@+id/headerContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#493373"
-            android:padding="12dp"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/btnOptions"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_more"
-                app:tint="#FFFFFF"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-            <Button
-                android:id="@+id/btnFollow"
-                android:layout_width="82dp"
-                android:layout_height="35dp"
-                android:layout_marginStart="8dp"
-                android:backgroundTint="#33FFFFFF"
-                android:ellipsize="none"
-                android:fontFamily="@font/jersey25_regular"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:paddingStart="4dp"
-                android:paddingEnd="4dp"
-                android:singleLine="true"
-                android:text="+ Follow"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                app:cornerRadius="16dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/btnOptions"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <LinearLayout
-                android:id="@+id/userInfoLayout"
-                android:layout_width="wrap_content"
+            <!-- HEADER: THÔNG TIN USER & NÚT TÙY CHỌN -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/headerLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="end"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintEnd_toStartOf="@id/imgAvatar"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent">
+                android:background="#493373"
+                android:padding="12dp"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <TextView
-                    android:id="@+id/tvUserName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <ImageView
+                    android:id="@+id/btnOptions"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_menu_more"
+                    app:tint="#FFFFFF"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <Button
+                    android:id="@+id/btnFollow"
+                    android:layout_width="82dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="#33FFFFFF"
+                    android:ellipsize="none"
                     android:fontFamily="@font/jersey25_regular"
-                    android:text="Manga Lover 101"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:singleLine="true"
+                    android:text="+ Follow"
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    app:cornerRadius="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/btnOptions"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/tvHandle"
+                <LinearLayout
+                    android:id="@+id/userInfoLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="\@squidiscute"
-                    android:textColor="#B3FFFFFF"
-                    android:textSize="10sp" />
-            </LinearLayout>
+                    android:orientation="vertical"
+                    android:gravity="end"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintEnd_toStartOf="@id/imgAvatar"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
 
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/imgAvatar"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:scaleType="centerCrop"
-                android:background="#A890D3"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
-                app:strokeWidth="2dp"
-                app:strokeColor="#FFFFFF"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                    <TextView
+                        android:id="@+id/tvUserName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/jersey25_regular"
+                        android:text="Manga Lover 101"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                    <TextView
+                        android:id="@+id/tvHandle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="\@squidiscute"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgAvatar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:scaleType="centerCrop"
+                    android:background="#A890D3"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+                    app:strokeWidth="2dp"
+                    app:strokeColor="#FFFFFF"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <!-- HEADER KIỂU GROUP: avatar nhóm + avatar người đăng nhỏ, 2 dòng chữ -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/groupHeaderLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#493373"
+                        android:padding="12dp"
+                        android:visibility="gone">
+
+                        <FrameLayout
+                            android:id="@+id/groupAvatarStack"
+                            android:layout_width="54dp"
+                            android:layout_height="54dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+
+                            <com.google.android.material.imageview.ShapeableImageView
+                                android:id="@+id/imgGroupAvatar"
+                                android:layout_width="44dp"
+                                android:layout_height="44dp"
+                                android:layout_gravity="top|start"
+                                android:background="#A890D3"
+                                android:contentDescription="@string/group_cd_avatar"
+                                android:scaleType="centerCrop"
+                                app:shapeAppearanceOverlay="@style/PostGroupAvatarShape" />
+
+                            <com.google.android.material.imageview.ShapeableImageView
+                                android:id="@+id/imgGroupPosterAvatar"
+                                android:layout_width="26dp"
+                                android:layout_height="26dp"
+                                android:layout_gravity="bottom|end"
+                                android:background="#A890D3"
+                                android:contentDescription="@string/group_cd_avatar"
+                                android:scaleType="centerCrop"
+                                app:shapeAppearanceOverlay="@style/GroupCircleImage"
+                                app:strokeColor="#493373"
+                                app:strokeWidth="2dp" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
+                            android:orientation="vertical"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/btnGroupOptions"
+                            app:layout_constraintStart_toEndOf="@id/groupAvatarStack"
+                            app:layout_constraintTop_toTopOf="parent">
+
+                            <TextView
+                                android:id="@+id/tvGroupName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:fontFamily="@font/inter_bold"
+                                android:maxLines="1"
+                                android:textColor="#FFFFFF"
+                                android:textSize="15sp" />
+
+                            <TextView
+                                android:id="@+id/tvGroupPoster"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:ellipsize="end"
+                                android:fontFamily="@font/inter_regular"
+                                android:maxLines="1"
+                                android:textColor="#B3FFFFFF"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/btnGroupOptions"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_more"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:tint="#FFFFFF" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </FrameLayout>
 
         <!-- NỘI DUNG BÀI VIẾT -->
         <TextView
@@ -114,7 +207,7 @@
             android:textColor="#333333"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/headerLayout" />
+            app:layout_constraintTop_toBottomOf="@id/headerContainer" />
 
 
         <!-- LƯỚI ẢNH BÀI VIẾT -->

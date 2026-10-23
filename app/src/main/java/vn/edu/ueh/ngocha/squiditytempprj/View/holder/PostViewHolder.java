@@ -27,6 +27,15 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
     public ImageView btnSendComment;
     public Chip tvLinkedComic;
 
+    // Header kiểu group (hiện thay cho header thường khi bài đăng thuộc một group)
+    public View headerLayout;
+    public View groupHeaderLayout;
+    public ImageView imgGroupAvatar;
+    public ImageView imgGroupPosterAvatar;
+    public TextView tvGroupName;
+    public TextView tvGroupPoster;
+    public ImageView btnGroupOptions;
+
     public PostViewHolder(@NonNull View itemView) {
         super(itemView);
         btnOptions = itemView.findViewById(R.id.btnOptions);
@@ -46,5 +55,13 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         btnSendComment = itemView.findViewById(R.id.btnSendComment);
 
         tvLinkedComic = itemView.findViewById(R.id.tvLinkedComic);
+
+        headerLayout = itemView.findViewById(R.id.headerLayout);
+        groupHeaderLayout = itemView.findViewById(R.id.groupHeaderLayout);
+        imgGroupAvatar = itemView.findViewById(R.id.imgGroupAvatar);
+        imgGroupPosterAvatar = itemView.findViewById(R.id.imgGroupPosterAvatar);
+        tvGroupName = itemView.findViewById(R.id.tvGroupName);
+        tvGroupPoster = itemView.findViewById(R.id.tvGroupPoster);
+        btnGroupOptions = itemView.findViewById(R.id.btnGroupOptions);
     }
 }

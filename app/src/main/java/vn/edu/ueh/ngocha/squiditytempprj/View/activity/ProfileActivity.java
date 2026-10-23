@@ -43,11 +43,26 @@ import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.CommentUsersWatcher;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.FollowViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
 public class ProfileActivity extends BaseActivity {
 
+    // Truyền id người muốn xem profile. Không truyền thì xem profile của chính mình.
+    public static final String EXTRA_USER_ID = "user_id";
+
+    // Follow
+    private FollowViewModel followViewModel;
+    private String targetUserId;
+    private boolean isOwnProfile = true;
+    private TextView tvFollowersCount;
+    private TextView tvFollowingCount;
+    private MaterialButton btnFollow;
+
+    // ViewModel & UI Profile (Phần của Nghĩa)
     private UserProfileViewModel profileViewModel;
     private ShapeableImageView imgProfileAvatar;
     private ImageView imgProfileCover;
@@ -121,6 +136,7 @@ public class ProfileActivity extends BaseActivity {
         }
 
         profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
+        followViewModel = new ViewModelProvider(this).get(FollowViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
         btnChangeAvatar.setOnClickListener(v -> avatarPicker.launch("image/*"));
@@ -258,6 +274,7 @@ public class ProfileActivity extends BaseActivity {
             public void onStampClick(Post post) {
                 String randomStampId = UUID.randomUUID().toString();
                 Stamp newStamp = new Stamp(randomStampId, currentUid(), StampType.LIKE);
+                Stamp newStamp = new Stamp(randomStampId, GroupActivity.currentUserId(), StampType.LIKE);
                 newStamp.setPostId(post.getPostId());
                 postViewModel.addStamp(newStamp, post);
                 Toast.makeText(ProfileActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
@@ -268,6 +285,7 @@ public class ProfileActivity extends BaseActivity {
                 if (commentText != null && !commentText.trim().isEmpty()) {
                     String randomCommentId = UUID.randomUUID().toString();
                     Comment newComment = new Comment(randomCommentId, currentUid(), post.getPostId(), commentText.trim());
+                    Comment newComment = new Comment(randomCommentId, GroupActivity.currentUserId(), post.getPostId(), commentText.trim());
                     postViewModel.addComment(newComment, post);
                     Toast.makeText(ProfileActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
                 } else {
@@ -289,11 +307,18 @@ public class ProfileActivity extends BaseActivity {
                 if (rvComments != null) {
                     rvComments.setAdapter(commentAdapter);
                 }
+                // Hiện đúng tên + ảnh tài khoản của người bình luận
+                CommentUsersWatcher usersWatcher = new CommentUsersWatcher(
+                        ProfileActivity.this,
+                        new ViewModelProvider(ProfileActivity.this).get(UserViewModel.class),
+                        commentAdapter);
+                bottomSheetDialog.setOnDismissListener(d -> usersWatcher.stop());
 
                 if (post.getPostId() != null) {
                     postViewModel.getCommentsByPostId(post.getPostId()).observe(ProfileActivity.this, realComments -> {
                         if (realComments != null) {
                             commentAdapter.setComments(realComments);
+                            usersWatcher.update(realComments);
                             if (!realComments.isEmpty() && rvComments != null) {
                                 rvComments.scrollToPosition(realComments.size() - 1);
                             }
@@ -336,7 +361,60 @@ public class ProfileActivity extends BaseActivity {
             }
         });
 
-        profileViewModel.loadCurrentProfile();
+        setupFollow();
+        loadTargetProfile();
+    }
+
+    private void loadTargetProfile() {
+        if (isOwnProfile) {
+            profileViewModel.loadCurrentProfile();
+        } else {
+            profileViewModel.loadProfile(targetUserId);
+        }
+    }
+
+    // =================================
+    // FOLLOW
+    // =================================
+    private void setupFollow() {
+        String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String fromIntent = getIntent().getStringExtra(EXTRA_USER_ID);
+        targetUserId = (fromIntent == null || fromIntent.isEmpty()) ? myUid : fromIntent;
+        isOwnProfile = targetUserId.equals(myUid);
+
+        tvFollowersCount = findViewById(R.id.tvFollowersCount);
+        tvFollowingCount = findViewById(R.id.tvFollowingCount);
+        btnFollow = findViewById(R.id.btnFollow);
+
+        if (isOwnProfile) {
+            // Không tự follow chính mình
+            btnFollow.setVisibility(View.GONE);
+        } else {
+            // Xem profile người khác: ẩn phần chỉnh sửa hồ sơ và nút đăng bài
+            View editCard = findViewById(R.id.editProfileCard);
+            if (editCard != null) editCard.setVisibility(View.GONE);
+            View fab = findViewById(R.id.fabCreatePost);
+            if (fab != null) fab.setVisibility(View.GONE);
+
+            btnFollow.setOnClickListener(v -> {
+                Boolean following = followViewModel.getIsFollowing().getValue();
+                if (Boolean.TRUE.equals(following)) {
+                    followViewModel.unfollowUser(targetUserId);
+                } else {
+                    followViewModel.followUser(targetUserId);
+                }
+            });
+        }
+
+        // Số Followers = số người đang follow profile này, Following = số người profile này đang follow
+        followViewModel.getFollowerCount().observe(this, count ->
+                tvFollowersCount.setText(String.valueOf(count == null ? 0 : count)));
+        followViewModel.getFollowingCount().observe(this, count ->
+                tvFollowingCount.setText(String.valueOf(count == null ? 0 : count)));
+        followViewModel.getIsFollowing().observe(this, following ->
+                btnFollow.setText(Boolean.TRUE.equals(following) ? "Following" : "+ Follow"));
+
+        followViewModel.observeProfile(targetUserId);
     }
 
     @Override
@@ -348,7 +426,7 @@ public class ProfileActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         if (profileViewModel != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
-            profileViewModel.loadCurrentProfile();
+            loadTargetProfile();
         }
     }
 }
