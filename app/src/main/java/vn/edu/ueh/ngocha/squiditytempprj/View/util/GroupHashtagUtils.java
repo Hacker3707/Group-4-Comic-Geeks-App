@@ -75,6 +75,34 @@ public final class GroupHashtagUtils {
         return tags;
     }
 
+    // Tên hiển thị của một chủ đề
+    public static String displayName(String tagKey) {
+        if (TAG_ANIME.equals(tagKey)) {
+            return "Anime";
+        } else if (TAG_MANGA.equals(tagKey)) {
+            return "Manga";
+        } else if (TAG_LIGHT_NOVEL.equals(tagKey)) {
+            return "Light Novel";
+        } else if (TAG_DISCUSSION.equals(tagKey)) {
+            return "Discussion";
+        } else if (TAG_OTAKU.equals(tagKey)) {
+            return "Otaku";
+        }
+        return "Khác";
+    }
+
+    // Nhãn chủ đề của một bài viết, ví dụ "Manga, Anime" hoặc "Khác"
+    public static String topicLabel(String content) {
+        StringBuilder label = new StringBuilder();
+        for (String tagKey : extractTags(content)) {
+            if (label.length() > 0) {
+                label.append(", ");
+            }
+            label.append(displayName(tagKey));
+        }
+        return label.toString();
+    }
+
     public static boolean hasTag(String content, String tagKey) {
         return extractTags(content).contains(tagKey);
     }

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/adminRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F7F4FC"
+    android:orientation="vertical">
+
+    <!-- Thanh tiêu đề -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#493373"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp">
+
+        <ImageView
+            android:id="@+id/imgAdminBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="Quay lại"
+            android:padding="8dp"
+            android:src="@drawable/ic_group_back"
+            app:tint="#FFFFFF" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:fontFamily="@font/jersey25_regular"
+            android:text="Quản trị Squidity"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp" />
+    </LinearLayout>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/adminTabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        app:tabIndicatorColor="#6D45D9"
+        app:tabMode="scrollable"
+        app:tabSelectedTextColor="#493373"
+        app:tabTextColor="#8A7BA8" />
+
+    <!-- Tổng quan -->
+    <ScrollView
+        android:id="@+id/adminOverview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvStatUsers"
+                style="@style/AdminStatCard" />
+
+            <TextView
+                android:id="@+id/tvStatBanned"
+                style="@style/AdminStatCard" />
+
+            <TextView
+                android:id="@+id/tvStatPosts"
+                style="@style/AdminStatCard" />
+
+            <TextView
+                android:id="@+id/tvStatGroups"
+                style="@style/AdminStatCard" />
+
+            <TextView
+                android:id="@+id/tvStatComments"
+                style="@style/AdminStatCard" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Danh sách (Người dùng / Bài viết / Nhóm) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAdmin"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:padding="12dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tvAdminEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="32dp"
+        android:text="Chưa có dữ liệu"
+        android:textColor="#8A7BA8"
+        android:visibility="gone" />
+</LinearLayout>

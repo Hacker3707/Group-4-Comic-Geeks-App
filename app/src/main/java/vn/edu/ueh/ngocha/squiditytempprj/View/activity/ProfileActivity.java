@@ -12,6 +12,7 @@ import android.app.Dialog;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import com.google.firebase.auth.FirebaseUser;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -31,6 +32,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,6 +40,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.ChatRoom;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
@@ -48,12 +51,28 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.GenreViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.CommentUsersWatcher;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ChatViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.FollowViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
 public class ProfileActivity extends BaseActivity {
 
-    // ViewModel & UI Profile
+    // Truyền id người muốn xem profile. Không truyền thì xem profile của chính mình.
+    public static final String EXTRA_USER_ID = "user_id";
+
+    // Follow
+    private FollowViewModel followViewModel;
+    private ChatViewModel chatViewModel;
+    private String targetUserId;
+    private boolean isOwnProfile = true;
+    private TextView tvFollowersCount;
+    private TextView tvFollowingCount;
+    private MaterialButton btnFollow;
+
+    // ViewModel & UI Profile (Phần của Nghĩa)
     private UserProfileViewModel profileViewModel;
     private ShapeableImageView imgProfileAvatar;
     private ImageView imgProfileCover;
@@ -66,7 +85,9 @@ public class ProfileActivity extends BaseActivity {
     private PostAdapter postAdapter;
     private PostViewModel postViewModel;
     private MaterialButton btnEditProfile;
-    private MaterialButton btnFollow;
+    private TextView tvProfilePostCount;
+    private String currentProfileUserId = "";
+    private String currentProfileUsername = "";
     private MaterialButton btnMessage;
     private String currentAvatarUrl = "";
     private String currentCoverUrl = "";
@@ -104,6 +125,13 @@ public class ProfileActivity extends BaseActivity {
                         }
                     }
             );
+    // Id của tài khoản đang đăng nhập, chưa đăng nhập thì dùng "guest"
+    private String currentUid() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            return "guest";
+        }
+        return FirebaseAuth.getInstance().getCurrentUser().getUid();
+    }
 
     private Observer<List<Genre>> genreObserver = new Observer<List<Genre>>() {
         @Override
@@ -189,6 +217,13 @@ public class ProfileActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ImageButton btnBackHome = findViewById(R.id.btnBackHome);
+
+        if (btnBackHome != null) {
+            btnBackHome.setVisibility(View.VISIBLE);
+            btnBackHome.setOnClickListener(v -> finish());
+        }
+
         // Ánh xạ các view Profile
         appBarLayout = findViewById(R.id.appBar);
         tvProfileName = findViewById(R.id.tvProfileName);
@@ -230,7 +265,27 @@ public class ProfileActivity extends BaseActivity {
         genreViewModel.getAllGenres().observe(this, genreObserver);
 
         profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
+        followViewModel = new ViewModelProvider(this).get(FollowViewModel.class);
+        chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
+
+        tvProfilePostCount = findViewById(R.id.tvProfilePostCount);
+
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser != null) {
+            currentProfileUserId = currentUser.getUid();
+
+            currentProfileUsername = currentUser.getDisplayName() == null
+                    ? ""
+                    : currentUser.getDisplayName();
+        }
+
+        if (tvProfilePostCount != null) {
+            tvProfilePostCount.setText("0");
+        }
+
         if (tabLayout != null) {
             tabLayout.addOnTabSelectedListener(
                     new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
@@ -373,8 +428,10 @@ public class ProfileActivity extends BaseActivity {
                 imgProfileCover.setImageResource(R.drawable.ic_launcher_background);
             }
 
+            // Chỉ là chủ profile khi đang xem profile của chính mình
             boolean isOwner =
-                    FirebaseAuth.getInstance().getCurrentUser() != null
+                    isOwnProfile
+                            && FirebaseAuth.getInstance().getCurrentUser() != null
                             && state.loggedIn;
 
             if (btnEditProfile != null) {
@@ -451,16 +508,17 @@ public class ProfileActivity extends BaseActivity {
             @Override
             public void onStampClick(Post post) {
                 String randomStampId = UUID.randomUUID().toString();
-                Stamp newStamp = new Stamp(randomStampId, "Meringoc_17", StampType.LIKE);
+                Stamp newStamp = new Stamp(randomStampId, currentUid(), StampType.LIKE);
                 newStamp.setPostId(post.getPostId());
-                postViewModel.addStamp(newStamp, post);                Toast.makeText(ProfileActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
+                postViewModel.addStamp(newStamp, post);
+                Toast.makeText(ProfileActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onCommentSend(Post post, String commentText) {
                 if (commentText != null && !commentText.trim().isEmpty()) {
                     String randomCommentId = UUID.randomUUID().toString();
-                    Comment newComment = new Comment(randomCommentId, "Meringoc_17", post.getPostId(), commentText.trim());
+                    Comment newComment = new Comment(randomCommentId, currentUid(), post.getPostId(), commentText.trim());
                     postViewModel.addComment(newComment, post);
                     Toast.makeText(ProfileActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
                 } else {
@@ -482,11 +540,18 @@ public class ProfileActivity extends BaseActivity {
                 if (rvComments != null) {
                     rvComments.setAdapter(commentAdapter);
                 }
+                // Hiện đúng tên + ảnh tài khoản của người bình luận
+                CommentUsersWatcher usersWatcher = new CommentUsersWatcher(
+                        ProfileActivity.this,
+                        new ViewModelProvider(ProfileActivity.this).get(UserViewModel.class),
+                        commentAdapter);
+                bottomSheetDialog.setOnDismissListener(d -> usersWatcher.stop());
 
                 if (post.getPostId() != null) {
                     postViewModel.getCommentsByPostId(post.getPostId()).observe(ProfileActivity.this, realComments -> {
                         if (realComments != null) {
                             commentAdapter.setComments(realComments);
+                            usersWatcher.update(realComments);
                             if (!realComments.isEmpty() && rvComments != null) {
                                 rvComments.scrollToPosition(realComments.size() - 1);
                             }
@@ -512,6 +577,8 @@ public class ProfileActivity extends BaseActivity {
                 intent.putExtra("post_id", post.getPostId());
                 intent.putExtra("post_content", post.getContent());
                 intent.putExtra("post_comic_id", post.getComicId());
+                intent.putExtra("post_comic_title", post.getComicTitle());
+                intent.putExtra("post_hashtag", post.getHashtag());
                 intent.putStringArrayListExtra("post_image_urls", post.getImageUris() != null ? new ArrayList<>(post.getImageUris()) : new ArrayList<>());
                 startActivity(intent);
             }
@@ -520,16 +587,105 @@ public class ProfileActivity extends BaseActivity {
         if (recyclerViewProfilePosts != null) {
             recyclerViewProfilePosts.setAdapter(postAdapter);
         }
-        postViewModel.getAllPosts().observe(this, new Observer<List<Post>>() {
-            @Override
-            public void onChanged(List<Post> realPosts) {
-                if (realPosts != null) {
-                    postAdapter.setPosts(realPosts);
+
+        postViewModel.getAllPosts().observe(this, realPosts -> {
+            if (realPosts == null) {
+                if (tvProfilePostCount != null) {
+                    tvProfilePostCount.setText("0");
                 }
+                return;
+            }
+
+            // Chỉ hiện bài của chủ profile đang xem và đếm số bài
+            List<Post> profilePosts = new ArrayList<>();
+            int postCount = 0;
+
+            for (Post post : realPosts) {
+                if (post == null || post.getUserId() == null) {
+                    continue;
+                }
+
+                String authorId = post.getUserId().trim();
+
+                boolean isCurrentUserPost =
+                        authorId.equals(currentProfileUserId)
+                                || (!currentProfileUsername.isEmpty()
+                                && authorId.equalsIgnoreCase(currentProfileUsername));
+
+                if (isCurrentUserPost) {
+                    postCount++;
+                    profilePosts.add(post);
+                }
+            }
+
+            postAdapter.setPosts(profilePosts);
+
+            if (tvProfilePostCount != null) {
+                tvProfilePostCount.setText(String.valueOf(postCount));
             }
         });
 
-        profileViewModel.loadCurrentProfile();
+        setupFollow();
+        loadTargetProfile();
+    }
+
+    private void loadTargetProfile() {
+        if (isOwnProfile) {
+            profileViewModel.loadCurrentProfile();
+        } else {
+            profileViewModel.loadProfile(targetUserId);
+        }
+    }
+
+    // =================================
+    // FOLLOW
+    // =================================
+    private void setupFollow() {
+        String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String fromIntent = getIntent().getStringExtra(EXTRA_USER_ID);
+        targetUserId = (fromIntent == null || fromIntent.isEmpty()) ? myUid : fromIntent;
+        isOwnProfile = targetUserId.equals(myUid);
+        currentProfileUserId = targetUserId;
+        if (!isOwnProfile) {
+            currentProfileUsername = "";
+        }
+
+        tvFollowersCount = findViewById(R.id.tvFollowersCount);
+        tvFollowingCount = findViewById(R.id.tvFollowingCount);
+        btnFollow = findViewById(R.id.btnFollow);
+
+        if (isOwnProfile) {
+            // Không tự follow chính mình
+            btnFollow.setVisibility(View.GONE);
+        } else {
+            // Xem profile người khác: ẩn nút đăng bài
+            View fab = findViewById(R.id.fabCreatePost);
+            if (fab != null) fab.setVisibility(View.GONE);
+
+            // Nút Message: mở thẳng khung chat với người này
+            if (btnMessage != null) {
+                btnMessage.setOnClickListener(v -> openChatWithTarget());
+            }
+
+            btnFollow.setOnClickListener(v -> {
+                Boolean following = followViewModel.getIsFollowing().getValue();
+                if (Boolean.TRUE.equals(following)) {
+                    followViewModel.unfollowUser(targetUserId);
+                } else {
+                    followViewModel.followUser(targetUserId);
+                }
+            });
+        }
+
+        // Số Followers = số người đang follow profile này, Following = số người profile này đang follow
+        followViewModel.getFollowerCount().observe(this, count ->
+                tvFollowersCount.setText(String.valueOf(count == null ? 0 : count)));
+        followViewModel.getFollowingCount().observe(this, count ->
+                tvFollowingCount.setText(String.valueOf(count == null ? 0 : count)));
+        followViewModel.getIsFollowing().observe(this, following ->
+                btnFollow.setText(Boolean.TRUE.equals(following) ? "Following" : "+ Follow"));
+
+        followViewModel.observeProfile(targetUserId);
     }
     private boolean isOwnerProfile(String profileUid) {
         com.google.firebase.auth.FirebaseUser currentUser =
@@ -538,6 +694,34 @@ public class ProfileActivity extends BaseActivity {
         return currentUser != null
                 && profileUid != null
                 && currentUser.getUid().equals(profileUid);
+    }
+
+    // Mở khung chat với chủ profile đang xem (phòng chat cố định theo cặp người dùng)
+    private void openChatWithTarget() {
+        FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
+        if (me == null || targetUserId == null || targetUserId.isEmpty()
+                || targetUserId.equals(me.getUid())) {
+            return;
+        }
+
+        String myId = me.getUid();
+        String chatRoomId = myId.compareTo(targetUserId) <= 0
+                ? myId + "_" + targetUserId
+                : targetUserId + "_" + myId;
+
+        // Chưa có phòng thì tạo, đã có thì Room bỏ qua
+        chatViewModel.createChatRoom(new ChatRoom(chatRoomId, myId, targetUserId));
+
+        String title = tvProfileName != null
+                ? tvProfileName.getText().toString()
+                : "";
+
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra(ChatActivity.EXTRA_CHAT_ROOM_ID, chatRoomId);
+        intent.putExtra(ChatActivity.EXTRA_CURRENT_USER_ID, myId);
+        intent.putExtra(ChatActivity.EXTRA_OTHER_USER_ID, targetUserId);
+        intent.putExtra(ChatActivity.EXTRA_CHAT_TITLE, title);
+        startActivity(intent);
     }
 
     private void showLargeImage(String imageUrl, boolean isAvatar) {
@@ -593,7 +777,7 @@ public class ProfileActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         if (profileViewModel != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
-            profileViewModel.loadCurrentProfile();
+            loadTargetProfile();
         }
     }
 
@@ -603,9 +787,9 @@ public class ProfileActivity extends BaseActivity {
             return;
         }
 
-        String uid = FirebaseAuth.getInstance()
-                .getCurrentUser()
-                .getUid();
+        String uid = (targetUserId != null && !targetUserId.isEmpty())
+                ? targetUserId
+                : FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         if (profileDetailsListener != null) {
             profileDetailsListener.remove();

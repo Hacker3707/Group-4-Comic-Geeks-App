@@ -27,10 +27,10 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.NotificationAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.NotificationViewModel;
 
 /**
- * Popup thông báo ngay trong app (không tạo Activity mới), mở khi bấm nút chuông ở MainActivity.
- * Đồng thời theo dõi thông báo chưa đọc để đẩy thông báo mới ra thanh thông báo hệ thống.
+ * Popup thông báo ngay trong app (không tạo Activity mới), mở khi bấm nút chuông.
+ * Đồng thời theo dõi thông báo chưa đọc để hiện số trên chuông và đẩy thông báo mới ra thanh thông báo hệ thống.
  *
- * Cách dùng trong MainActivity.onCreate:
+ * Cách dùng trong onCreate của Activity:
  *   NtfChannel.setup(this);
  *   NotificationPopup.attach(this, findViewById(R.id.btnNotification));
  */
@@ -48,6 +48,7 @@ public class NotificationPopup {
     private final PopupWindow popupWindow;
     private final RecyclerView rcvNotifications;
     private final TextView tvEmpty;
+    private final TextView tvBadge;
 
     private List<Notification> allNotifications = new ArrayList<>();
 
@@ -65,6 +66,9 @@ public class NotificationPopup {
         this.viewModel = new ViewModelProvider(activity).get(NotificationViewModel.class);
         // Bắt đầu nhận thông báo từ Firestore
         viewModel.startListening();
+
+        // Chấm đỏ đếm thông báo chưa đọc (có thể null nếu màn hình không có thanh trên)
+        tvBadge = activity.findViewById(R.id.tvNotificationBadge);
 
         View content = LayoutInflater.from(activity).inflate(R.layout.popup_notification, null);
         rcvNotifications = content.findViewById(R.id.rcvNotifications);
@@ -131,9 +135,24 @@ public class NotificationPopup {
         viewModel.getUnreadNotifications().observe(activity, new Observer<List<Notification>>() {
             @Override
             public void onChanged(List<Notification> unread) {
+                updateBadge(unread);
                 pushNewOnesToSystem(unread);
             }
         });
+    }
+
+    // Hiện số thông báo chưa đọc trên chuông, từ 10 trở lên hiện "9+"
+    private void updateBadge(List<Notification> unread) {
+        if (tvBadge == null) {
+            return;
+        }
+        int count = (unread != null) ? unread.size() : 0;
+        if (count == 0) {
+            tvBadge.setVisibility(View.GONE);
+        } else {
+            tvBadge.setText(count > 9 ? "9+" : String.valueOf(count));
+            tvBadge.setVisibility(View.VISIBLE);
+        }
     }
 
     // Lần tải đầu chỉ ghi nhận thông báo cũ, các lần sau có thông báo mới mới đẩy ra hệ thống

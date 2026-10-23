@@ -26,6 +26,10 @@ import java.util.List;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Group;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.GroupAdapter;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.GroupSyncManager;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.GroupViewModel;
 
 /**
@@ -39,6 +43,20 @@ public class GroupActivity extends AppCompatActivity {
 
     // TODO: user thử, dùng chung cho 3 màn Group. Thay bằng user đang đăng nhập khi app có đăng nhập
     public static final String CURRENT_USER_ID = "demo_user_1";
+
+    // Id người dùng thật (uid Firebase). Chưa đăng nhập thì dùng id thử ở trên.
+    public static String currentUserId() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        return user != null ? user.getUid() : CURRENT_USER_ID;
+    }
+
+    // Khi dữ liệu nhóm từ Firestore về Room thì tải lại danh sách
+    private final GroupSyncManager.OnSyncListener syncListener = new GroupSyncManager.OnSyncListener() {
+        @Override
+        public void onGroupsSynced() {
+            refreshList();
+        }
+    };
 
     private GroupViewModel groupViewModel;
     private GroupAdapter groupAdapter;
@@ -69,8 +87,18 @@ public class GroupActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Lắng nghe nhóm từ Firestore: nhóm do tài khoản/máy khác tạo sẽ hiện ra ở đây
+        GroupSyncManager syncManager = GroupSyncManager.getInstance(getApplication());
+        syncManager.addListener(syncListener);
+        syncManager.start();
         // Quay lại từ màn tạo group hoặc xem chi tiết thì tải lại danh sách
         refreshList();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GroupSyncManager.getInstance(getApplication()).removeListener(syncListener);
     }
 
     // =================================

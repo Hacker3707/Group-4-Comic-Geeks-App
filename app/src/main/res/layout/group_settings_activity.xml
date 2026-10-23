@@ -102,55 +102,124 @@
                 android:textColorHint="@color/group_composer_hint"
                 android:textSize="13sp" />
 
-            <TextView
+            <!-- Ảnh bìa: chọn từ thư viện ảnh của máy -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:fontFamily="@font/inter_bold"
-                android:text="@string/create_group_cover_label"
-                android:textColor="@color/group_name"
-                android:textSize="13sp" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/edtCoverUrl"
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/inter_bold"
+                    android:text="@string/create_group_cover_label"
+                    android:textColor="@color/group_name"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/btnRemoveCover"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:fontFamily="@font/inter"
+                    android:padding="4dp"
+                    android:text="@string/group_image_remove"
+                    android:textColor="@color/group_tab_selected"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/layoutCoverPick"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="140dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/bg_group_composer"
-                android:fontFamily="@font/inter"
-                android:hint="@string/create_group_cover_hint"
-                android:importantForAutofill="no"
-                android:inputType="textUri"
-                android:maxLines="1"
-                android:padding="12dp"
-                android:textColor="@color/group_text"
-                android:textColorHint="@color/group_composer_hint"
-                android:textSize="13sp" />
+                android:clickable="true"
+                android:clipToOutline="true"
+                android:focusable="true">
 
-            <TextView
+                <ImageView
+                    android:id="@+id/imgCoverPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/group_cd_cover"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/group_cover_placeholder" />
+
+                <TextView
+                    android:id="@+id/txtCoverHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/inter"
+                    android:text="@string/group_image_pick_cover"
+                    android:textColor="@color/white"
+                    android:textSize="13sp" />
+            </FrameLayout>
+
+            <!-- Ảnh đại diện: chọn từ thư viện ảnh của máy -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:fontFamily="@font/inter_bold"
-                android:text="@string/create_group_avatar_label"
-                android:textColor="@color/group_name"
-                android:textSize="13sp" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/edtAvatarUrl"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/inter_bold"
+                    android:text="@string/create_group_avatar_label"
+                    android:textColor="@color/group_name"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/btnRemoveAvatar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:fontFamily="@font/inter"
+                    android:padding="4dp"
+                    android:text="@string/group_image_remove"
+                    android:textColor="@color/group_tab_selected"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/layoutAvatarPick"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
                 android:layout_marginTop="6dp"
-                android:background="@drawable/bg_group_composer"
-                android:fontFamily="@font/inter"
-                android:hint="@string/create_group_cover_hint"
-                android:importantForAutofill="no"
-                android:inputType="textUri"
-                android:maxLines="1"
-                android:padding="12dp"
-                android:textColor="@color/group_text"
-                android:textColorHint="@color/group_composer_hint"
-                android:textSize="13sp" />
+                android:clickable="true"
+                android:focusable="true">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgAvatarPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/group_cd_avatar"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/group_cover_placeholder"
+                    app:shapeAppearanceOverlay="@style/GroupCircleImage" />
+
+                <TextView
+                    android:id="@+id/txtAvatarHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/inter"
+                    android:text="@string/group_image_pick_avatar"
+                    android:textColor="@color/white"
+                    android:textSize="13sp" />
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/btnSaveSettings"

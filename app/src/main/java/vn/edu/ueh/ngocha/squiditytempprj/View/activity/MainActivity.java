@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import android.widget.LinearLayout;
@@ -48,7 +49,6 @@ import vn.edu.ueh.ngocha.squiditytempprj.R;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
-import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.Observer;
@@ -58,12 +58,21 @@ import java.util.List;
 import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.HomeFeedViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.CommentUsersWatcher;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Group;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
+import java.util.Map;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.SearchViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
 import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
+import com.google.firebase.auth.FirebaseAuth;
+
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
@@ -79,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rcvpostlist;
     private PostAdapter postAdapter;
     private PostViewModel postViewModel;
+    private HomeFeedViewModel homeFeedViewModel;
 
     private TextView tvMainUsername;
     private TextView tvDrawerUsername;
@@ -241,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                     } else if (id == R.id.action_chat) {
-                         startActivity(new Intent(MainActivity.this, ChatListActivity.class));
+                        startActivity(new Intent(MainActivity.this, ChatListActivity.class));
                     } else if (id == R.id.action_group) {
                         // Mở màn hình Groups
                         Intent intent = new Intent(
@@ -249,6 +259,9 @@ public class MainActivity extends AppCompatActivity {
                                 GroupActivity.class
                         );
                         startActivity(intent);
+                    }
+                    else if (id == R.id.action_admin) {
+                        startActivity(new Intent(MainActivity.this, AdminActivity.class));
                     }
                     else if (id == R.id.action_comic) {
                         Intent intent = new Intent(
@@ -264,6 +277,44 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
             };
+
+    // Hiện mục Admin trong menu nếu là admin; tài khoản bị cấm thì đăng xuất
+    private void checkAdminAndBan() {
+        if (navigationView == null) {
+            return;
+        }
+        final android.view.MenuItem adminItem = navigationView.getMenu().findItem(R.id.action_admin);
+        FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
+        if (me == null) {
+            if (adminItem != null) adminItem.setVisible(false);
+            return;
+        }
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("users").document(me.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    if (doc == null || !doc.exists()) {
+                        return;
+                    }
+                    if (Boolean.TRUE.equals(doc.getBoolean("banned"))) {
+                        FirebaseAuth.getInstance().signOut();
+                        Toast.makeText(MainActivity.this,
+                                "Tài khoản của bạn đã bị khóa bởi admin", Toast.LENGTH_LONG).show();
+                        startActivity(new Intent(MainActivity.this, AuthActivity.class));
+                        return;
+                    }
+                    if (adminItem != null) {
+                        adminItem.setVisible(AdminActivity.ROLE_ADMIN.equals(doc.getString("role")));
+                    }
+                });
+    }
+
+    // Id của tài khoản đang đăng nhập, chưa đăng nhập thì dùng "guest"
+    private String currentUid() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            return "guest";
+        }
+        return FirebaseAuth.getInstance().getCurrentUser().getUid();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -403,15 +454,33 @@ public class MainActivity extends AppCompatActivity {
         imgMainAvatar.setOnClickListener(onProfileClickListener);
         navigationView.setNavigationItemSelectedListener(onAvatarsClickListener);
 
+        // Nút tạo bài viết ở trang chủ
+        FloatingActionButton fabCreatePost = findViewById(R.id.fabCreatePost);
+        if (fabCreatePost != null) {
+            fabCreatePost.setOnClickListener(v -> {
+                if (authViewModel.getCurrentUser() == null) {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Yêu cầu đăng nhập")
+                            .setMessage("Bạn cần đăng nhập để đăng bài.")
+                            .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
+                            .setPositiveButton("Đăng nhập", (dialog, which) ->
+                                    startActivity(new Intent(MainActivity.this, AuthActivity.class)))
+                            .show();
+                } else {
+                    startActivity(new Intent(MainActivity.this, CreatePostActivity.class));
+                }
+            });
+        }
+
         rcvpostlist.setLayoutManager(new LinearLayoutManager(this));
 
         postAdapter = new PostAdapter(this, new ArrayList<>(), new PostAdapter.OnPostInteractionListener() {
             @Override
             public void onStampClick(Post post) {
                 String randomStampId = UUID.randomUUID().toString();
-                Stamp newStamp = new Stamp(randomStampId, "Meringoc_17", StampType.LIKE);
+                Stamp newStamp = new Stamp(randomStampId, currentUid(), StampType.LIKE);
                 newStamp.setPostId(post.getPostId());
-                postViewModel.addStamp(newStamp);
+                postViewModel.addStamp(newStamp, post);
                 Toast.makeText(MainActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
             }
 
@@ -419,8 +488,8 @@ public class MainActivity extends AppCompatActivity {
             public void onCommentSend(Post post, String commentText) {
                 if (commentText != null && !commentText.trim().isEmpty()) {
                     String randomCommentId = UUID.randomUUID().toString();
-                    Comment newComment = new Comment(randomCommentId, "Meringoc_17", post.getPostId(), commentText.trim());
-                    postViewModel.addComment(newComment);
+                    Comment newComment = new Comment(randomCommentId, currentUid(), post.getPostId(), commentText.trim());
+                    postViewModel.addComment(newComment, post);
                     Toast.makeText(MainActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Vui lòng nhập nội dung bình luận!", Toast.LENGTH_SHORT).show();
@@ -441,11 +510,18 @@ public class MainActivity extends AppCompatActivity {
                 if (rvComments != null) {
                     rvComments.setAdapter(commentAdapter);
                 }
+                // Hiện đúng tên + ảnh tài khoản của người bình luận
+                CommentUsersWatcher usersWatcher = new CommentUsersWatcher(
+                        MainActivity.this,
+                        new ViewModelProvider(MainActivity.this).get(UserViewModel.class),
+                        commentAdapter);
+                bottomSheetDialog.setOnDismissListener(d -> usersWatcher.stop());
 
                 if (post.getPostId() != null) {
                     postViewModel.getCommentsByPostId(post.getPostId()).observe(MainActivity.this, realComments -> {
                         if (realComments != null) {
                             commentAdapter.setComments(realComments);
+                            usersWatcher.update(realComments);
                             if (!realComments.isEmpty() && rvComments != null) {
                                 rvComments.scrollToPosition(realComments.size() - 1);
                             }
@@ -478,11 +554,28 @@ public class MainActivity extends AppCompatActivity {
         rcvpostlist.setAdapter(postAdapter);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
-        postViewModel.getAllPosts().observe(this, new Observer<List<Post>>() {
+        // Trang chủ chỉ hiện bài của người đã follow, bài trong group đã join và bài của mình
+        homeFeedViewModel = new ViewModelProvider(this).get(HomeFeedViewModel.class);
+
+        homeFeedViewModel.getGroups().observe(this, new Observer<Map<String, Group>>() {
             @Override
-            public void onChanged(List<Post> realPosts) {
-                if (realPosts != null) {
-                    postAdapter.setPosts(realPosts);
+            public void onChanged(Map<String, Group> groups) {
+                postAdapter.setGroups(groups);
+            }
+        });
+
+        homeFeedViewModel.getUsers().observe(this, new Observer<Map<String, User>>() {
+            @Override
+            public void onChanged(Map<String, User> users) {
+                postAdapter.setUsers(users);
+            }
+        });
+
+        homeFeedViewModel.getFeed().observe(this, new Observer<List<Post>>() {
+            @Override
+            public void onChanged(List<Post> feedPosts) {
+                if (feedPosts != null) {
+                    postAdapter.setPosts(feedPosts);
                 }
             }
         });
@@ -538,6 +631,11 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if (profileViewModel != null) {
             profileViewModel.loadCurrentProfile();
+        }
+        checkAdminAndBan();
+        // Đăng nhập / đăng xuất / đổi tài khoản thì lọc lại feed
+        if (homeFeedViewModel != null) {
+            homeFeedViewModel.refreshUser();
         }
     }
 

@@ -1,59 +1,55 @@
+
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.OnApplyWindowInsetsListener;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.ChatRoom;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Message;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.ChatSyncManager;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ChatItemAdapter;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ChatViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.FollowViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
 
 /**
- * Màn danh sách chat: hiện các cuộc trò chuyện của người dùng hiện tại.
- * Nút "+" cho chọn người để chat, chỉ gồm những người theo dõi qua lại (mutual follow).
+ * Màn danh sách chat: hiện các cuộc trò chuyện của tài khoản đang đăng nhập.
+ * Nút "+" cho chọn người để chat (chỉ những người theo dõi qua lại) hoặc tìm bạn bằng Gmail để theo dõi.
+ * Dữ liệu follow, phòng chat, tin nhắn được ChatSyncManager đồng bộ từ Firestore về Room.
  * Activity chỉ gọi ViewModel, không gọi DAO trực tiếp.
  */
-public class ChatListActivity extends AppCompatActivity {
-
-    public static final String EXTRA_USER_ID = "extra_user_id";
-
-    // Chưa có đăng nhập thật nên tạm dùng tài khoản demo.
-    // Khi nhóm nối đăng nhập: truyền userId qua Intent (EXTRA_USER_ID) và đặt DEMO_MODE = false.
-    private static final boolean DEMO_MODE = true;
-    private static final String DEMO_USER_ID = "demo_me";
-    private static final String PREFS_NAME = "chat_demo_prefs";
-    private static final String KEY_SEEDED = "chat_demo_seeded";
+public class ChatListActivity extends BaseActivity {
 
     private ChatViewModel chatViewModel;
     private UserViewModel userViewModel;
@@ -75,27 +71,32 @@ public class ChatListActivity extends AppCompatActivity {
             new ChatItemAdapter.OnChatRoomClickListener() {
                 @Override
                 public void onChatRoomClick(ChatRoom chatRoom, String otherUserId, String otherUserName) {
-                    openChat(chatRoom.getChatRoomId(), otherUserName);
+                    openChat(chatRoom.getChatRoomId(), otherUserId, otherUserName);
                 }
             };
+
+    // Thanh trên và thanh bên do BaseActivity lo, Activity chỉ cung cấp layout nội dung
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.activity_chat_list;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_chat_list);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), new OnApplyWindowInsetsListener() {
-            @Override
-            public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
-                Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
-                return insets;
-            }
-        });
+        // Chat cần tài khoản thật: chưa đăng nhập thì chuyển sang màn đăng nhập
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "Vui lòng đăng nhập để dùng chat", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, AuthActivity.class));
+            finish();
+            return;
+        }
+        currentUserId = user.getUid();
 
-        String userIdFromIntent = getIntent().getStringExtra(EXTRA_USER_ID);
-        currentUserId = (userIdFromIntent != null) ? userIdFromIntent : DEMO_USER_ID;
+        // Bắt đầu nhận follow, phòng chat và tin nhắn từ Firestore
+        ChatSyncManager.getInstance(this).start();
 
         rcvChatRooms = findViewById(R.id.rcvChatRooms);
         tvChatListEmpty = findViewById(R.id.tvChatListEmpty);
@@ -104,13 +105,6 @@ public class ChatListActivity extends AppCompatActivity {
         chatRoomAdapter = new ChatItemAdapter(currentUserId, onChatRoomClickListener);
         rcvChatRooms.setLayoutManager(new LinearLayoutManager(this));
         rcvChatRooms.setAdapter(chatRoomAdapter);
-
-        findViewById(R.id.btnChatListBack).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
 
         chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
@@ -124,10 +118,6 @@ public class ChatListActivity extends AppCompatActivity {
                 requestMutualFollowDialog();
             }
         });
-
-        if (DEMO_MODE) {
-            seedDemoDataOnce();
-        }
     }
 
     // Observer đặt trong Activity: ViewModel cấp LiveData, Activity lắng nghe và cập nhật giao diện
@@ -193,14 +183,11 @@ public class ChatListActivity extends AppCompatActivity {
             }
         }
 
-        if (mutualUsers.isEmpty()) {
-            Toast.makeText(this, "Chưa có ai theo dõi qua lại với bạn", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String[] names = new String[mutualUsers.size()];
+        // Mục đầu tiên là tìm bạn bằng Gmail, các mục sau là người theo dõi qua lại
+        String[] names = new String[mutualUsers.size() + 1];
+        names[0] = "Tìm bạn bằng Gmail";
         for (int i = 0; i < mutualUsers.size(); i++) {
-            names[i] = mutualUsers.get(i).getUsername();
+            names[i + 1] = mutualUsers.get(i).getUsername();
         }
 
         new AlertDialog.Builder(this)
@@ -208,11 +195,114 @@ public class ChatListActivity extends AppCompatActivity {
                 .setItems(names, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        startChatWith(mutualUsers.get(which));
+                        if (which == 0) {
+                            showFindByEmailDialog();
+                        } else {
+                            startChatWith(mutualUsers.get(which - 1));
+                        }
                     }
                 })
                 .show();
     }
+
+    // =================================
+    // Tìm bạn bằng Gmail
+    // =================================
+
+    private void showFindByEmailDialog() {
+        final EditText input = new EditText(this);
+        input.setHint("Nhập Gmail của bạn bè");
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+
+        int padding = (int) (20 * getResources().getDisplayMetrics().density);
+        FrameLayout container = new FrameLayout(this);
+        container.setPadding(padding, padding / 2, padding, 0);
+        container.addView(input);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Tìm bạn bằng Gmail")
+                .setView(container)
+                .setPositiveButton("Tìm", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        searchUserByEmail(input.getText().toString().trim(), true);
+                    }
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    // Tìm trong collection "users" của Firestore. Không thấy thì thử lại với chữ thường
+    private void searchUserByEmail(final String email, final boolean retryLowerCase) {
+        if (email.isEmpty()) {
+            Toast.makeText(this, "Hãy nhập Gmail", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        FirebaseFirestore.getInstance().collection("users")
+                .whereEqualTo("email", email)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot snapshots) {
+                        if (snapshots.isEmpty()) {
+                            String lower = email.toLowerCase(Locale.ROOT);
+                            if (retryLowerCase && !lower.equals(email)) {
+                                searchUserByEmail(lower, false);
+                            } else {
+                                Toast.makeText(ChatListActivity.this,
+                                        "Không tìm thấy tài khoản với Gmail này",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                            return;
+                        }
+                        showFoundUser(snapshots.getDocuments().get(0), email);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(ChatListActivity.this,
+                                "Tìm thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void showFoundUser(DocumentSnapshot doc, String email) {
+        String foundId = doc.getString("userId");
+        if (foundId == null || foundId.isEmpty()) {
+            foundId = doc.getId();
+        }
+        if (foundId.equals(currentUserId)) {
+            Toast.makeText(this, "Đây là tài khoản của bạn", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String foundName = doc.getString("username");
+        if (foundName == null || foundName.trim().isEmpty()) {
+            foundName = email;
+        }
+
+        final String targetId = foundId;
+        final String targetName = foundName;
+        new AlertDialog.Builder(this)
+                .setTitle("Tìm thấy tài khoản")
+                .setMessage(targetName + "\n" + email
+                        + "\n\nTheo dõi để chat. Khi người này theo dõi lại bạn, hai bạn sẽ nhắn tin được.")
+                .setPositiveButton("Theo dõi", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        followViewModel.follow(currentUserId, targetId);
+                        Toast.makeText(ChatListActivity.this,
+                                "Đã theo dõi " + targetName, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    // =================================
+    // Mở phòng chat
+    // =================================
 
     private void startChatWith(User other) {
         String chatRoomId = buildChatRoomId(currentUserId, other.getUserId());
@@ -227,7 +317,7 @@ public class ChatListActivity extends AppCompatActivity {
         if (!exists) {
             chatViewModel.createChatRoom(new ChatRoom(chatRoomId, currentUserId, other.getUserId()));
         }
-        openChat(chatRoomId, other.getUsername());
+        openChat(chatRoomId, other.getUserId(), other.getUsername());
     }
 
     // Id phòng chat cố định theo cặp người dùng, nên A chat B và B chat A là cùng một phòng
@@ -238,37 +328,12 @@ public class ChatListActivity extends AppCompatActivity {
         return userB + "_" + userA;
     }
 
-    private void openChat(String chatRoomId, String title) {
+    private void openChat(String chatRoomId, String otherUserId, String title) {
         Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra(ChatActivity.EXTRA_CHAT_ROOM_ID, chatRoomId);
         intent.putExtra(ChatActivity.EXTRA_CURRENT_USER_ID, currentUserId);
+        intent.putExtra(ChatActivity.EXTRA_OTHER_USER_ID, otherUserId);
         intent.putExtra(ChatActivity.EXTRA_CHAT_TITLE, title);
         startActivity(intent);
-    }
-
-    // Dữ liệu mẫu để chạy thử khi chưa có đăng nhập. Chỉ tạo một lần cho mỗi lần cài app.
-    private void seedDemoDataOnce() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        if (prefs.getBoolean(KEY_SEEDED, false)) {
-            return;
-        }
-        prefs.edit().putBoolean(KEY_SEEDED, true).apply();
-
-        userViewModel.insertUser(new User(DEMO_USER_ID, "Minh Khang", "khang@demo.com", "", ""));
-        userViewModel.insertUser(new User("demo_meilin", "Meilin Zhang", "meilin@demo.com", "", ""));
-        userViewModel.insertUser(new User("demo_nghia", "Nghia", "nghia@demo.com", "", ""));
-        userViewModel.insertUser(new User("demo_toan", "Gia Toan", "toan@demo.com", "", ""));
-
-        // Meilin và Nghia theo dõi qua lại với mình. Toan chỉ được mình theo dõi một chiều, nên không hiện trong danh sách chọn
-        followViewModel.follow(DEMO_USER_ID, "demo_meilin");
-        followViewModel.follow("demo_meilin", DEMO_USER_ID);
-        followViewModel.follow(DEMO_USER_ID, "demo_nghia");
-        followViewModel.follow("demo_nghia", DEMO_USER_ID);
-        followViewModel.follow(DEMO_USER_ID, "demo_toan");
-
-        String roomId = buildChatRoomId(DEMO_USER_ID, "demo_meilin");
-        chatViewModel.createChatRoom(new ChatRoom(roomId, DEMO_USER_ID, "demo_meilin"));
-        chatViewModel.sendMessage(new Message(UUID.randomUUID().toString(),
-                "Chào bạn, bên mình mới đọc chap mới nè!", "demo_meilin", roomId));
     }
 }

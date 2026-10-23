@@ -11,5 +11,5 @@
     <string name="group_dissolve_confirm_message">Nhóm và toàn bộ thành viên sẽ bị xoá. Hành động này không thể hoàn tác.</string>
     <string name="group_dissolve_success">Đã giải tán nhóm</string>
 
-    <string name="create_group_avatar_label">Link ảnh đại diện (không bắt buộc)</string>
+    <string name="create_group_avatar_label">Ảnh đại diện (không bắt buộc)</string>
 </resources>

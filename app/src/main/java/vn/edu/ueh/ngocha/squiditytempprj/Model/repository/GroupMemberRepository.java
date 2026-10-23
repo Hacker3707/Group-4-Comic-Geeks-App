@@ -12,23 +12,28 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupRole;
 public class GroupMemberRepository {
 
     private final GroupMemberDao groupMemberDao;
+    private final GroupSyncManager syncManager;
 
 
     public GroupMemberRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
+        syncManager = GroupSyncManager.getInstance(application);
         groupMemberDao = db.groupMemberDao();
     }
 
     public void insert(GroupMember member) {
         groupMemberDao.insert(member);
+        syncManager.pushMember(member);
     }
 
     public void update(GroupMember member) {
         groupMemberDao.update(member);
+        syncManager.pushMember(member);
     }
 
     public void delete(GroupMember member) {
         groupMemberDao.delete(member);
+        syncManager.deleteMemberRemote(member.getMembershipId());
     }
 
     public List<GroupMember> getAll() {
@@ -53,10 +58,12 @@ public class GroupMemberRepository {
 
     public void changeRole(String membershipId, GroupRole newRole) {
         groupMemberDao.updateRole(membershipId, newRole);
+        syncManager.pushMember(groupMemberDao.getById(membershipId));
     }
 
     public void removeMember(String membershipId) {
         groupMemberDao.deactivate(membershipId);
+        syncManager.pushMember(groupMemberDao.getById(membershipId));
     }
 
     public boolean isAdmin(String userId, String groupId) {
