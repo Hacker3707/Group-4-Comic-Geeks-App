@@ -9,6 +9,8 @@ import com.google.firebase.firestore.SetOptions;
 
 import android.net.Uri;
 
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FieldValue;
@@ -17,8 +19,18 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 public class UserProfileRepository {
+
+    public ListenerRegistration listenProfileDetails(
+            String uid,
+            EventListener<DocumentSnapshot> listener
+    ) {
+        return firestore.collection("users")
+                .document(uid)
+                .addSnapshotListener(listener);
+    }
 
     private final FirebaseStorage storage =
             FirebaseStorage.getInstance();
@@ -204,5 +216,28 @@ public class UserProfileRepository {
                             .document(uid)
                             .set(data, SetOptions.merge());
                 });
+    }
+
+    public Task<Void> updateProfileDetails(
+            String uid,
+            String username,
+            String bio,
+            String introduction,
+            String gender,
+            String birthDate,
+            List<String> favGenres
+    ) {
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("username", username);
+        data.put("bio", bio);
+        data.put("introduction", introduction);
+        data.put("gender", gender);
+        data.put("birthDate", birthDate);
+        data.put("favGenres", favGenres);
+
+        return firestore.collection("users")
+                .document(uid)
+                .set(data, SetOptions.merge());
     }
 }
