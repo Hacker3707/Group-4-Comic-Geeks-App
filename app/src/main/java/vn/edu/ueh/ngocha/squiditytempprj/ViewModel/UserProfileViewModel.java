@@ -4,12 +4,18 @@ import android.net.Uri;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
+import android.app.Application;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.UserFavoriteGenreRepository;
 
 import java.util.Collections;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -20,7 +26,7 @@ import java.util.List;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.UserProfileRepository;
 
-public class UserProfileViewModel extends ViewModel {
+public class UserProfileViewModel extends AndroidViewModel {
 
     private final UserProfileRepository repository =
             new UserProfileRepository();
@@ -44,6 +50,12 @@ public class UserProfileViewModel extends ViewModel {
 
     public LiveData<ProfileUiState> getProfile() {
         return profile;
+    }
+    private final UserFavoriteGenreRepository favoriteGenreRepository;
+    public UserProfileViewModel(@NonNull Application application) {
+        super(application);
+        favoriteGenreRepository =
+                new UserFavoriteGenreRepository(application);
     }
 
     // Danh sách tài khoản dùng cho màn tìm kiếm người dùng
@@ -126,7 +138,14 @@ public class UserProfileViewModel extends ViewModel {
                         return;
                     }
 
-                    profile.setValue(createState(document, fallback));
+                    ProfileUiState state = createState(document, fallback);
+
+                    profile.setValue(state);
+
+                    favoriteGenreRepository.saveFavoriteGenreIds(
+                            uid,
+                            state.favGenres
+                    );
                 })
                 .addOnFailureListener(error -> {
                     FirebaseUser currentUser =
@@ -549,4 +568,138 @@ public class UserProfileViewModel extends ViewModel {
 
 
     }
+
+    public void updateCompleteProfile(
+            String username,
+            String bio,
+            String introduction,
+            String gender,
+            String birthDate,
+            List<String> favGenres
+    ) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user == null) {
+            message.setValue("Vui lòng đăng nhập trước.");
+            return;
+        }
+
+        String name = username == null ? "" : username.trim();
+
+        if (name.isEmpty()) {
+            message.setValue("Vui lòng nhập tên hiển thị.");
+            return;
+        }
+
+        String safeBio = bio == null ? "" : bio.trim();
+        String safeIntroduction =
+                introduction == null ? "" : introduction.trim();
+        String safeGender = gender == null ? "" : gender.trim();
+        String safeBirthDate = birthDate == null ? "" : birthDate.trim();
+
+        List<String> safeGenres = favGenres == null
+                ? new ArrayList<>()
+                : new ArrayList<>(favGenres);
+
+        saving.setValue(true);
+        message.setValue(null);
+
+        repository.updateProfileDetails(
+                user.getUid(),
+                name,
+                safeBio,
+                safeIntroduction,
+                safeGender,
+                safeBirthDate,
+                safeGenres
+        ).addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                saving.setValue(false);
+                message.setValue(
+                        "Lưu hồ sơ thất bại: "
+                                + getErrorText(task.getException())
+                );
+                return;
+            }
+
+            UserProfileChangeRequest request =
+                    new UserProfileChangeRequest.Builder()
+                            .setDisplayName(name)
+                            .build();
+            favoriteGenreRepository.saveFavoriteGenreIds(
+                    user.getUid(),
+                    safeGenres
+            );
+            user.updateProfile(request).addOnCompleteListener(authTask -> {
+                saving.setValue(false);
+
+                if (authTask.isSuccessful()) {
+                    message.setValue("Đã lưu hồ sơ.");
+                } else {
+                    message.setValue(
+                            "Đã lưu hồ sơ nhưng chưa đồng bộ tên Firebase Auth."
+                    );
+                }
+
+                loadCurrentProfile();
+            });
+        });
+    }
+
+    private ListenerRegistration detailsListener;
+
+    private final MutableLiveData<String> liveBio =
+            new MutableLiveData<>("");
+
+    private final MutableLiveData<String> liveIntroduction =
+            new MutableLiveData<>("");
+
+    public LiveData<String> getLiveBio() {
+        return liveBio;
+    }
+
+    public LiveData<String> getLiveIntroduction() {
+        return liveIntroduction;
+    }
+
+    public void observeProfileDetails(String uid) {
+        if (uid == null || uid.trim().isEmpty()) {
+            return;
+        }
+
+        if (detailsListener != null) {
+            detailsListener.remove();
+            detailsListener = null;
+        }
+
+        detailsListener = repository.listenProfileDetails(
+                uid,
+                (document, error) -> {
+                    if (error != null || document == null
+                            || !document.exists()) {
+                        return;
+                    }
+
+                    String bio = document.getString("bio");
+                    String introduction =
+                            document.getString("introduction");
+
+                    liveBio.postValue(bio == null ? "" : bio);
+                    liveIntroduction.postValue(
+                            introduction == null ? "" : introduction
+                    );
+                }
+        );
+    }
+
+    @Override
+    protected void onCleared() {
+        if (detailsListener != null) {
+            detailsListener.remove();
+            detailsListener = null;
+        }
+
+        super.onCleared();
+    }
+
 }
