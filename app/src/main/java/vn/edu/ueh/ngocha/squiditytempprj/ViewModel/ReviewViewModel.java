@@ -129,6 +129,10 @@ public class ReviewViewModel extends AndroidViewModel {
         return reviewRepository.getReview(comicId, userId);
     }
 
+    public void delete(Review review) {
+        reviewRepository.delete(review);
+    }
+
     public void update(Review review) {
         reviewRepository.update(review);
     }
