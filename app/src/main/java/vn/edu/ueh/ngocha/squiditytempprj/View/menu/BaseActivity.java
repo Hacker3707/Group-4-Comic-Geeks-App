@@ -272,47 +272,63 @@ public abstract class BaseActivity extends AppCompatActivity {
                 return;
             }
 
-            tvDrawerUsername.setText(state.username);
-            tvDrawerEmail.setText(state.email);
-            if (tvMainUsername != null) tvMainUsername.setText(state.username);
+            if (tvDrawerUsername != null) {
+                tvDrawerUsername.setText(state.username);
+            }
 
-            btnAuthAction.setText(
-                    state.loggedIn ? "Đăng xuất" : "Đăng nhập / Đăng ký"
-            );
+            if (tvDrawerEmail != null) {
+                tvDrawerEmail.setText(state.email);
+            }
 
-            if (state.avatarUrl == null || state.avatarUrl.isEmpty()) {
-                imgDrawerAvatar.setImageResource(
-                        R.drawable.ic_launcher_background
+            if (tvMainUsername != null) {
+                tvMainUsername.setText(state.username);
+            }
+
+            if (btnAuthAction != null) {
+                btnAuthAction.setText(
+                        state.loggedIn ? "Đăng xuất" : "Đăng nhập / Đăng ký"
                 );
+            }
 
-                if (imgMainAvatar != null) imgMainAvatar.setImageResource(
-                        R.drawable.ic_launcher_background
-                );
-            } else {
-                Glide.with(BaseActivity.this)
-                        .load(state.avatarUrl)
-                        .placeholder(R.drawable.ic_launcher_background)
-                        .error(R.drawable.ic_launcher_background)
-                        .circleCrop()
-                        .into(imgDrawerAvatar);
+            int placeholder = R.drawable.ic_launcher_background;
 
-                if (imgMainAvatar != null) {
+            if (imgDrawerAvatar != null) {
+                if (state.avatarUrl == null || state.avatarUrl.isEmpty()) {
+                    imgDrawerAvatar.setImageResource(placeholder);
+                } else {
                     Glide.with(BaseActivity.this)
                             .load(state.avatarUrl)
-                            .placeholder(R.drawable.ic_launcher_background)
-                            .error(R.drawable.ic_launcher_background)
+                            .placeholder(placeholder)
+                            .error(placeholder)
+                            .circleCrop()
+                            .into(imgDrawerAvatar);
+                }
+            }
+
+            if (imgMainAvatar != null) {
+                if (state.avatarUrl == null || state.avatarUrl.isEmpty()) {
+                    imgMainAvatar.setImageResource(placeholder);
+                } else {
+                    Glide.with(BaseActivity.this)
+                            .load(state.avatarUrl)
+                            .placeholder(placeholder)
+                            .error(placeholder)
                             .circleCrop()
                             .into(imgMainAvatar);
                 }
             }
 
-            if (state.coverUrl != null && !state.coverUrl.isEmpty()) {
-                Glide.with(BaseActivity.this).load(state.coverUrl)
-                        .placeholder(R.drawable.ic_launcher_background)
-                        .error(R.drawable.ic_launcher_background)
-                        .centerCrop().into(imgnavProfileCover);
-            } else {
-                imgnavProfileCover.setImageResource(R.drawable.ic_launcher_background);
+            if (imgnavProfileCover != null) {
+                if (state.coverUrl == null || state.coverUrl.isEmpty()) {
+                    imgnavProfileCover.setImageResource(placeholder);
+                } else {
+                    Glide.with(BaseActivity.this)
+                            .load(state.coverUrl)
+                            .placeholder(placeholder)
+                            .error(placeholder)
+                            .centerCrop()
+                            .into(imgnavProfileCover);
+                }
             }
         }
     };

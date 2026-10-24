@@ -3,7 +3,6 @@ package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -76,11 +75,9 @@ public class ProfileActivity extends BaseActivity {
     private UserProfileViewModel profileViewModel;
     private ShapeableImageView imgProfileAvatar;
     private ImageView imgProfileCover;
-    private EditText etProfileUsername;
     private TextView tvProfileName;
     private LinearLayout profileActionButtons;
     private TextView tvProfileEmail;
-    private androidx.constraintlayout.widget.ConstraintLayout appBarLayout;
     private RecyclerView recyclerViewProfilePosts;
     private PostAdapter postAdapter;
     private PostViewModel postViewModel;
@@ -99,7 +96,6 @@ public class ProfileActivity extends BaseActivity {
     private TextView tvIntroGender;
     private TextView tvIntroBirthDate;
     private TextView tvIntroBio;
-    private ListenerRegistration profileDetailsListener;
     private View layoutIntroductionDetails;
     private com.google.android.material.tabs.TabLayout tabLayout;
     private ChipGroup chipGenreProfile;
@@ -198,21 +194,6 @@ public class ProfileActivity extends BaseActivity {
         );
     }
 
-    private void displayGenres(List<Genre> genres) {
-        chipGenreProfile.setSingleSelection(false);
-        chipGenreProfile.setSelectionRequired(false);
-        chipGenreProfile.removeAllViews();
-
-        for (Genre genre : genres) {
-            Chip chip = new Chip(this);
-
-            chip.setText(genre.getGenreName());
-            chip.setTag(genre.getGenreId());
-
-            chipGenreProfile.addView(chip);
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -225,7 +206,6 @@ public class ProfileActivity extends BaseActivity {
         }
 
         // Ánh xạ các view Profile
-        appBarLayout = findViewById(R.id.appBar);
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileEmail = findViewById(R.id.tvProfileEmail);
         imgProfileAvatar = findViewById(R.id.imgProfileAvatar);
@@ -265,6 +245,30 @@ public class ProfileActivity extends BaseActivity {
         genreViewModel.getAllGenres().observe(this, genreObserver);
 
         profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
+        profileViewModel.getLiveBio().observe(this, bio -> {
+            if (tvProfileBio != null) {
+                tvProfileBio.setText(
+                        bio == null || bio.trim().isEmpty()
+                                ? "No signature here~ Got nothing to say~.~"
+                                : bio.trim()
+                );
+            }
+        });
+
+        profileViewModel.getLiveIntroduction().observe(this, introduction -> {
+            if (tvIntroBio != null) {
+                tvIntroBio.setText(
+                        introduction == null || introduction.trim().isEmpty()
+                                ? "Chưa có giới thiệu bản thân"
+                                : introduction.trim()
+                );
+            }
+        });
+
+        profileViewModel.getLiveIntroduction().observe(this, introduction -> {
+            // Cập nhật TextView giới thiệu bản thân riêng tại đây
+            // khi bạn đã xác định đúng ID của TextView trong layout.
+        });
         followViewModel = new ViewModelProvider(this).get(FollowViewModel.class);
         chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
@@ -627,6 +631,7 @@ public class ProfileActivity extends BaseActivity {
 
         setupFollow();
         loadTargetProfile();
+        profileViewModel.observeProfileDetails(targetUserId);
     }
 
     private void loadTargetProfile() {
@@ -686,14 +691,6 @@ public class ProfileActivity extends BaseActivity {
                 btnFollow.setText(Boolean.TRUE.equals(following) ? "Following" : "+ Follow"));
 
         followViewModel.observeProfile(targetUserId);
-    }
-    private boolean isOwnerProfile(String profileUid) {
-        com.google.firebase.auth.FirebaseUser currentUser =
-                FirebaseAuth.getInstance().getCurrentUser();
-
-        return currentUser != null
-                && profileUid != null
-                && currentUser.getUid().equals(profileUid);
     }
 
     // Mở khung chat với chủ profile đang xem (phòng chat cố định theo cặp người dùng)
@@ -778,78 +775,6 @@ public class ProfileActivity extends BaseActivity {
         super.onResume();
         if (profileViewModel != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
             loadTargetProfile();
-        }
-    }
-
-
-    private void listenProfileDetails() {
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            return;
-        }
-
-        String uid = (targetUserId != null && !targetUserId.isEmpty())
-                ? targetUserId
-                : FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        if (profileDetailsListener != null) {
-            profileDetailsListener.remove();
-        }
-
-        profileDetailsListener = FirebaseFirestore.getInstance()
-                .collection("users")
-                .document(uid)
-                .addSnapshotListener((document, error) -> {
-                    if (isFinishing() || isDestroyed()) {
-                        return;
-                    }
-
-                    if (error != null) {
-                        Toast.makeText(
-                                this,
-                                "Không tải được Bio và giới thiệu.",
-                                Toast.LENGTH_SHORT
-                        ).show();
-                        return;
-                    }
-
-                    if (document == null || !document.exists()) {
-                        return;
-                    }
-
-                    String bio = document.getString("bio");
-                    String introduction = document.getString("introduction");
-
-                    if (tvProfileBio != null) {
-                        tvProfileBio.setText(
-                                bio == null || bio.trim().isEmpty()
-                                        ? "No signature here~ Got nothing to say~.~"
-                                        : bio.trim()
-                        );
-                    }
-
-                    if (tvIntroBio != null) {
-                        tvIntroBio.setText(
-                                introduction == null
-                                        || introduction.trim().isEmpty()
-                                        ? "Chưa có giới thiệu bản thân"
-                                        : introduction.trim()
-                        );
-                    }
-                });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        listenProfileDetails();
-    }
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        if (profileDetailsListener != null) {
-            profileDetailsListener.remove();
-            profileDetailsListener = null;
         }
     }
 }

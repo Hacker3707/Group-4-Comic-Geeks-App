@@ -39,6 +39,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Tag;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.GenreViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
 public class EditProfileActivity extends AppCompatActivity {
 
@@ -53,8 +54,8 @@ public class EditProfileActivity extends AppCompatActivity {
     private List<String> selectedFavoriteGenreIds = new ArrayList<>();
 
     private GenreViewModel genreViewModel;
-    private FirebaseFirestore firestore;
     private FirebaseUser currentUser;
+    private UserProfileViewModel profileViewModel;
 
     private final String[] genders = {
             "Chưa chọn",
@@ -88,8 +89,6 @@ public class EditProfileActivity extends AppCompatActivity {
             return;
         }
 
-        firestore = FirebaseFirestore.getInstance();
-
         etUsername = findViewById(R.id.etEditUsername);
         etBirthDate = findViewById(R.id.etEditBirthDate);
         etBio = findViewById(R.id.etEditBio);
@@ -109,14 +108,59 @@ public class EditProfileActivity extends AppCompatActivity {
 
         etBirthDate.setOnClickListener(v -> showDatePicker());
 
-        loadProfile();
-
         btnSave.setOnClickListener(v -> saveProfile());
 
         chipGroupGenres = findViewById(R.id.chipGroupGenres);
         genreViewModel = new ViewModelProvider(this).get(GenreViewModel.class);
         genreViewModel.getAllGenres().observe(this, genresObserver);
 
+        profileViewModel = new ViewModelProvider(this)
+                .get(UserProfileViewModel.class);
+
+        profileViewModel.getProfile().observe(this, state -> {
+            if (state == null) return;
+
+            etUsername.setText(state.username == null ? "" : state.username);
+            etBio.setText(state.bio == null ? "" : state.bio);
+            etBirthDate.setText(
+                    state.birthDate == null ? "" : state.birthDate
+            );
+
+            selectGender(state.gender);
+
+            selectedFavoriteGenreIds.clear();
+
+            if (state.favGenres != null) {
+                selectedFavoriteGenreIds.addAll(state.favGenres);
+            }
+
+            applySelectedGenres();
+        });
+
+        profileViewModel.getLiveIntroduction().observe(this, introduction -> {
+            if (etIntroduction != null) {
+                etIntroduction.setText(
+                        introduction == null ? "" : introduction
+                );
+            }
+        });
+
+        profileViewModel.getSaving().observe(this, saving -> {
+            btnSave.setEnabled(!Boolean.TRUE.equals(saving));
+        });
+
+        profileViewModel.getMessage().observe(this, message -> {
+            if (message != null && !message.trim().isEmpty()) {
+                Toast.makeText(
+                        EditProfileActivity.this,
+                        message,
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+
+        profileViewModel.loadCurrentProfile();
+        profileViewModel.observeProfileDetails(currentUser.getUid());
     }
 
     private Observer<List<Genre>> genresObserver = new Observer<List<Genre>>() {
@@ -126,63 +170,6 @@ public class EditProfileActivity extends AppCompatActivity {
             displayGenres(genres);
         }
     };
-
-    private void loadProfile() {
-        String uid = currentUser.getUid();
-
-        firestore.collection("users")
-                .document(uid)
-                .get()
-                .addOnSuccessListener(document -> {
-                    if (isFinishing() || isDestroyed()) return;
-
-                    String username = document.getString("username");
-                    String bio = document.getString("bio");
-                    String gender = document.getString("gender");
-                    String birthDate = document.getString("birthDate");
-                    String introduction = document.getString("introduction");
-                    selectedFavoriteGenreIds.clear();
-
-                    Object rawGenres = document.get("favGenres");
-
-                    if (rawGenres instanceof List<?>) {
-                        for (Object item : (List<?>) rawGenres) {
-                            if (item instanceof String) {
-                                selectedFavoriteGenreIds.add((String) item);
-                            }
-                        }
-                    }
-
-                    applySelectedGenres();
-
-                    if (username == null || username.trim().isEmpty()) {
-                        username = currentUser.getDisplayName();
-                    }
-
-                    etUsername.setText(
-                            username == null ? "" : username
-                    );
-
-                    etBio.setText(bio == null ? "" : bio);
-                    if (etIntroduction != null) {
-                        etIntroduction.setText(
-                                introduction == null ? "" : introduction
-                        );
-                    }
-
-                    etBirthDate.setText(
-                            birthDate == null ? "" : birthDate
-                    );
-
-                    selectGender(gender);
-                })
-                .addOnFailureListener(error -> {
-                    Toast.makeText(this,
-                            "Không tải được hồ sơ: "
-                                    + error.getLocalizedMessage(),
-                            Toast.LENGTH_LONG).show();
-                });
-    }
 
     private void selectGender(String gender) {
         int selectedPosition = 0;
@@ -244,11 +231,13 @@ public class EditProfileActivity extends AppCompatActivity {
     private void saveProfile() {
         String username = etUsername.getText().toString().trim();
         String bio = etBio.getText().toString().trim();
+        String introduction = etIntroduction.getText().toString().trim();
         String birthDate = etBirthDate.getText().toString().trim();
+
         String gender = spGender.getSelectedItem().toString();
-        String introduction = etIntroduction == null
-                ? ""
-                : etIntroduction.getText().toString().trim();
+        if ("Chưa chọn".equals(gender)) {
+            gender = "";
+        }
 
         if (username.isEmpty()) {
             etUsername.setError("Vui lòng nhập tên hiển thị.");
@@ -256,63 +245,20 @@ public class EditProfileActivity extends AppCompatActivity {
             return;
         }
 
-        if (!birthDate.isEmpty() && !birthDate.matches(
-                "^\\d{2}/\\d{2}/\\d{4}$")) {
+        if (!birthDate.isEmpty()
+                && !birthDate.matches("^\\d{2}/\\d{2}/\\d{4}$")) {
             etBirthDate.setError("Ngày sinh không đúng định dạng.");
             return;
         }
 
-        btnSave.setEnabled(false);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("username", username);
-        data.put("bio", bio);
-        data.put("introduction", introduction);
-        data.put("gender", gender.equals("Chưa chọn") ? "" : gender);
-        data.put("birthDate", birthDate);
-        data.put("email",
-                currentUser.getEmail() == null
-                        ? ""
-                        : currentUser.getEmail());
-        data.put("favGenres", getSelectedGenres());
-
-        firestore.collection("users")
-                .document(currentUser.getUid())
-                .set(data, SetOptions.merge())
-                .addOnSuccessListener(unused -> {
-                    UserProfileChangeRequest request =
-                            new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(username)
-                                    .build();
-
-
-
-                    currentUser.updateProfile(request)
-                            .addOnCompleteListener(task -> {
-                                btnSave.setEnabled(true);
-
-                                Toast.makeText(
-                                        EditProfileActivity.this,
-                                        task.isSuccessful()
-                                                ? "Đã lưu thông tin cá nhân."
-                                                : "Đã lưu Firestore nhưng chưa đồng bộ tên Firebase Auth.",
-                                        Toast.LENGTH_LONG
-                                ).show();
-
-                                if (task.isSuccessful()) {
-                                    finish();
-                                }
-                            });
-                })
-                .addOnFailureListener(error -> {
-                    btnSave.setEnabled(true);
-
-                    Toast.makeText(this,
-                            "Lưu thất bại: "
-                                    + error.getLocalizedMessage(),
-                            Toast.LENGTH_LONG).show();
-                });
-
+        profileViewModel.updateCompleteProfile(
+                username,
+                bio,
+                introduction,
+                gender,
+                birthDate,
+                getSelectedGenres()
+        );
     }
 
     private void styleGenreChip(Chip chip) {
