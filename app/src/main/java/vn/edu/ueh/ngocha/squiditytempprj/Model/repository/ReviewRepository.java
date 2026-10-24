@@ -82,6 +82,104 @@ public class ReviewRepository {
                 });
     }
 
+    public void update(Review review) {
+        Map<String, Object> reviewData = new HashMap<>();
+        reviewData.put("reviewText", review.getReviewText());
+        reviewData.put("reviewRating", review.getReviewRating());
+        reviewData.put("reviewDate", FieldValue.serverTimestamp());
+
+        firestore.collection("reviews")
+                .document(review.getReviewId())
+                .update(reviewData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("ReviewRepository",
+                                "Review updated with ID: " + review.getReviewId());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("ReviewRepository",
+                                "Error updating review", e);
+                    }
+                });
+
+    }
+
+    public LiveData<Review> getReview(String comicId, String userId) {
+        return new LiveData<Review>() {
+            private ListenerRegistration reviewListener;
+            @Override
+            protected void onActive() {
+                super.onActive();
+                if (reviewListener == null) {
+                    reviewListener = firestore.collection("reviews")
+                            .whereEqualTo("comicId", comicId)
+                            .whereEqualTo("userId", userId)
+                            .limit(1)
+                            .addSnapshotListener(
+                                    new EventListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onEvent(
+                                                @Nullable QuerySnapshot snapshots,
+                                                @Nullable FirebaseFirestoreException error) {
+                                            if (error != null) {
+                                                Log.e("ReviewRepository",
+                                                        "Error getting review",
+                                                        error);
+                                                return;
+                                            }
+
+                                            if (snapshots == null) {
+                                                return;
+                                            }
+
+                                            for (QueryDocumentSnapshot document : snapshots) {
+                                                Map<String, Object> data = document.getData();
+                                                Review review = new Review(
+                                                        data.get("comicId").toString(),
+                                                        data.get("userId").toString(),
+                                                        data.get("reviewText").toString()
+                                                );
+
+                                                float rating = 0F;
+                                                if (data.get("reviewRating") != null) {
+                                                    rating = Float.parseFloat(
+                                                            data.get("reviewRating").toString()
+                                                    );
+                                                }
+
+                                                review.setReviewRating(rating);
+                                                review.setReviewId(document.getId());
+
+                                                Object reviewDate = data.get("reviewDate");
+                                                if (reviewDate instanceof com.google.firebase.Timestamp) {
+                                                    review.setReviewDate(
+                                                            ((com.google.firebase.Timestamp) reviewDate).toDate()
+                                                    );
+                                                }
+                                                postValue(review);
+
+                                            }
+                                        }
+                                    }
+                            );
+                    }
+            }
+            @Override
+            protected void onInactive() {
+                super.onInactive();
+                if (reviewListener != null) {
+                    reviewListener.remove();
+                    reviewListener = null;
+
+                }
+            }
+
+        };
+    }
 
     public LiveData<List<Review>> getAllReviews() {
         return reviewDao.getAllReviews();

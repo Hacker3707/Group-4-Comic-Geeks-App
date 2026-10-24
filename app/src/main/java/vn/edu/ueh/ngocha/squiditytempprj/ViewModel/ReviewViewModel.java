@@ -125,6 +125,13 @@ public class ReviewViewModel extends AndroidViewModel {
         return reviewRepository.getAverageRatingLive(comicId);
     }
 
+    public LiveData<Review> getReview(String comicId, String userId) {
+        return reviewRepository.getReview(comicId, userId);
+    }
+
+    public void update(Review review) {
+        reviewRepository.update(review);
+    }
 
     public void insert(User user) {
         userRepository.insert(user);

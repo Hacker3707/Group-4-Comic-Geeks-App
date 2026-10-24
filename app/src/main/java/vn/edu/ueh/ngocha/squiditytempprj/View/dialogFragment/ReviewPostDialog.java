@@ -21,6 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
@@ -90,6 +91,39 @@ public class ReviewPostDialog extends DialogFragment {
         }
     };
 
+    public View.OnClickListener onEditClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Toast.makeText(v.getContext(), "You're in Edit Mode!", Toast.LENGTH_SHORT).show();
+            ratingBar.setEnabled(true);
+            etReviewContent.setEnabled(true);
+        }
+    };
+
+    public View.OnClickListener onSaveClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            float rating = ratingBar.getRating();
+            String content = etReviewContent
+                    .getText()
+                    .toString()
+                    .trim();
+
+        }
+    };
+
+    public Observer<Review> reviewObserver = new Observer<Review>() {
+        @Override
+        public void onChanged(Review review) {
+            if (review == null) {
+                return;
+            }
+
+            ratingBar.setRating(review.getReviewRating());
+            etReviewContent.setText(review.getReviewText());
+        }
+    };
+
     public ReviewPostDialog(String comicId, String userId) {
         this.comicId = comicId;
         this.userId = userId;
@@ -135,6 +169,7 @@ public class ReviewPostDialog extends DialogFragment {
         reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
+        // Hiển thị thông tin người dùng
         String username = authViewModel.getCurrentUser().getDisplayName();
         String avatarUrl = authViewModel.getCurrentUser().getPhotoUrl().toString();
         Glide.with(this)
@@ -143,6 +178,9 @@ public class ReviewPostDialog extends DialogFragment {
                 .into(imgProfileAvt);
 
         txtUsername.setText(username);
+
+        // Get Review from currentUser in this comic (if exist)
+
     }
 
     @Override
