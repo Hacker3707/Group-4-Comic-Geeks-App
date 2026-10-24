@@ -55,6 +55,11 @@ public class Review {
         this.reviewText = reviewText;
     }
 
+    @Ignore
+    public Review() {
+    }
+
+
 
     // =================================
     // Getter methods for each field
@@ -72,15 +77,12 @@ public class Review {
     public String getUserId() {
         return userId;
     }
-
     public String getReviewText() {
         return reviewText;
     }
-
     public float getReviewRating() {
         return reviewRating;
     }
-
     public Date getReviewDate() {
         return reviewDate;
     }
@@ -100,15 +102,12 @@ public class Review {
     public void setUserId(@NonNull String userId) {
         this.userId = userId;
     }
-
     public void setReviewText(String reviewText) {
         this.reviewText = reviewText;
     }
-
     public void setReviewRating(float reviewRating) {
         this.reviewRating = reviewRating;
     }
-
     public void setReviewDate(Date reviewDate) {
         this.reviewDate = reviewDate;
     }

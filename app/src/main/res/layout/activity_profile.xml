@@ -103,8 +103,8 @@
                         android:contentDescription="Đổi ảnh bìa"
                         android:src="@android:drawable/ic_menu_edit"
                         android:visibility="gone"
-                        app:layout_constraintEnd_toEndOf="@id/imgProfileCover"
-                        app:layout_constraintTop_toTopOf="@id/imgProfileCover"
+                        app:layout_constraintEnd_toEndOf="@id/imgProfileAvatar"
+                        app:layout_constraintTop_toTopOf="@id/imgProfileAvatar"
                         app:tint="#493373" />
 
                     <LinearLayout

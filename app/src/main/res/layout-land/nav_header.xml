@@ -10,12 +10,11 @@
         android:layout_height="180dp">
 
         <ImageView
-            android:id="@+id/imgProfileCover"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_launcher_background"
             android:contentDescription="Drawer header background"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_background" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imageView4"

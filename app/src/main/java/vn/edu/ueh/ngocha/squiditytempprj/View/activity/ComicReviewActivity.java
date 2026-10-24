@@ -30,10 +30,11 @@ import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicReviewAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicReviewHeaderAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.dialogFragment.ReviewPostDialog;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ReviewViewModel;
 
-public class ComicReviewActivity extends AppCompatActivity {
+public class ComicReviewActivity extends BaseActivity {
 
     public static String COMIC_ID = "comic_id";
     private static final String KEY_COMIC_ID = "saved_comic_id";
@@ -55,6 +56,14 @@ public class ComicReviewActivity extends AppCompatActivity {
             showReviewDialog();
         }
     };
+
+    private final View.OnClickListener onViewReviewClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            finish();
+        }
+    };
+
 
     public View.OnClickListener onExitClickListener = new View.OnClickListener() {
         @Override
@@ -87,7 +96,20 @@ public class ComicReviewActivity extends AppCompatActivity {
         public void onChanged(List<Review> reviews) {
             reviewAdapter.setReviews(reviews);
             headerAdapter.setReviewCount(reviews.size());
-            headerAdapter.setAverageRating(calculateAverageRating(reviews));
+        }
+    };
+
+    private final Observer<Float> averageRatingObserver = new Observer<Float>() {
+        @Override
+        public void onChanged(Float averageRating) {
+            headerAdapter.setAverageRating(averageRating);
+        }
+    };
+
+    private final Observer<Boolean> isSameUserObserver = new Observer<Boolean>() {
+        @Override
+        public void onChanged(Boolean isSameUser) {
+            headerAdapter.setIsSameUser(isSameUser);
         }
     };
 
@@ -101,15 +123,13 @@ public class ComicReviewActivity extends AppCompatActivity {
     }
 
     @Override
+    protected int getContentLayoutId() {
+        return R.layout.activity_comic_review;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_comic_review);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         if (savedInstanceState != null) {
             comicId = savedInstanceState.getString(KEY_COMIC_ID);
@@ -122,7 +142,6 @@ public class ComicReviewActivity extends AppCompatActivity {
         }
 
         COMIC_ID = comicId;
-
 
         spnReviewfilter = findViewById(R.id.spinnerReviewFilter);
         ratingBar = findViewById(R.id.ratingBar);
@@ -148,6 +167,8 @@ public class ComicReviewActivity extends AppCompatActivity {
         reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
         reviewViewModel.getReviewsByComicId(COMIC_ID).observe(this, reviewsObserver);
         reviewViewModel.getUsersForComic(COMIC_ID).observe(this, usersObserver);
+        reviewViewModel.getAverageRating(COMIC_ID).observe(this, averageRatingObserver);
+        reviewViewModel.isSameUser.observe(this, isSameUserObserver);
 
         // ------------ Set up authViewModel ------------
 
@@ -175,20 +196,6 @@ public class ComicReviewActivity extends AppCompatActivity {
                 getSupportFragmentManager(),
                 "ReviewPostDialog"
         );
-    }
-
-    public float calculateAverageRating(List<Review> reviews) {
-        if (reviews == null || reviews.isEmpty()) {
-            return 0f;
-        }
-
-        float sum = 0f;
-
-        for (Review review : reviews) {
-            sum += review.getReviewRating();
-        }
-
-        return sum / reviews.size();
     }
 
 }

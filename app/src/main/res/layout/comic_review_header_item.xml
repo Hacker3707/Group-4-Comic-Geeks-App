@@ -10,13 +10,17 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:background="@color/white"
         android:gravity="top"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="12dp">
 
         <ImageView
             android:id="@+id/imgComicCover"
             android:layout_width="160dp"
             android:layout_height="220dp"
+            android:layout_marginLeft="5dp"
             android:background="@drawable/bg_comic_small_card"
             android:contentDescription="Comic cover"
             android:scaleType="centerCrop"
@@ -60,6 +64,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <RatingBar
                     android:id="@+id/ratingBar"
                     style="@style/Widget.AppCompat.RatingBar.Indicator"
@@ -92,11 +97,19 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Bộ lọc review -->
-    <Spinner
-        android:id="@+id/spinnerReviewFilter"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:layout_marginTop="20dp" />
+        android:layout_height="wrap_content"
+        android:background="#C1A5F8"
+        android:padding="10dp">
+
+        <!-- Bộ lọc review -->
+        <Spinner
+            android:id="@+id/spinnerReviewFilter"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:background="#FFFFFF" />
+
+    </LinearLayout>
 
 </LinearLayout>

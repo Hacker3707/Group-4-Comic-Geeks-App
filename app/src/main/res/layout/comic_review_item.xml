@@ -18,7 +18,7 @@
 
         <!-- Avatar -->
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/imgProfileCover"
+            android:id="@+id/imgAvtReview"
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_marginEnd="12dp"
