@@ -16,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Khung bong bóng chứa Tên và Nội dung -->
+    <!-- Khung bong bóng chứa Tên, Nội dung và phần Trả lời -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -29,6 +29,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!-- Tên người dùng -->
         <TextView
             android:id="@+id/tvCommentUsername"
             android:layout_width="wrap_content"
@@ -38,6 +39,19 @@
             android:textColor="#333333"
             android:textSize="13sp" />
 
+        <!-- 👉 Nhãn hiển thị thông tin đang trả lời ai (Ví dụ: Trả lời @username) -->
+        <TextView
+            android:id="@+id/tvReplyInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trả lời @..."
+            android:textColor="#7E57C2"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:visibility="gone"
+            android:layout_marginTop="2dp" />
+
+        <!-- Nội dung bình luận -->
         <TextView
             android:id="@+id/tvCommentContent"
             android:layout_width="wrap_content"
@@ -46,6 +60,21 @@
             android:textColor="#444444"
             android:layout_marginTop="4dp"
             android:textSize="14sp" />
+
+        <!-- 👉 Nút bấm "Trả lời" nằm ngay dưới nội dung comment -->
+        <TextView
+            android:id="@+id/btnReplyComment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trả lời"
+            android:textColor="#5E35B1"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground"
+            android:paddingTop="4dp"
+            android:paddingBottom="2dp"
+            android:layout_marginTop="4dp" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
