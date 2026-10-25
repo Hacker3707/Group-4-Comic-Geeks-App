@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.notification;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -44,7 +45,7 @@ public class NtfChannel {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = new NotificationChannel(
                     CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
-            notificationChannel.setDescription("Thông báo từ Squidity: theo dõi, bình luận, hệ thống");
+            notificationChannel.setDescription(Str.t(R.string.notif_channel_desc));
 
             NotificationManager notifyManager =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

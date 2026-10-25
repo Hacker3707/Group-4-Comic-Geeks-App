@@ -9,7 +9,7 @@
         android:fontFamily="@font/jersey25_regular"
         android:icon="@drawable/ic_group_new2"
         android:orderInCategory="30"
-        android:title="Delete"
+        android:title="@string/common_delete"
         app:showAsAction="ifRoom" />
 
 </menu>

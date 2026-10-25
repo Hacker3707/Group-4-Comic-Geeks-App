@@ -10,7 +10,7 @@
         android:layout_height="220dp"
         android:layout_marginLeft="5dp"
         android:background="@drawable/bg_comic_small_card"
-        android:contentDescription="Comic cover"
+        android:contentDescription="@string/comic_cover_cd"
         android:scaleType="centerCrop"
         android:src="@drawable/comic_background"/>
 

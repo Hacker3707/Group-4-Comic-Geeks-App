@@ -24,7 +24,7 @@
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_revert"
-            android:contentDescription="Quay lại"
+            android:contentDescription="@string/common_back"
             app:tint="#493373"/>
 
         <EditText
@@ -34,7 +34,7 @@
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:background="@drawable/bg_search"
-            android:hint="Tìm kiếm bài viết, user, group..."
+            android:hint="@string/search_hint_all"
             android:paddingHorizontal="12dp"
             android:textSize="14sp"
             android:maxLines="1"
@@ -56,17 +56,17 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bài viết (Post)" />
+            android:text="@string/search_tab_posts" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Người dùng (User)" />
+            android:text="@string/search_tab_users" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nhóm (Group)" />
+            android:text="@string/search_tab_groups" />
 
     </com.google.android.material.tabs.TabLayout>
 

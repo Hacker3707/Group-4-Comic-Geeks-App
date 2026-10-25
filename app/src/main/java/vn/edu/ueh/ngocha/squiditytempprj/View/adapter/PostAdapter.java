@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -200,7 +201,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         holder.btnFollow.setVisibility(View.VISIBLE);
-        holder.btnFollow.setText(myFollowingIds.contains(ownerId) ? "Following" : "+ Follow");
+        holder.btnFollow.setText(myFollowingIds.contains(ownerId) ? Str.t(R.string.common_following) : Str.t(R.string.common_follow_plus));
         holder.btnFollow.setOnClickListener(v -> {
             if (followRepository == null) return;
             if (myFollowingIds.contains(ownerId)) {
@@ -348,7 +349,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (isExpanded) {
                 holder.tvPostContent.setMaxLines(Integer.MAX_VALUE);
                 holder.tvPostContent.setEllipsize(null);
-                holder.tvPostContent.setText(content + " Thu gọn");
+                holder.tvPostContent.setText(Str.t(R.string.post_collapse, content));
             } else {
                 holder.tvPostContent.setMaxLines(3);
                 holder.tvPostContent.setEllipsize(TextUtils.TruncateAt.END);
@@ -381,7 +382,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         intent.putExtra("search_option", "MangaDex");
                         context.startActivity(intent);
                     } else {
-                        Toast.makeText(context, "Không tìm thấy mã ID truyện này!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, Str.t(R.string.post_comic_id_not_found), Toast.LENGTH_SHORT).show();
                     }
                 });
             } else {
@@ -420,7 +421,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             // 3. Nếu vẫn không có nữa thì mới dùng bộ lọc topicLabel hoặc mặc định là #Discussion
             if (foundHashtag.isEmpty()) {
                 String topic = GroupHashtagUtils.topicLabel(content);
-                foundHashtag = (topic != null && !topic.isEmpty() && !topic.equals("Khác")) ? "#" + topic : "#Discussion";
+                foundHashtag = (topic != null && !topic.isEmpty() && !topic.equals(Str.t(R.string.group_chip_other))) ? "#" + topic : "#Discussion";
             }
 
             holder.tvHashtag.setText(foundHashtag);

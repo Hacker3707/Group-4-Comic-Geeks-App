@@ -1,6 +1,7 @@
 
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -88,7 +89,7 @@ public class ChatListActivity extends BaseActivity {
         // Chat cần tài khoản thật: chưa đăng nhập thì chuyển sang màn đăng nhập
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
-            Toast.makeText(this, "Vui lòng đăng nhập để dùng chat", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Str.t(R.string.chat_login_required), Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, AuthActivity.class));
             finish();
             return;
@@ -185,13 +186,13 @@ public class ChatListActivity extends BaseActivity {
 
         // Mục đầu tiên là tìm bạn bằng Gmail, các mục sau là người theo dõi qua lại
         String[] names = new String[mutualUsers.size() + 1];
-        names[0] = "Tìm bạn bằng Gmail";
+        names[0] = Str.t(R.string.chat_find_by_gmail);
         for (int i = 0; i < mutualUsers.size(); i++) {
             names[i + 1] = mutualUsers.get(i).getUsername();
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Chọn người để chat")
+                .setTitle(Str.t(R.string.chat_pick_person))
                 .setItems(names, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -211,7 +212,7 @@ public class ChatListActivity extends BaseActivity {
 
     private void showFindByEmailDialog() {
         final EditText input = new EditText(this);
-        input.setHint("Nhập Gmail của bạn bè");
+        input.setHint(Str.t(R.string.chat_enter_gmail));
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
 
         int padding = (int) (20 * getResources().getDisplayMetrics().density);
@@ -220,22 +221,22 @@ public class ChatListActivity extends BaseActivity {
         container.addView(input);
 
         new AlertDialog.Builder(this)
-                .setTitle("Tìm bạn bằng Gmail")
+                .setTitle(Str.t(R.string.chat_find_by_gmail))
                 .setView(container)
-                .setPositiveButton("Tìm", new DialogInterface.OnClickListener() {
+                .setPositiveButton(Str.t(R.string.chat_search_btn), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         searchUserByEmail(input.getText().toString().trim(), true);
                     }
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(Str.t(R.string.common_cancel), null)
                 .show();
     }
 
     // Tìm trong collection "users" của Firestore. Không thấy thì thử lại với chữ thường
     private void searchUserByEmail(final String email, final boolean retryLowerCase) {
         if (email.isEmpty()) {
-            Toast.makeText(this, "Hãy nhập Gmail", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Str.t(R.string.chat_gmail_required), Toast.LENGTH_SHORT).show();
             return;
         }
         FirebaseFirestore.getInstance().collection("users")
@@ -251,7 +252,7 @@ public class ChatListActivity extends BaseActivity {
                                 searchUserByEmail(lower, false);
                             } else {
                                 Toast.makeText(ChatListActivity.this,
-                                        "Không tìm thấy tài khoản với Gmail này",
+                                        Str.t(R.string.chat_gmail_not_found),
                                         Toast.LENGTH_SHORT).show();
                             }
                             return;
@@ -263,7 +264,7 @@ public class ChatListActivity extends BaseActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Toast.makeText(ChatListActivity.this,
-                                "Tìm thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                Str.t(R.string.chat_search_failed, e.getMessage()), Toast.LENGTH_LONG).show();
                     }
                 });
     }
@@ -274,7 +275,7 @@ public class ChatListActivity extends BaseActivity {
             foundId = doc.getId();
         }
         if (foundId.equals(currentUserId)) {
-            Toast.makeText(this, "Đây là tài khoản của bạn", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Str.t(R.string.chat_own_account), Toast.LENGTH_SHORT).show();
             return;
         }
         String foundName = doc.getString("username");
@@ -285,18 +286,17 @@ public class ChatListActivity extends BaseActivity {
         final String targetId = foundId;
         final String targetName = foundName;
         new AlertDialog.Builder(this)
-                .setTitle("Tìm thấy tài khoản")
-                .setMessage(targetName + "\n" + email
-                        + "\n\nTheo dõi để chat. Khi người này theo dõi lại bạn, hai bạn sẽ nhắn tin được.")
-                .setPositiveButton("Theo dõi", new DialogInterface.OnClickListener() {
+                .setTitle(Str.t(R.string.chat_found_account))
+                .setMessage(Str.t(R.string.chat_follow_to_chat_msg, targetName, email))
+                .setPositiveButton(Str.t(R.string.chat_follow_btn), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         followViewModel.follow(currentUserId, targetId);
                         Toast.makeText(ChatListActivity.this,
-                                "Đã theo dõi " + targetName, Toast.LENGTH_SHORT).show();
+                                Str.t(R.string.chat_followed, targetName), Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(Str.t(R.string.common_cancel), null)
                 .show();
     }
 

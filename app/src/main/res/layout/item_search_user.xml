@@ -15,7 +15,7 @@
         android:id="@+id/imgSearchUserAvatar"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:contentDescription="Avatar"
+        android:contentDescription="@string/common_avatar_short"
         android:scaleType="centerCrop" />
 
     <TextView

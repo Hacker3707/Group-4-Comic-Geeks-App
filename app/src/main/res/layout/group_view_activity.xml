@@ -599,7 +599,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="40dp"
-        android:contentDescription="Đăng bài trong nhóm"
+        android:contentDescription="@string/group_post_in_group_cd"
         android:src="@android:drawable/ic_input_add"
         android:visibility="gone"
         app:backgroundTint="#786FF8"

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="group_settings_title">Cài đặt nhóm</string>
-    <string name="group_settings_save">Lưu thay đổi</string>
-    <string name="group_settings_saved">Đã lưu thay đổi</string>
-    <string name="group_settings_no_permission">Chỉ người tạo nhóm hoặc admin của app mới được cài đặt nhóm</string>
+    <string name="group_settings_title">Group settings</string>
+    <string name="group_settings_save">Save changes</string>
+    <string name="group_settings_saved">Changes saved</string>
+    <string name="group_settings_no_permission">Only the group creator or an app admin can change group settings</string>
 
-    <string name="group_dissolve">Giải tán nhóm</string>
-    <string name="group_dissolve_hint">Nhóm sẽ bị xoá và thành viên không còn thấy nhóm này nữa. Không thể hoàn tác.</string>
-    <string name="group_dissolve_confirm_title">Giải tán nhóm?</string>
-    <string name="group_dissolve_confirm_message">Nhóm và toàn bộ thành viên sẽ bị xoá. Hành động này không thể hoàn tác.</string>
-    <string name="group_dissolve_success">Đã giải tán nhóm</string>
+    <string name="group_dissolve">Dissolve group</string>
+    <string name="group_dissolve_hint">The group will be deleted and members will no longer see it. This cannot be undone.</string>
+    <string name="group_dissolve_confirm_title">Dissolve group?</string>
+    <string name="group_dissolve_confirm_message">The group and all its members will be deleted. This cannot be undone.</string>
+    <string name="group_dissolve_success">Group dissolved</string>
 
-    <string name="create_group_avatar_label">Ảnh đại diện (không bắt buộc)</string>
+    <string name="create_group_avatar_label">Profile picture (optional)</string>
 </resources>

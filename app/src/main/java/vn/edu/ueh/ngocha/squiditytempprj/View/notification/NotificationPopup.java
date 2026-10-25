@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.notification;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
@@ -81,6 +82,8 @@ public class NotificationPopup {
                 if (!notification.isRead()) {
                     viewModel.markNotificationAsRead(notification.getNotifId());
                 }
+                popupWindow.dismiss();
+                NotificationNavigator.open(activity, notification);
             }
         });
         rcvNotifications.setLayoutManager(new LinearLayoutManager(activity));
@@ -110,7 +113,7 @@ public class NotificationPopup {
                 @Override
                 public boolean onLongClick(View v) {
                     viewModel.insertNotification(new Notification(UUID.randomUUID().toString(),
-                            "Meilin Zhang vừa theo dõi bạn", NotificationType.FOLLOW));
+                            Str.t(R.string.notif_demo), NotificationType.FOLLOW));
                     return true;
                 }
             });

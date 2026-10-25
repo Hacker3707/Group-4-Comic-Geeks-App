@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="group_chip_other">Khác</string>
-    <string name="group_empty_tag">Chưa có bài viết nào cho chủ đề này</string>
-    <string name="group_tag_help">Gõ # để gắn chủ đề. Bài không có # hợp lệ sẽ vào mục Khác.</string>
+    <string name="group_chip_other">Others</string>
+    <string name="group_empty_tag">No posts for this topic yet</string>
+    <string name="group_tag_help">Type # to add a topic. Posts without a valid # go to Others.</string>
 
     <!-- Gợi ý khi gõ # (cũng là nội dung được chèn vào bài viết) -->
     <string name="group_tag_anime">#Anime</string>

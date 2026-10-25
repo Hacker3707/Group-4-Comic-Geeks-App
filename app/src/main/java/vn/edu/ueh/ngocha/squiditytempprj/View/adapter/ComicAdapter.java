@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,7 +48,7 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicViewHolder> {
     public void onBindViewHolder(@NonNull ComicViewHolder holder, int position) {
         MangaData manga = mangaList.get(position);
 
-        String title = "Untitled";
+        String title = Str.t(R.string.comic_untitled);
         if (manga.getAttributes() != null && manga.getAttributes().getTitle() != null) {
             if (manga.getAttributes().getTitle().get("en") != null) {
                 title = manga.getAttributes().getTitle().get("en");

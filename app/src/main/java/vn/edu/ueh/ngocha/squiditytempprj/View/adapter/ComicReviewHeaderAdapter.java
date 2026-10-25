@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -99,18 +100,18 @@ public class ComicReviewHeaderAdapter
         holder.ratingBar.setRating(averageRating);
 
         if (isSameUser) {
-            holder.btnwriteReview.setText("View your review!");
+            holder.btnwriteReview.setText(Str.t(R.string.review_view_yours));
         } else {
-            holder.btnwriteReview.setText("Write a review!");
+            holder.btnwriteReview.setText(Str.t(R.string.review_write));
         }
 
         if (reviewCount == 0) {
-            holder.txtComicRating.setText("Not rated yet");
+            holder.txtComicRating.setText(Str.t(R.string.review_not_rated));
         } else {
             holder.txtComicRating.setText(
                     String.format(
                             Locale.getDefault(),
-                            "%.1f / 5 (%d reviews)",
+                            Str.t(R.string.review_rating_summary),
                             averageRating,
                             reviewCount
                     )
@@ -118,9 +119,9 @@ public class ComicReviewHeaderAdapter
         }
 
         String[] filters = {
-                "Newest",
-                "Highest Rating",
-                "Lowest Rating"
+                Str.t(R.string.review_filter_newest),
+                Str.t(R.string.review_filter_highest),
+                Str.t(R.string.review_filter_lowest)
         };
 
         ArrayAdapter<String> spinnerAdapter =

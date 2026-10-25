@@ -8,5 +8,5 @@
     android:scaleType="centerCrop"
     android:background="#EEEEEE"
     android:layout_margin="4dp"
-    android:contentDescription="Ảnh bài viết"
+    android:contentDescription="@string/post_image_cd"
     app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />

@@ -29,7 +29,7 @@
             android:background="@android:color/transparent"
             android:src="@drawable/ic_arrow_back"
             android:scaleType="fitCenter"
-            android:contentDescription="Quay lại"
+            android:contentDescription="@string/common_back"
             app:tint="#FFFFFF" />
 
         <TextView
@@ -39,7 +39,7 @@
             android:layout_weight="1"
             android:fontFamily="@font/jersey25_regular"
             android:maxLines="1"
-            android:text="Edit Profile"
+            android:text="@string/profile_edit_title"
             android:textColor="#FFFFFF"
             android:textSize="32sp" />
 
@@ -67,7 +67,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Tên hiển thị"
+                android:text="@string/profile_display_name"
                 android:textStyle="bold"
                 android:textColor="#493373" />
 
@@ -75,7 +75,7 @@
                 android:id="@+id/etEditUsername"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Nhập tên hiển thị"
+                android:hint="@string/profile_display_name_hint"
                 android:inputType="textPersonName"
                 android:maxLength="50"
                 android:maxLines="1" />
@@ -84,7 +84,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Email"
+                android:text="@string/common_email"
                 android:textStyle="bold"
                 android:textColor="#493373" />
 
@@ -101,7 +101,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Giới tính"
+                android:text="@string/profile_gender"
                 android:textStyle="bold"
                 android:textColor="#493373" />
 
@@ -115,7 +115,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Ngày sinh"
+                android:text="@string/profile_birth_date"
                 android:textStyle="bold"
                 android:textColor="#493373" />
 
@@ -133,14 +133,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Signature"
+                android:text="@string/profile_signature"
                 android:textStyle="bold" />
 
             <EditText
                 android:id="@+id/etEditBio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Something like a unique catch phrase:D"
+                android:hint="@string/profile_signature_hint"
                 android:inputType="textCapSentences|textMultiLine"
                 android:maxLines="3"
                 android:minHeight="48dp" />
@@ -149,7 +149,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Giới thiệu bản thân"
+                android:text="@string/profile_about_me"
                 android:textStyle="bold" />
 
             <EditText
@@ -157,7 +157,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
                 android:gravity="top|start"
-                android:hint="Giới thiệu chi tiết về bản thân..."
+                android:hint="@string/profile_about_hint"
                 android:inputType="textCapSentences|textMultiLine"
                 android:minHeight="120dp"
                 android:padding="12dp" />
@@ -167,7 +167,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Genre yêu thích"
+                android:text="@string/profile_fav_genre_label"
                 android:textColor="#493373"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -176,7 +176,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Chọn những thể loại bạn yêu thích nhé"
+                android:text="@string/profile_fav_genre_hint"
                 android:textColor="#777080"
                 android:textSize="13sp" />
 
@@ -205,7 +205,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="12dp"
-        android:text="Lưu thay đổi"
+        android:text="@string/common_save_changes"
         android:textAllCaps="false"
         android:textSize="16sp"
         android:textStyle="bold"

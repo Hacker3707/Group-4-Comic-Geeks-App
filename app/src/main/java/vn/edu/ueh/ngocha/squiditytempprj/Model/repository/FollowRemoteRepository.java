@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
+import vn.edu.ueh.ngocha.squiditytempprj.R;
 import android.app.Application;
 import android.util.Log;
 
@@ -74,7 +76,7 @@ public class FollowRemoteRepository {
                 // Báo cho người được follow
                 String actorName = notificationRepository.currentActorName(followerId);
                 notificationRepository.sendNotification(followingId, followerId, actorName,
-                        NotificationType.FOLLOW, null, actorName + " đã theo dõi bạn");
+                        NotificationType.FOLLOW, null, Str.t(R.string.notif_followed_you, actorName));
             }
         }).addOnFailureListener(new com.google.android.gms.tasks.OnFailureListener() {
             @Override

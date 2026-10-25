@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.ViewModel;
 
+import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -76,7 +78,7 @@ public class AuthViewModel extends ViewModel {
                         error.setValue(
                                 task.getException() != null
                                         ? task.getException().getMessage()
-                                        : "Đăng nhập thất bại."
+                                        : Str.t(R.string.auth_login_failed)
                         );
                     }
                 });
@@ -96,7 +98,7 @@ public class AuthViewModel extends ViewModel {
                         loading.setValue(false);
                         error.setValue(task.getException() != null
                                 ? task.getException().getMessage()
-                                : "Đăng ký thất bại.");
+                                : Str.t(R.string.auth_register_failed));
                         return;
                     }
 
@@ -104,7 +106,7 @@ public class AuthViewModel extends ViewModel {
 
                     if (user == null) {
                         loading.setValue(false);
-                        error.setValue("Không lấy được tài khoản vừa tạo.");
+                        error.setValue(Str.t(R.string.auth_err_new_account));
                         return;
                     }
 
@@ -112,7 +114,7 @@ public class AuthViewModel extends ViewModel {
                             .addOnCompleteListener(nameTask -> {
                                 if (!nameTask.isSuccessful()) {
                                     loading.setValue(false);
-                                    error.setValue("Không cập nhật được tên hiển thị.");
+                                    error.setValue(Str.t(R.string.auth_err_update_name));
                                     return;
                                 }
 
@@ -122,7 +124,7 @@ public class AuthViewModel extends ViewModel {
 
                                             if (!saveTask.isSuccessful()) {
                                                 error.setValue(
-                                                        "Đã tạo tài khoản nhưng chưa lưu được hồ sơ."
+                                                        Str.t(R.string.auth_err_save_profile)
                                                 );
                                                 return;
                                             }
@@ -150,7 +152,7 @@ public class AuthViewModel extends ViewModel {
                         error.setValue(
                                 task.getException() != null
                                         ? task.getException().getMessage()
-                                        : "Đăng nhập Google thất bại."
+                                        : Str.t(R.string.auth_google_failed)
                         );
                     }
                 });

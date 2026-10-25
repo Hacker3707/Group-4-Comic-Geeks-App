@@ -12,30 +12,30 @@
     <string name="group_chip_discussion">Discussion</string>
     <string name="group_chip_otaku">Otaku</string>
 
-    <string name="group_tab_posts">Bài viết</string>
-    <string name="group_tab_members">Thành viên</string>
-    <string name="group_tab_events">Sự kiện</string>
-    <string name="group_tab_files">File</string>
-    <string name="group_tab_about">Giới thiệu</string>
+    <string name="group_tab_posts">Posts</string>
+    <string name="group_tab_members">Members</string>
+    <string name="group_tab_events">Events</string>
+    <string name="group_tab_files">Files</string>
+    <string name="group_tab_about">About</string>
 
-    <string name="group_composer_hint">Viết bài, chia sẻ điều gì đó...</string>
-    <string name="group_empty_posts">Chưa có bài viết nào</string>
-    <string name="group_empty_members">Chưa có thành viên nào</string>
-    <string name="group_member_search_hint">Tìm thành viên...</string>
-    <string name="group_empty_member_search">Không tìm thấy thành viên nào</string>
-    <string name="group_member_unknown_name">Người dùng</string>
-    <string name="group_member_you">%1$s (Bạn)</string>
-    <string name="group_empty_other">Chưa có nội dung</string>
+    <string name="group_composer_hint">Write a post, share something...</string>
+    <string name="group_empty_posts">No posts yet</string>
+    <string name="group_empty_members">No members yet</string>
+    <string name="group_member_search_hint">Search members...</string>
+    <string name="group_empty_member_search">No members found</string>
+    <string name="group_member_unknown_name">User</string>
+    <string name="group_member_you">%1$s (You)</string>
+    <string name="group_empty_other">Nothing here yet</string>
 
     <string name="group_post_dots">•••</string>
     <string name="group_post_topic">Discussion</string>
     <string name="group_post_say">Say something... くコ:彡</string>
 
-    <string name="group_cd_back">Quay lại</string>
-    <string name="group_cd_search">Tìm kiếm</string>
-    <string name="group_cd_more">Thêm</string>
-    <string name="group_cd_cover">Ảnh bìa group</string>
-    <string name="group_cd_avatar">Ảnh đại diện</string>
-    <string name="group_cd_send">Gửi bài viết</string>
-    <string name="group_cd_topic">Chủ đề</string>
+    <string name="group_cd_back">Back</string>
+    <string name="group_cd_search">Search</string>
+    <string name="group_cd_more">More</string>
+    <string name="group_cd_cover">Group cover photo</string>
+    <string name="group_cd_avatar">Profile picture</string>
+    <string name="group_cd_send">Send post</string>
+    <string name="group_cd_topic">Topic</string>
 </resources>

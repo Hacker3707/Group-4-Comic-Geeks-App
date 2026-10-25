@@ -36,7 +36,7 @@
             android:layout_marginLeft="13dp"
             android:layout_weight="1"
             android:fontFamily="@font/jersey25_regular"
-            android:text="Post a Comic Review!"
+            android:text="@string/review_dialog_title"
             android:textColor="@color/white"
             android:textSize="22sp"
             app:layout_constraintTop_toTopOf="parent" />
@@ -48,7 +48,7 @@
             android:layout_marginTop="5dp"
             android:src="@drawable/m3_split_button_chevron_avd"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Mở menu"
+            android:contentDescription="@string/common_open_menu"
             android:scaleType="centerInside"
             app:tint="#FFFFFF" />
 
@@ -84,7 +84,7 @@
                     android:layout_height="50dp"
                     android:layout_marginEnd="12dp"
                     android:background="#FFFFFF"
-                    android:contentDescription="Reviewer avatar"
+                    android:contentDescription="@string/comic_reviewer_avatar_cd"
                     android:scaleType="centerCrop"
                     app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
                     app:strokeColor="#FFFFFF"
@@ -123,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="13dp"
                 android:fontFamily="@font/jersey25_regular"
-                android:text="Rate the comic! Tap to give stars:"
+                android:text="@string/review_rate_prompt"
                 android:textSize="18sp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -154,7 +154,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/jersey25_regular"
-                android:text="Any words about it? (Optional):"
+                android:text="@string/review_words_prompt"
                 android:textSize="18sp" />
 
             <EditText
@@ -173,7 +173,7 @@
                 android:layout_gravity="center"
                 android:layout_marginVertical="5dp"
                 android:fontFamily="@font/jersey25_regular"
-                android:text="Reviewed on..."
+                android:text="@string/review_date_label"
                 android:textAlignment="center"
                 android:textColor="@color/group_chip_text"
                 android:textSize="18sp"
@@ -187,7 +187,7 @@
                 android:layout_gravity="center"
                 android:layout_marginVertical="5dp"
                 android:fontFamily="@font/jersey25_regular"
-                android:text="Guide"
+                android:text="@string/review_guide"
                 android:textColor="@color/squidity_magenta"
                 android:textSize="18sp"
                 android:visibility="gone" />
@@ -198,7 +198,7 @@
                 android:layout_height="52dp"
                 android:layout_gravity="end"
                 android:layout_marginTop="10dp"
-                android:text="Post review!"
+                android:text="@string/review_post_button"
                 android:textSize="16sp" />
 
             <LinearLayout
@@ -214,14 +214,14 @@
                     android:layout_width="151dp"
                     android:layout_height="52dp"
                     android:layout_marginEnd="10dp"
-                    android:text="Edit"
+                    android:text="@string/common_edit"
                     android:textSize="16sp" />
 
                 <Button
                     android:id="@+id/btnSaveReview"
                     android:layout_width="151dp"
                     android:layout_height="52dp"
-                    android:text="Save"
+                    android:text="@string/common_save"
                     android:textSize="16sp" />
 
             </LinearLayout>

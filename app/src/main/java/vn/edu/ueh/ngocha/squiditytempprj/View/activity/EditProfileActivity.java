@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.app.DatePickerDialog;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -83,7 +84,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
         if (currentUser == null) {
             Toast.makeText(this,
-                    "Vui lòng đăng nhập trước.",
+                    Str.t(R.string.common_login_first),
                     Toast.LENGTH_SHORT).show();
             finish();
             return;
@@ -234,20 +235,18 @@ public class EditProfileActivity extends AppCompatActivity {
         String introduction = etIntroduction.getText().toString().trim();
         String birthDate = etBirthDate.getText().toString().trim();
 
-        String gender = spGender.getSelectedItem().toString();
-        if ("Chưa chọn".equals(gender)) {
-            gender = "";
-        }
+        int genderPos = spGender.getSelectedItemPosition();
+        String gender = (genderPos <= 0 || genderPos >= genders.length) ? "" : genders[genderPos];
 
         if (username.isEmpty()) {
-            etUsername.setError("Vui lòng nhập tên hiển thị.");
+            etUsername.setError(Str.t(R.string.profile_err_name_required));
             etUsername.requestFocus();
             return;
         }
 
         if (!birthDate.isEmpty()
                 && !birthDate.matches("^\\d{2}/\\d{2}/\\d{4}$")) {
-            etBirthDate.setError("Ngày sinh không đúng định dạng.");
+            etBirthDate.setError(Str.t(R.string.profile_err_birth_format));
             return;
         }
 

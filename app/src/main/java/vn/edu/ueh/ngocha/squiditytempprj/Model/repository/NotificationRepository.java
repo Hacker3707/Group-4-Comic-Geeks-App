@@ -271,12 +271,16 @@ public class NotificationRepository {
         }
         Boolean read = doc.getBoolean("isRead");
         Date time = doc.getDate("timestamp");
-        return new Notification(
+        Notification n = new Notification(
                 doc.getId(),
                 doc.getString("content"),
                 type,
                 read != null && read,
                 time != null ? time : new Date());
+        n.setActorId(doc.getString("actorId"));
+        n.setActorName(doc.getString("actorName"));
+        n.setPostId(doc.getString("postId"));
+        return n;
     }
 
     //======================== AsyncTask cho các thao tác trong Notification ========================

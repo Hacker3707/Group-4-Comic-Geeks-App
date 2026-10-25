@@ -70,7 +70,7 @@
                     android:paddingStart="4dp"
                     android:paddingEnd="4dp"
                     android:singleLine="true"
-                    android:text="+ Follow"
+                    android:text="@string/follow_button_follow"
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
                     app:cornerRadius="16dp"
@@ -315,7 +315,7 @@
             android:layout_marginTop="4dp"
             android:layout_marginEnd="16dp"
             android:fontFamily="@font/jersey25_regular"
-            android:text="📖 Linked Comic"
+            android:text="@string/post_linked_comic"
             android:textColor="#493373"
             android:textSize="16sp"
             android:visibility="gone"
@@ -362,7 +362,7 @@
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:fontFamily="@font/mozilla_headline"
-                android:hint="Say something...くコ:彡 o O "
+                android:hint="@string/post_say_something"
                 android:textSize="16sp" />
 
             <ImageView

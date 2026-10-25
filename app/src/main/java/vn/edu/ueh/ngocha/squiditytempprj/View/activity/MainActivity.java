@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -84,6 +85,8 @@ public class MainActivity extends BaseActivity {
     private boolean isSearchAnimating = false;
 
     private RecyclerView rcvpostlist;
+    public static final String EXTRA_POST_ID = "extra_post_id";
+    private String pendingPostId;
     private PostAdapter postAdapter;
     private PostViewModel postViewModel;
     private HomeFeedViewModel homeFeedViewModel;
@@ -221,7 +224,7 @@ public class MainActivity extends BaseActivity {
                     if (Boolean.TRUE.equals(doc.getBoolean("banned"))) {
                         FirebaseAuth.getInstance().signOut();
                         Toast.makeText(MainActivity.this,
-                                "Tài khoản của bạn đã bị khóa bởi admin", Toast.LENGTH_LONG).show();
+                                Str.t(R.string.account_banned_by_admin), Toast.LENGTH_LONG).show();
                         startActivity(new Intent(MainActivity.this, AuthActivity.class));
                         return;
                     }
@@ -292,10 +295,10 @@ public class MainActivity extends BaseActivity {
             fabCreatePost.setOnClickListener(v -> {
                 if (authViewModel.getCurrentUser() == null) {
                     new AlertDialog.Builder(MainActivity.this)
-                            .setTitle("Yêu cầu đăng nhập")
-                            .setMessage("Bạn cần đăng nhập để đăng bài.")
-                            .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
-                            .setPositiveButton("Đăng nhập", (dialog, which) ->
+                            .setTitle(Str.t(R.string.common_login_required_title))
+                            .setMessage(Str.t(R.string.post_login_required_msg))
+                            .setNegativeButton(Str.t(R.string.common_cancel), (dialog, which) -> dialog.dismiss())
+                            .setPositiveButton(Str.t(R.string.common_login), (dialog, which) ->
                                     startActivity(new Intent(MainActivity.this, AuthActivity.class)))
                             .show();
                 } else {
@@ -313,7 +316,7 @@ public class MainActivity extends BaseActivity {
                 Stamp newStamp = new Stamp(randomStampId, currentUid(), StampType.LIKE);
                 newStamp.setPostId(post.getPostId());
                 postViewModel.addStamp(newStamp, post);
-                Toast.makeText(MainActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, Str.t(R.string.post_stamped), Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -322,9 +325,9 @@ public class MainActivity extends BaseActivity {
                     String randomCommentId = UUID.randomUUID().toString();
                     Comment newComment = new Comment(randomCommentId, currentUid(), post.getPostId(), commentText.trim());
                     postViewModel.addComment(newComment, post);
-                    Toast.makeText(MainActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, Str.t(R.string.post_comment_sent), Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MainActivity.this, "Vui lòng nhập nội dung bình luận!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, Str.t(R.string.post_comment_empty), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -367,7 +370,7 @@ public class MainActivity extends BaseActivity {
             public void onDeletePost(Post post) {
                 if (post != null) {
                     postViewModel.deletePost(post);
-                    Toast.makeText(MainActivity.this, "Đã xóa bài viết!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, Str.t(R.string.post_deleted), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -403,15 +406,39 @@ public class MainActivity extends BaseActivity {
             }
         });
 
+        pendingPostId = getIntent().getStringExtra(EXTRA_POST_ID);
         homeFeedViewModel.getFeed().observe(this, new Observer<List<Post>>() {
             @Override
             public void onChanged(List<Post> feedPosts) {
                 if (feedPosts != null) {
                     postAdapter.setPosts(feedPosts);
+                    scrollToPendingPost(feedPosts);
                 }
             }
         });
 
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        pendingPostId = intent.getStringExtra(EXTRA_POST_ID);
+        if (pendingPostId != null && homeFeedViewModel.getFeed().getValue() != null) {
+            scrollToPendingPost(homeFeedViewModel.getFeed().getValue());
+        }
+    }
+
+    // Từ thông báo bấm vào: cuộn tới đúng bài viết trên trang chủ
+    private void scrollToPendingPost(List<Post> posts) {
+        if (pendingPostId == null) return;
+        for (int i = 0; i < posts.size(); i++) {
+            if (pendingPostId.equals(posts.get(i).getPostId())) {
+                rcvpostlist.scrollToPosition(i);
+                break;
+            }
+        }
+        pendingPostId = null;
     }
 
     private void openAuthActivity() {
@@ -420,7 +447,7 @@ public class MainActivity extends BaseActivity {
             startActivity(intent);
         } catch (Exception e) {
             Log.e("MainActivity", "Không mở được AuthActivity", e);
-            Toast.makeText(this, "Không mở được màn hình đăng nhập", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Str.t(R.string.auth_open_failed), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -446,7 +473,7 @@ public class MainActivity extends BaseActivity {
 
         if (!isSearchOpen) {
             btnSearch.setImageResource(R.drawable.ic_crossx);
-            btnSearch.setContentDescription("Đóng tìm kiếm");
+            btnSearch.setContentDescription(Str.t(R.string.search_close_cd));
             // Mở Search bar
             layoutSearchBar.setVisibility(View.VISIBLE);
             searchDimOverlay.setVisibility(View.VISIBLE);
@@ -490,7 +517,7 @@ public class MainActivity extends BaseActivity {
             // Đóng Search bar
             float distance = layoutSearchBar.getHeight();
             btnSearch.setImageResource(R.drawable.ic_search_white);
-            btnSearch.setContentDescription("Mở tìm kiếm");
+            btnSearch.setContentDescription(Str.t(R.string.search_open_cd));
             btnSearch.setTranslationX(-10);
 
             searchOverlay.animate()

@@ -2,19 +2,19 @@
 <resources>
     <!-- Vai trò thành viên -->
     <string name="group_role_admin">Admin</string>
-    <string name="group_role_member">Thành viên</string>
+    <string name="group_role_member">Member</string>
 
     <!-- Admin quản lý thành viên -->
-    <string name="group_member_make_admin">Đặt làm Admin</string>
-    <string name="group_member_make_member">Hạ xuống Thành viên</string>
-    <string name="group_member_remove">Xoá khỏi nhóm</string>
-    <string name="group_member_self">Bạn không thể thao tác với chính mình</string>
+    <string name="group_member_make_admin">Make admin</string>
+    <string name="group_member_make_member">Demote to member</string>
+    <string name="group_member_remove">Remove from group</string>
+    <string name="group_member_self">You can\'t perform actions on yourself</string>
 
     <!-- Quản lý nhóm -->
-    <string name="group_admin_only">Chỉ admin mới quản lý được nhóm</string>
-    <string name="group_delete">Xoá nhóm</string>
-    <string name="group_delete_confirm_title">Xoá nhóm?</string>
-    <string name="group_delete_confirm_message">Toàn bộ thành viên sẽ bị xoá khỏi nhóm. Hành động này không thể hoàn tác.</string>
-    <string name="group_cancel">Huỷ</string>
-    <string name="group_delete_success">Đã xoá nhóm</string>
+    <string name="group_admin_only">Only admins can manage the group</string>
+    <string name="group_delete">Delete group</string>
+    <string name="group_delete_confirm_title">Delete group?</string>
+    <string name="group_delete_confirm_message">All members will be removed from the group. This action cannot be undone.</string>
+    <string name="group_cancel">Cancel</string>
+    <string name="group_delete_success">Group deleted</string>
 </resources>

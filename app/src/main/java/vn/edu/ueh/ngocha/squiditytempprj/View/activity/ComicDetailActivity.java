@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -170,7 +171,7 @@ public class ComicDetailActivity extends BaseActivity {
 
     private String getLocalizedText(Map<String, String> texts) {
         if (texts == null || texts.isEmpty()) {
-            return "Unknown";
+            return Str.t(R.string.common_unknown);
         }
 
         String englishText = texts.get("en");
@@ -185,13 +186,13 @@ public class ComicDetailActivity extends BaseActivity {
             }
         }
 
-        return "Unknown";
+        return Str.t(R.string.common_unknown);
     }
 
     private String valueOrDefault(String value) {
         return value != null && !value.trim().isEmpty()
                 ? value
-                : "Unknown";
+                : Str.t(R.string.common_unknown);
     }
 
     private void displayMangaData(MangaData mangaData) {
@@ -241,30 +242,25 @@ public class ComicDetailActivity extends BaseActivity {
         );
 
         txtContentRating.setText(
-                "Content rating: "
-                        + valueOrDefault(attributes.getContentRating())
+                Str.t(R.string.comic_content_rating, valueOrDefault(attributes.getContentRating()))
         );
 
         txtLanguage.setText(
-                "Original language: "
-                        + valueOrDefault(attributes.getOriginalLanguage())
+                Str.t(R.string.comic_original_language, valueOrDefault(attributes.getOriginalLanguage()))
         );
 
         txtYear.setText(
-                "Release year: "
-                        + (attributes.getYear() != null
+                Str.t(R.string.comic_release_year, (attributes.getYear() != null
                         ? attributes.getYear().toString()
-                        : "Unknown")
+                        : Str.t(R.string.common_unknown)))
         );
 
         txtLastVolume.setText(
-                "Last volume: "
-                        + valueOrDefault(attributes.getLastVolume())
+                Str.t(R.string.comic_last_volume, valueOrDefault(attributes.getLastVolume()))
         );
 
         txtLastChapter.setText(
-                "Last chapter: "
-                        + valueOrDefault(attributes.getLastChapter())
+                Str.t(R.string.comic_last_chapter, valueOrDefault(attributes.getLastChapter()))
         );
 
         String coverUrl = null;
@@ -328,30 +324,29 @@ public class ComicDetailActivity extends BaseActivity {
         txtStatus.setText(
                 comic.getComicStatus() != null
                         ? comic.getComicStatus()
-                        : "Unknown"
+                        : Str.t(R.string.common_unknown)
         );
 
         txtContentRating.setText(
-                "Content rating: " + valueOrDefault(comic.getContentRating())
+                Str.t(R.string.comic_content_rating, valueOrDefault(comic.getContentRating()))
         );
 
         txtLanguage.setText(
-                "Original language: " + valueOrDefault(comic.getOriginalLanguage())
+                Str.t(R.string.comic_original_language, valueOrDefault(comic.getOriginalLanguage()))
         );
 
         txtYear.setText(
-                "Release year: " +
-                        (comic.getReleaseYear() != null
+                Str.t(R.string.comic_release_year, (comic.getReleaseYear() != null
                                 ? comic.getReleaseYear().toString()
-                                : "Unknown")
+                                : Str.t(R.string.common_unknown)))
         );
 
         txtLastVolume.setText(
-                "Last volume: " + valueOrDefault(comic.getLastVolume())
+                Str.t(R.string.comic_last_volume, valueOrDefault(comic.getLastVolume()))
         );
 
         txtLastChapter.setText(
-                "Last chapter: " + valueOrDefault(comic.getLastChapter())
+                Str.t(R.string.comic_last_chapter, valueOrDefault(comic.getLastChapter()))
         );
     }
 

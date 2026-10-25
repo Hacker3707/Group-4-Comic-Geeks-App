@@ -31,6 +31,15 @@ public class Notification {
     @ColumnInfo(name = "timestamp")
     private Date timestamp;
 
+    @ColumnInfo(name = "actor_id")
+    private String actorId;
+
+    @ColumnInfo(name = "actor_name")
+    private String actorName;
+
+    @ColumnInfo(name = "post_id")
+    private String postId;
+
     public Notification() {
     }
 
@@ -100,5 +109,29 @@ public class Notification {
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getActorId() {
+        return actorId;
+    }
+
+    public void setActorId(String actorId) {
+        this.actorId = actorId;
+    }
+
+    public String getActorName() {
+        return actorName;
+    }
+
+    public void setActorName(String actorName) {
+        this.actorName = actorName;
+    }
+
+    public String getPostId() {
+        return postId;
+    }
+
+    public void setPostId(String postId) {
+        this.postId = postId;
     }
 }

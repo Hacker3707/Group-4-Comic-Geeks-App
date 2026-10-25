@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.ViewModel;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
+import vn.edu.ueh.ngocha.squiditytempprj.R;
 import android.app.Application;
 
 import androidx.lifecycle.AndroidViewModel;
@@ -58,7 +60,7 @@ public class ChatViewModel extends AndroidViewModel {
             snippet = snippet.substring(0, 40) + "...";
         }
         notificationRepository.sendNotification(recipientId, senderId, actorName,
-                NotificationType.MESSAGE, null, actorName + " đã nhắn tin: " + snippet);
+                NotificationType.MESSAGE, null, Str.t(R.string.notif_messaged, actorName, snippet));
     }
 
     public void markMessageAsRead(String messageId) {

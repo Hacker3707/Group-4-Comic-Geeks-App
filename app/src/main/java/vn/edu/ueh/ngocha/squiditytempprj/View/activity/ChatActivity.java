@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -95,7 +96,7 @@ public class ChatActivity extends AppCompatActivity {
         String title = getIntent().getStringExtra(EXTRA_CHAT_TITLE);
 
         if (chatRoomId == null || currentUserId == null) {
-            Toast.makeText(this, "Thiếu thông tin phòng chat", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Str.t(R.string.chat_missing_room), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -104,7 +105,7 @@ public class ChatActivity extends AppCompatActivity {
         ChatSyncManager.getInstance(this).start();
 
         TextView tvChatTitle = findViewById(R.id.tvChatTitle);
-        tvChatTitle.setText(title != null ? title : "Chat");
+        tvChatTitle.setText(title != null ? title : Str.t(R.string.chat_title_default));
 
         rcvMessages = findViewById(R.id.rcvMessages);
         edtMessage = findViewById(R.id.edtMessage);
@@ -163,7 +164,7 @@ public class ChatActivity extends AppCompatActivity {
     // Lưu tin, đẩy lên Firestore cho người nhận và gửi thông báo lên chuông của họ
     private void sendMessageContent(String content) {
         Message message = new Message(UUID.randomUUID().toString(), content, currentUserId, chatRoomId);
-        String preview = content.startsWith(MessageAdapter.IMAGE_PREFIX) ? "[Hình ảnh]" : content;
+        String preview = content.startsWith(MessageAdapter.IMAGE_PREFIX) ? Str.t(R.string.chat_image_preview) : content;
         chatViewModel.sendMessage(message, otherUserId, preview);
     }
 
@@ -178,7 +179,7 @@ public class ChatActivity extends AppCompatActivity {
 
     // Tải ảnh lên Firebase Storage, lấy đường dẫn rồi gửi như một tin nhắn ảnh
     private void uploadImageAndSend(Uri source) {
-        Toast.makeText(this, "Đang gửi ảnh...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, Str.t(R.string.chat_sending_image), Toast.LENGTH_SHORT).show();
 
         final StorageReference imageRef = FirebaseStorage.getInstance().getReference()
                 .child("chat_images")
@@ -204,7 +205,7 @@ public class ChatActivity extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(ChatActivity.this, "Gửi ảnh thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(ChatActivity.this, Str.t(R.string.chat_send_image_failed, e.getMessage()), Toast.LENGTH_LONG).show();
                     }
                 });
     }

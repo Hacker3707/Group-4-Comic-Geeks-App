@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.ViewModel;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
+import vn.edu.ueh.ngocha.squiditytempprj.R;
 import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -102,7 +104,7 @@ public class PostViewModel extends AndroidViewModel {
         }
         notificationRepository.sendNotification(post.getUserId(), comment.getUserId(), actorName,
                 NotificationType.COMMENT, post.getPostId(),
-                actorName + " đã bình luận bài viết của bạn: " + text);
+                Str.t(R.string.notif_commented, actorName, text));
     }
 
     public LiveData<List<Comment>> getAllComments() {
@@ -131,7 +133,7 @@ public class PostViewModel extends AndroidViewModel {
         String actorName = notificationRepository.currentActorName(stamp.getUserId());
         notificationRepository.sendNotification(post.getUserId(), stamp.getUserId(), actorName,
                 NotificationType.LIKE, post.getPostId(),
-                actorName + " đã thả stamp vào bài viết của bạn");
+                Str.t(R.string.notif_stamped, actorName));
     }
 
     public void uploadPostToFirestore(Post post, PostRepository.OnFirestoreUploadListener listener) {

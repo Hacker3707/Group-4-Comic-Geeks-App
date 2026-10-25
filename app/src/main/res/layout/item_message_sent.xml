@@ -17,7 +17,7 @@
             android:id="@+id/imgMessage"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:contentDescription="Image message"
+            android:contentDescription="@string/chat_image_message_cd"
             android:scaleType="centerCrop"
             android:visibility="gone" />
 
