@@ -1,6 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.menu;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -104,14 +105,41 @@ public abstract class BaseActivity extends AppCompatActivity {
                     Insets systemBars = insets.getInsets(
                             WindowInsetsCompat.Type.systemBars()
                     );
+
                     statusBarInset = systemBars.top;
 
-                    mainContainer.setPadding(
-                            mainContainer.getPaddingLeft(),
-                            systemBars.top,
-                            mainContainer.getPaddingRight(),
-                            mainContainer.getPaddingBottom()
-                    );
+                    boolean isLandscape =
+                            getResources().getConfiguration().orientation
+                                    == Configuration.ORIENTATION_LANDSCAPE;
+
+                    if (isLandscape) {
+                        // Sidebar và content bắt đầu từ phía trên.
+                        mainContainer.setPadding(
+                                mainContainer.getPaddingLeft(),
+                                0,
+                                mainContainer.getPaddingRight(),
+                                mainContainer.getPaddingBottom()
+                        );
+
+                        View landscapeContent =
+                                findViewById(R.id.landscapeMainContent);
+
+                        if (landscapeContent != null) {
+                            landscapeContent.setPadding(
+                                    landscapeContent.getPaddingLeft(),
+                                    systemBars.top,
+                                    landscapeContent.getPaddingRight(),
+                                    landscapeContent.getPaddingBottom()
+                            );
+                        }
+                    } else {
+                        mainContainer.setPadding(
+                                mainContainer.getPaddingLeft(),
+                                systemBars.top,
+                                mainContainer.getPaddingRight(),
+                                mainContainer.getPaddingBottom()
+                        );
+                    }
 
                     return insets;
                 }
@@ -347,15 +375,25 @@ public abstract class BaseActivity extends AppCompatActivity {
     };
 
 
-    protected View.OnClickListener onProfileClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (drawerLayout.getWidth() > 0
-                    && drawerLayout.getHeight() > 0) {
-                drawerLayout.openDrawer(GravityCompat.START);
-            }
-        }
-    };
+    protected View.OnClickListener onProfileClickListener =
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean isLandscape =
+                            getResources().getConfiguration().orientation
+                                    == Configuration.ORIENTATION_LANDSCAPE;
+
+                    if (isLandscape) {
+                        // Navigation đã hiển thị cố định bên trái.
+                        return;
+                    }
+
+                    if (drawerLayout.getWidth() > 0
+                            && drawerLayout.getHeight() > 0) {
+                        drawerLayout.openDrawer(GravityCompat.START);
+                    }
+                }
+            };
 
     protected View.OnClickListener onLogoClickListener = new View.OnClickListener() {
         @Override

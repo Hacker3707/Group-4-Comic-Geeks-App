@@ -141,4 +141,8 @@ public class ComicViewModel extends AndroidViewModel {
         mangaRepository.searchManga(query, limit, offset, include);
     }
 
+    public LiveData<List<MangaData>> getComicbyIdList(List<String> comicIds) {
+        return mangaRepository.getMangaByIdList(comicIds);
+    }
+
 }

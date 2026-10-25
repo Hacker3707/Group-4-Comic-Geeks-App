@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -358,5 +359,122 @@ public class ReviewRepository {
                 });
 
     }
+
+
+    public LiveData<List<Review>> getReviewsByUserId(String userId) {
+        return new LiveData<List<Review>>() {
+
+            private ListenerRegistration reviewListener;
+
+            @Override
+            protected void onActive() {
+                super.onActive();
+
+                if (userId == null || userId.trim().isEmpty()) {
+                    postValue(new ArrayList<Review>());
+                    return;
+                }
+
+                if (reviewListener != null) {
+                    return;
+                }
+
+                reviewListener = firestore.collection("reviews")
+                        .whereEqualTo("userId", userId)
+                        .addSnapshotListener(
+                                new EventListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onEvent(
+                                            @Nullable QuerySnapshot snapshots,
+                                            @Nullable FirebaseFirestoreException error) {
+
+                                        if (error != null) {
+                                            Log.e(
+                                                    "ReviewRepository",
+                                                    "Error getting reviews by user ID",
+                                                    error
+                                            );
+                                            return;
+                                        }
+
+                                        if (snapshots == null) {
+                                            postValue(new ArrayList<Review>());
+                                            return;
+                                        }
+
+                                        List<Review> reviews = new ArrayList<>();
+
+                                        for (QueryDocumentSnapshot document : snapshots) {
+                                            String comicId =
+                                                    document.getString("comicId");
+
+                                            String reviewUserId =
+                                                    document.getString("userId");
+
+                                            String reviewText =
+                                                    document.getString("reviewText");
+
+                                            if (comicId == null || reviewUserId == null) {
+                                                continue;
+                                            }
+
+                                            Review review = new Review(
+                                                    comicId,
+                                                    reviewUserId,
+                                                    reviewText == null ? "" : reviewText
+                                            );
+
+                                            review.setReviewId(document.getId());
+
+                                            Object ratingValue =
+                                                    document.get("reviewRating");
+
+                                            if (ratingValue instanceof Number) {
+                                                review.setReviewRating(
+                                                        ((Number) ratingValue).floatValue()
+                                                );
+                                            } else if (ratingValue != null) {
+                                                try {
+                                                    review.setReviewRating(
+                                                            Float.parseFloat(
+                                                                    ratingValue.toString()
+                                                            )
+                                                    );
+                                                } catch (NumberFormatException e) {
+                                                    review.setReviewRating(0f);
+                                                }
+                                            }
+
+                                            Object dateValue =
+                                                    document.get("reviewDate");
+
+                                            if (dateValue instanceof com.google.firebase.Timestamp) {
+                                                review.setReviewDate(
+                                                        ((com.google.firebase.Timestamp)
+                                                                dateValue).toDate()
+                                                );
+                                            }
+
+                                            reviews.add(review);
+                                        }
+
+                                        postValue(reviews);
+                                    }
+                                }
+                        );
+            }
+
+            @Override
+            protected void onInactive() {
+                super.onInactive();
+
+                if (reviewListener != null) {
+                    reviewListener.remove();
+                    reviewListener = null;
+                }
+            }
+        };
+    }
+
 
 }
