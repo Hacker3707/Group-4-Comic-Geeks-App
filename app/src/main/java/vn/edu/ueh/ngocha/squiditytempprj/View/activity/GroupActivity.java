@@ -1,7 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -9,13 +8,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
-import androidx.activity.SystemBarStyle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.OnApplyWindowInsetsListener;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,6 +23,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.GroupSyncManager;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.GroupViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
 
 /**
  * Màn danh sách group (mở từ mục "Groups" trong thanh kéo của MainActivity).
@@ -39,7 +32,13 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.GroupViewModel;
  * - Gõ vào ô tìm kiếm: lọc group theo tên.
  * Dữ liệu lấy qua LiveData của GroupViewModel và được lắng nghe bằng Observer.
  */
-public class GroupActivity extends AppCompatActivity {
+public class GroupActivity extends BaseActivity {
+
+    // BaseActivity sẽ inflate layout này vào khung nội dung (có sẵn thanh trên + menu kéo)
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.group_activity;
+    }
 
     // TODO: user thử, dùng chung cho 3 màn Group. Thay bằng user đang đăng nhập khi app có đăng nhập
     public static final String CURRENT_USER_ID = "demo_user_1";
@@ -67,15 +66,9 @@ public class GroupActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // BaseActivity đã lo setContentView, EdgeToEdge và insets nên không gọi lại ở đây
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(
-                this,
-                SystemBarStyle.dark(Color.TRANSPARENT),
-                SystemBarStyle.dark(Color.TRANSPARENT)
-        );
-        setContentView(R.layout.group_activity);
 
-        setupInsets();
         bindViews();
         setupRecycler();
         setupListeners();
@@ -105,21 +98,6 @@ public class GroupActivity extends AppCompatActivity {
     // Khởi tạo giao diện
     // =================================
 
-    private void setupInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(R.id.main),
-                new OnApplyWindowInsetsListener() {
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
-                        Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                        Insets keyboard = insets.getInsets(WindowInsetsCompat.Type.ime());
-                        int bottom = Math.max(systemBars.bottom, keyboard.bottom);
-                        v.setPadding(systemBars.left, systemBars.top, systemBars.right, bottom);
-                        return insets;
-                    }
-                });
-    }
-
     private void bindViews() {
         rcvGroups = findViewById(R.id.rcvGroups);
         txtEmpty = findViewById(R.id.txtEmpty);
@@ -141,13 +119,6 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        findViewById(R.id.imgBack).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
         findViewById(R.id.imgAddGroup).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
