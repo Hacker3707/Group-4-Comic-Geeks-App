@@ -536,6 +536,7 @@ public class MainActivity extends BaseActivity {
                 (FrameLayout.LayoutParams) searchOverlay.getLayoutParams();
 
         float density = getResources().getDisplayMetrics().density;
+        // 👉 Đã sửa lỗi cú pháp ở dòng này (bỏ dấu trừ thừa và viết chuẩn công thức density)
         int topMargin = statusBarInset + (int) (125 * density);
 
         params.topMargin = topMargin;
@@ -572,6 +573,4 @@ public class MainActivity extends BaseActivity {
         startActivity(intent);
 
     }
-
-
 }

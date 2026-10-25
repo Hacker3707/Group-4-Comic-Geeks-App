@@ -44,22 +44,11 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.GroupHashtagUtils;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.UserDisplayUtils;
 
-/**
- * Adapter bài viết dùng chung cho 2 kiểu hiển thị:
- *
- *  1) Kiểu trang chủ / hồ sơ / tìm kiếm (activity_post.xml) - tạo bằng
- *     {@link #PostAdapter(Context, List, OnPostInteractionListener)}.
- *     Bài thuộc group sẽ có header riêng: avatar nhóm + avatar người đăng nhỏ,
- *     dòng đậm là tên nhóm, dòng nhạt bên dưới là người gửi (cần gọi setGroups + setUsers).
- *
- *  2) Trang chi tiết group: dùng chung layout activity_post, tạo bằng {@link #forGroupPage(Context, OnPostInteractionListener)}.
- */
 public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_POST = 0;
     private static final int TYPE_GROUP_PAGE_POST = 1;
 
-    // Màn hình đăng ký để nhận bình luận mới người dùng vừa gửi (kiểu trang group)
     public interface OnCommentSendListener {
         void onCommentSend(Post post, String content);
     }
@@ -71,19 +60,14 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final Map<String, Boolean> expandedStates = new HashMap<>();
 
-    // Tên + ảnh của các tài khoản (key = userId), cập nhật theo thời gian thực
     private final Map<String, User> users = new HashMap<>();
-    // Các group (key = groupId) để vẽ header bài đăng trong group
     private final Map<String, Group> groups = new HashMap<>();
 
-    // --- Kiểu trang group: bình luận hiện trong khung bài ---
     private final Map<String, List<Comment>> commentsByPost = new HashMap<>();
     private OnCommentSendListener commentSendListener;
-    // Bài đang mở ô nhập bình luận và chữ gõ dở (giữ lại khi danh sách vẽ lại)
     private String commentingPostId = null;
     private String commentDraft = "";
 
-    // Follow: danh sách id mình đang follow (cập nhật realtime từ Firestore)
     private static final String PAYLOAD_FOLLOW = "follow_state";
     private final Set<String> myFollowingIds = new HashSet<>();
     private FollowRemoteRepository followRepository;
@@ -111,14 +95,9 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.groupPageMode = true;
     }
 
-    // Adapter cho màn hình chi tiết group: dùng chung layout + chức năng với bài trang chủ
     public static PostAdapter forGroupPage(Context context, OnPostInteractionListener listener) {
         return new PostAdapter(context, listener);
     }
-
-    // =================================
-    // Dữ liệu đi kèm
-    // =================================
 
     public void setOnCommentSendListener(OnCommentSendListener listener) {
         this.commentSendListener = listener;
@@ -153,20 +132,10 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         notifyDataSetChanged();
     }
 
-    private int indexOfPost(String postId) {
-        for (int i = 0; i < postList.size(); i++) {
-            if (postList.get(i).getPostId().equals(postId)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     private String fallbackName() {
         return context.getString(R.string.group_member_unknown_name);
     }
 
-    // Tên hiển thị của người đăng; chưa tải được tài khoản thì dùng userId như trước đây
     private String authorName(Post post) {
         User user = users.get(post.getUserId());
         return UserDisplayUtils.displayName(user,
@@ -178,7 +147,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     // =================================
-    // Follow (chỉ kiểu trang chủ)
+    // Follow & Profile Navigation
     // =================================
 
     @Override
@@ -195,7 +164,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     public void onResult(Set<String> ids) {
                         myFollowingIds.clear();
                         myFollowingIds.addAll(ids);
-                        // Chỉ vẽ lại nút Follow, không bind lại cả bài viết
                         notifyItemRangeChanged(0, getItemCount(), PAYLOAD_FOLLOW);
                     }
                 });
@@ -220,14 +188,12 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    // Nút Follow ở góc bài viết: follow / unfollow chủ bài viết
     private void bindFollowButton(PostViewHolder holder, Post post) {
         if (holder.btnFollow == null) return;
 
         FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
         final String ownerId = post.getUserId();
 
-        // Chưa đăng nhập, bài không có chủ, hoặc bài của chính mình thì không cần nút Follow
         if (me == null || ownerId == null || ownerId.isEmpty() || ownerId.equals(me.getUid())) {
             holder.btnFollow.setVisibility(View.GONE);
             return;
@@ -243,23 +209,16 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 followRepository.follow(me.getUid(), ownerId);
             }
         });
-
-        // Bấm tên / avatar để xem profile người đó (và thấy số follow của họ)
-        View.OnClickListener openOwnerProfile = v -> openProfile(ownerId);
-        holder.tvUserName.setOnClickListener(openOwnerProfile);
-        holder.imgAvatar.setOnClickListener(openOwnerProfile);
     }
 
+    // 👉 Hàm mở trang Profile cá nhân của người dùng
     private void openProfile(String userId) {
         if (userId == null || userId.isEmpty()) return;
         Intent intent = new Intent(context, ProfileActivity.class);
+        intent.putExtra("profile_user_id", userId);
         intent.putExtra(ProfileActivity.EXTRA_USER_ID, userId);
         context.startActivity(intent);
     }
-
-    // =================================
-    // Tạo + gắn dữ liệu
-    // =================================
 
     @Override
     public int getItemViewType(int position) {
@@ -278,17 +237,18 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         bindPost((PostViewHolder) holder, postList.get(position), position);
     }
 
-    // ---------- Kiểu trang chủ / hồ sơ / tìm kiếm ----------
+    // =================================
+    // Tách nhỏ các hàm bind để dọn gọn code
+    // =================================
 
     private void bindHeader(PostViewHolder holder, Post post) {
-        // Trong trang group thì luôn dùng header mực chảy với tên người đăng
         Group group = (!groupPageMode && isGroupPost(post)) ? groups.get(post.getGroupId()) : null;
         String name = authorName(post);
         User user = users.get(post.getUserId());
         String posterAvatarUrl = user != null ? user.getAvatarUrl() : null;
+        final String ownerId = post.getUserId();
 
         if (group != null) {
-            // Header kiểu group: avatar nhóm + avatar người đăng nhỏ, tên nhóm (đậm) + người gửi (nhạt)
             holder.headerLayout.setVisibility(View.GONE);
             holder.groupHeaderLayout.setVisibility(View.VISIBLE);
 
@@ -308,7 +268,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             holder.imgGroupAvatar.setOnClickListener(openGroup);
             holder.tvGroupName.setOnClickListener(openGroup);
 
-            final String ownerId = post.getUserId();
+            // Bấm vào avatar/tên người đăng nhỏ trong group -> Sang Profile người đó
             View.OnClickListener openOwner = v -> openProfile(ownerId);
             holder.imgGroupPosterAvatar.setOnClickListener(openOwner);
             holder.tvGroupPoster.setOnClickListener(openOwner);
@@ -317,16 +277,20 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             holder.headerLayout.setVisibility(View.VISIBLE);
             holder.tvUserName.setText(name);
             if (holder.tvHandle != null) {
-                holder.tvHandle.setText(user != null
-                        ? "@" + name.replace(" ", "").toLowerCase()
-                        : "");
+                holder.tvHandle.setText(user != null ? "@" + name.replace(" ", "").toLowerCase() : "");
             }
             loadAvatar(holder.imgAvatar, posterAvatarUrl);
             bindFollowButton(holder, post);
+
+            // 👉 Bấm vào tên hoặc avatar chính của bài đăng -> Sang Profile người đó
+            View.OnClickListener openOwnerProfile = v -> openProfile(ownerId);
+            holder.tvUserName.setOnClickListener(openOwnerProfile);
+            if (holder.imgAvatar != null) {
+                holder.imgAvatar.setOnClickListener(openOwnerProfile);
+            }
         }
     }
 
-    // Có link ảnh thì tải, không có thì để trống (nền tím của khung avatar)
     private void loadAvatar(ImageView view, String url) {
         if (url != null && !url.trim().isEmpty()) {
             Glide.with(context)
@@ -343,7 +307,15 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private void bindPost(@NonNull final PostViewHolder holder, final Post post, final int position) {
         bindHeader(holder, post);
-        // Lắng nghe và hiển thị chính xác số lượng comment thực tế từ cơ sở dữ liệu
+        bindCommentCount(holder, post);
+        bindContent(holder, post, position);
+        bindLinkedComic(holder, post);
+        bindHashtag(holder, post);
+        setupInteractions(holder, post, position);
+        bindImages(holder, post);
+    }
+
+    private void bindCommentCount(PostViewHolder holder, Post post) {
         if (context instanceof AppCompatActivity) {
             AppCompatActivity activity = (AppCompatActivity) context;
             PostViewModel postViewModel = new ViewModelProvider(activity).get(PostViewModel.class);
@@ -363,7 +335,9 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         } else {
             holder.tvCommentCount.setText(String.valueOf(post.getCommentCount()));
         }
+    }
 
+    private void bindContent(PostViewHolder holder, Post post, int position) {
         String content = post.getContent();
         String postId = post.getPostId() != null ? post.getPostId() : String.valueOf(position);
         boolean isExpanded = expandedStates.containsKey(postId) && Boolean.TRUE.equals(expandedStates.get(postId));
@@ -389,7 +363,9 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         } else {
             holder.tvPostContent.setVisibility(View.GONE);
         }
+    }
 
+    private void bindLinkedComic(PostViewHolder holder, Post post) {
         if (holder.tvLinkedComic != null) {
             String comicTitle = post.getComicTitle();
             String comicId = post.getComicId();
@@ -412,43 +388,74 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 holder.tvLinkedComic.setVisibility(View.GONE);
             }
         }
-        // Bài thường lưu hashtag riêng; bài trong group lưu hashtag ngay trong nội dung (vd "#Manga")
-        final String hashtag;
+    }
+
+    private void bindHashtag(PostViewHolder holder, Post post) {
+        final String hashtagToDisplay;
+
         if (isGroupPost(post)) {
-            // Lấy chủ đề từ nội dung giống trang group: "Manga", "Anime, Otaku"... hoặc "Khác"
-            String topic = GroupHashtagUtils.topicLabel(post.getContent());
-            holder.tvHashtag.setText("# " + topic);
-            hashtag = topic;
-        } else {
-            hashtag = post.getHashtag();
-            if (hashtag != null && !hashtag.isEmpty()) {
-                holder.tvHashtag.setText(hashtag);
-            } else {
-                holder.tvHashtag.setText("# Discussion");
+            String content = post.getContent();
+            String foundHashtag = "";
+
+            // 1. Ưu tiên quét xem trong nội dung (content) có chứa từ bắt đầu bằng dấu # hay không
+            if (content != null && content.contains("#")) {
+                int hashIndex = content.indexOf("#");
+                String sub = content.substring(hashIndex).trim();
+                int spaceIndex = sub.indexOf(" ");
+                if (spaceIndex != -1) {
+                    foundHashtag = sub.substring(0, spaceIndex);
+                } else {
+                    foundHashtag = sub;
+                }
             }
+
+            // 2. Nếu trong content không có dấu #, kiểm tra tiếp trường post.getHashtag() xem có dữ liệu không
+            if (foundHashtag.isEmpty() && post.getHashtag() != null && !post.getHashtag().trim().isEmpty()) {
+                foundHashtag = post.getHashtag().trim();
+                if (!foundHashtag.startsWith("#")) {
+                    foundHashtag = "#" + foundHashtag;
+                }
+            }
+
+            // 3. Nếu vẫn không có nữa thì mới dùng bộ lọc topicLabel hoặc mặc định là #Discussion
+            if (foundHashtag.isEmpty()) {
+                String topic = GroupHashtagUtils.topicLabel(content);
+                foundHashtag = (topic != null && !topic.isEmpty() && !topic.equals("Khác")) ? "#" + topic : "#Discussion";
+            }
+
+            holder.tvHashtag.setText(foundHashtag);
+            hashtagToDisplay = foundHashtag;
+        } else {
+            // Dành cho bài đăng ngoài trang chủ (Home)
+            String hashtag = post.getHashtag();
+            if (hashtag != null && !hashtag.trim().isEmpty()) {
+                hashtagToDisplay = hashtag.startsWith("#") ? hashtag : "#" + hashtag;
+            } else {
+                hashtagToDisplay = "#Discussion";
+            }
+            holder.tvHashtag.setText(hashtagToDisplay);
         }
 
+        // Sự kiện khi bấm vào hashtag để tìm kiếm
         holder.tvHashtag.setOnClickListener(v -> {
             Intent intent = new Intent(context, SearchActivity.class);
-            intent.putExtra("SEARCH_QUERY",
-                    hashtag != null && !hashtag.isEmpty() ? hashtag : "Discussion");
+            intent.putExtra("SEARCH_QUERY", hashtagToDisplay.replace("#", "").trim());
             context.startActivity(intent);
         });
+    }
 
-        // --- CÁC SỰ KIỆN TƯƠNG TÁC KHÁC (Stamp, Comment, Options...) ---
+    private void setupInteractions(PostViewHolder holder, Post post, int position) {
         holder.btnStamp.setOnClickListener(v -> {
             boolean isStamped = holder.btnStamp.getTag() != null && (boolean) holder.btnStamp.getTag();
             if (isStamped) {
                 holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#A890D3"));
                 holder.btnStamp.setImageResource(R.drawable.ic_splash_unfill);
                 holder.btnStamp.setTag(false);
-                // Nếu muốn xử lý hủy stamp trên Firebase bạn có thể viết thêm ở đây sau
             } else {
                 holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#493373"));
                 holder.btnStamp.setImageResource(R.drawable.post_ink_splat);
                 holder.btnStamp.setTag(true);
 
-                // 👉 BẮT BUỘC PHẢI CÓ DÒNG NÀY ĐỂ GỌI ĐẨY STAMP LÊN FIREBASE
                 if (listener != null) {
                     listener.onStampClick(post);
                 }
@@ -470,24 +477,43 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         });
 
-        // Nút ⋮ có ở cả 2 kiểu header, mở cùng một menu
+        // 👉 KIỂM TRA QUYỀN SỞ HỮU BÀI VIẾT (So sánh Firebase UID của bài post với user đang đăng nhập)
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         View.OnClickListener openOptions = v -> showOptionsMenu(v, post);
-        holder.btnOptions.setOnClickListener(openOptions);
-        if (holder.btnGroupOptions != null) {
-            holder.btnGroupOptions.setOnClickListener(openOptions);
-        }
 
-        // --- XỬ LÝ LƯỚI ẢNH ---
+        boolean canModify = post.getUserId() != null && currentUser != null &&
+                post.getUserId().equals(currentUser.getUid());
+
+        if (canModify) {
+            if (holder.btnOptions != null) {
+                holder.btnOptions.setVisibility(View.VISIBLE);
+                holder.btnOptions.setOnClickListener(openOptions);
+            }
+            if (holder.btnGroupOptions != null) {
+                holder.btnGroupOptions.setVisibility(View.VISIBLE);
+                holder.btnGroupOptions.setOnClickListener(openOptions);
+            }
+        } else {
+            // Không phải bài của mình -> Ẩn nút chỉnh sửa/xóa đi
+            if (holder.btnOptions != null) {
+                holder.btnOptions.setVisibility(View.GONE);
+                holder.btnOptions.setOnClickListener(null);
+            }
+            if (holder.btnGroupOptions != null) {
+                holder.btnGroupOptions.setVisibility(View.GONE);
+                holder.btnGroupOptions.setOnClickListener(null);
+            }
+        }
+    }
+
+    private void bindImages(PostViewHolder holder, Post post) {
         List<String> imageUris = post.getImageUris();
 
         if (imageUris != null && !imageUris.isEmpty()) {
             holder.rvPostImages.setVisibility(View.VISIBLE);
             int imageCount = imageUris.size();
 
-            // Mặc định 2 cột; nếu chỉ có 1 ảnh thì ảnh chiếm cả 2 cột
             GridLayoutManager layoutManager = new GridLayoutManager(context, 2);
-
-            // 👉 Đã sửa từ spanSize thành getSpanSize đúng chuẩn Android
             layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
                 public int getSpanSize(int position) {
@@ -533,7 +559,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @Override
-    public int getItemCount() { // 👉 Đã thêm từ khóa public vào đây
+    public int getItemCount() {
         return postList != null ? postList.size() : 0;
     }
 }
