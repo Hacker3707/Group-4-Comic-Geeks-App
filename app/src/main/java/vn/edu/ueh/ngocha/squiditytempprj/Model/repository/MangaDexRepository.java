@@ -24,6 +24,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaResponse;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaSingleResponse;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaTagResponse;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Tag;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
 
 public class MangaDexRepository {
@@ -395,5 +396,83 @@ public class MangaDexRepository {
             }
         });
     }
+
+
+    public LiveData<List<MangaData>> getMangaByIdList(List<String> mangaIds) {
+        MutableLiveData<List<MangaData>> result =
+                new MutableLiveData<>();
+
+        if (mangaIds == null || mangaIds.isEmpty()) {
+            result.setValue(new ArrayList<MangaData>());
+            return result;
+        }
+
+        final List<MangaData> mangaList = new ArrayList<>();
+        final int[] completedRequests = {0};
+        final int totalRequests = mangaIds.size();
+
+        for (String mangaId : mangaIds) {
+            if (mangaId == null || mangaId.trim().isEmpty()) {
+                completedRequests[0]++;
+                continue;
+            }
+
+            List<String> includes = new ArrayList<>();
+            includes.add("cover_art");
+            includes.add("author");
+
+            api.getMangaById(mangaId, includes)
+                    .enqueue(new Callback<MangaSingleResponse>() {
+                        @Override
+                        public void onResponse(
+                                Call<MangaSingleResponse> call,
+                                Response<MangaSingleResponse> response) {
+
+                            if (response.isSuccessful()
+                                    && response.body() != null
+                                    && response.body().getData() != null) {
+                                synchronized (mangaList) {
+                                    mangaList.add(response.body().getData());
+                                }
+                            } else {
+                                Log.e("MangaDexRepository",
+                                        "Failed to get manga: " + mangaId);
+                            }
+
+                            synchronized (completedRequests) {
+                                completedRequests[0]++;
+
+                                if (completedRequests[0] == totalRequests) {
+                                    result.postValue(
+                                            new ArrayList<MangaData>(mangaList)
+                                    );
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(
+                                Call<MangaSingleResponse> call,
+                                Throwable t) {
+
+                            Log.e("MangaDexRepository",
+                                    "Request failed for " + mangaId, t);
+
+                            synchronized (completedRequests) {
+                                completedRequests[0]++;
+
+                                if (completedRequests[0] == totalRequests) {
+                                    result.postValue(
+                                            new ArrayList<MangaData>(mangaList)
+                                    );
+                                }
+                            }
+                        }
+                    });
+        }
+
+        return result;
+    }
+
 
 }

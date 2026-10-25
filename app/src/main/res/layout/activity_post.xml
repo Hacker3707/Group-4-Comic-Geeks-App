@@ -322,16 +322,15 @@
             android:maxLines="1"
             android:ellipsize="end"
             android:maxWidth="280dp"
-
-        app:chipBackgroundColor="#EEE7FF"
-        app:chipCornerRadius="16dp"
-        app:chipIconVisible="false"
-        app:chipMinHeight="36dp"
-        app:chipStrokeColor="#D2C3FF"
-        app:chipStrokeWidth="1dp"
-        app:closeIconVisible="false"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionLayout" />
+            app:chipBackgroundColor="#EEE7FF"
+            app:chipCornerRadius="16dp"
+            app:chipIconVisible="false"
+            app:chipMinHeight="36dp"
+            app:chipStrokeColor="#D2C3FF"
+            app:chipStrokeWidth="1dp"
+            app:closeIconVisible="false"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/actionLayout" />
 
         <!-- DIVIDER -->
         <View
@@ -363,13 +362,13 @@
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:fontFamily="@font/mozilla_headline"
-                android:hint="Say something...くコ:彡"
-                android:textSize="15sp" />
+                android:hint="Say something...くコ:彡 o O "
+                android:textSize="16sp" />
 
             <ImageView
                 android:id="@+id/btnSendComment"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
                 android:src="@android:drawable/ic_menu_send"
                 app:tint="#493373" />
         </LinearLayout>

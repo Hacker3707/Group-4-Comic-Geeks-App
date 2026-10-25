@@ -21,6 +21,7 @@
             android:id="@+id/imgAvtReview"
             android:layout_width="45dp"
             android:layout_height="45dp"
+            android:layout_gravity="top"
             android:layout_marginEnd="12dp"
             android:background="#FFFFFF"
             android:contentDescription="Reviewer avatar"
@@ -36,6 +37,11 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
             <TextView
                 android:id="@+id/txtReviewerName"
                 android:layout_width="match_parent"
@@ -44,6 +50,61 @@
                 android:textColor="#49316B"
                 android:textSize="16sp"
                 android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtReviewAddition_pf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="posted a review about:"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lnly_reviewProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipLinkedComic_pf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="16dp"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/jersey25_regular"
+                    android:maxWidth="280dp"
+                    android:maxLines="1"
+                    android:text="📖 Linked Comic"
+                    android:textColor="#493373"
+                    android:textSize="16sp"
+                    android:visibility="visible"
+                    app:chipBackgroundColor="#EEE7FF"
+                    app:chipCornerRadius="16dp"
+                    app:chipIconVisible="false"
+                    app:chipMinHeight="36dp"
+                    app:chipStrokeColor="#D2C3FF"
+                    app:chipStrokeWidth="1dp"
+                    app:closeIconVisible="false" />
+
+                <RatingBar
+                    android:id="@+id/ratingBarReview_pf"
+                    style="@style/Widget.AppCompat.RatingBar.Indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="4dp"
+                    android:isIndicator="true"
+                    android:numStars="5"
+                    android:rating="0"
+                    android:stepSize="0.1" />
+
+            </LinearLayout>
 
             <RatingBar
                 android:id="@+id/ratingBarReview"
@@ -54,7 +115,7 @@
                 android:isIndicator="true"
                 android:numStars="5"
                 android:rating="0"
-                android:stepSize="0.1" />
+                android:stepSize="0.5" />
 
 
         </LinearLayout>
@@ -64,6 +125,7 @@
     <!-- Nội dung review -->
     <TextView
         android:id="@+id/txtReviewContent"
+        style="@style/Widget.AppCompat.TextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="58dp"

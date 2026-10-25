@@ -431,7 +431,7 @@
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="GIỚI THIỆU" />
+                        android:text="INTRO" />
 
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
@@ -441,7 +441,7 @@
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="COLLECTION" />
+                        android:text="LIKED POSTS" />
 
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
@@ -557,6 +557,18 @@
                     android:clipToPadding="false"
                     android:layout_marginBottom="80dp"
                     tools:listitem="@layout/activity_post" />
+
+                <!-- REVIEW LIST -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rcvProfileReviews"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#FFFFFF"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingTop="8dp"
+                    android:clipToPadding="false"
+                    android:layout_marginBottom="80dp"
+                    tools:listitem="@layout/comic_review_item"/>
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

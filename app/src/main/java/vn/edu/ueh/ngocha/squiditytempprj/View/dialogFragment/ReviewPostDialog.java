@@ -134,7 +134,7 @@ public class ReviewPostDialog extends DialogFragment {
         public void onClick(View v) {
             if (!isEditing) {
                 Toast.makeText(v.getContext(), "You're in Edit Mode!", Toast.LENGTH_SHORT).show();
-                ratingBar.setClickable(true);
+                ratingBar.setIsIndicator(true);
                 etReviewContent.setEnabled(true);
                 txtReviewDate.setVisibility(View.GONE);
                 btnEdit.setText("Cancel");
@@ -145,7 +145,7 @@ public class ReviewPostDialog extends DialogFragment {
                 btnSave.setEnabled(false);
                 btnEdit.setText("Edit");
 
-                ratingBar.setClickable(false);
+                ratingBar.setIsIndicator(true);
                 ratingBar.setRating(oldReview.getReviewRating());
 
                 etReviewContent.setEnabled(false);
@@ -186,7 +186,7 @@ public class ReviewPostDialog extends DialogFragment {
                 btnConfirm.setVisibility(View.VISIBLE);
                 lnEditSaveReview.setVisibility(View.GONE);
 
-                ratingBar.setClickable(true);
+                ratingBar.setIsIndicator(false);
                 etReviewContent.setEnabled(true);
                 txtReviewDate.setVisibility(View.GONE);
 
@@ -202,7 +202,7 @@ public class ReviewPostDialog extends DialogFragment {
                 btnSave.setEnabled(false);
 
                 ratingBar.setRating(review.getReviewRating());
-                ratingBar.setClickable(false);
+                ratingBar.setIsIndicator(false);
 
                 etReviewContent.setText(review.getReviewText());
                 etReviewContent.setEnabled(false);

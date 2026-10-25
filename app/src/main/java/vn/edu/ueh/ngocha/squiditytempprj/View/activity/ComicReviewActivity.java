@@ -1,6 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -57,11 +58,35 @@ public class ComicReviewActivity extends BaseActivity {
         }
     };
 
-    private final View.OnClickListener onViewReviewClickListener = new View.OnClickListener() {
+    public ComicReviewAdapter.OnReviewClickListener reviewInteractionListener = new ComicReviewAdapter.OnReviewClickListener() {
         @Override
-        public void onClick(View view) {
-            finish();
+        public void onUserClick(String userId) {
+            if (userId == null || userId.trim().isEmpty()) {
+                return;
+            }
+
+            Intent intent = new Intent(
+                    ComicReviewActivity.this,
+                    ProfileActivity.class
+            );
+
+            intent.putExtra(ProfileActivity.EXTRA_USER_ID, userId);
+            startActivity(intent);
         }
+
+        @Override
+        public void onComicChipClick(String comicId) {
+            Intent intent = new Intent(
+                    ComicReviewActivity.this,
+                    ComicDetailActivity.class
+            );
+
+            intent.putExtra("comic_id", comicId);
+            intent.putExtra("search_option", "MangaDex");
+
+            startActivity(intent);
+        }
+
     };
 
 
@@ -95,7 +120,9 @@ public class ComicReviewActivity extends BaseActivity {
         @Override
         public void onChanged(List<Review> reviews) {
             reviewAdapter.setReviews(reviews);
-            headerAdapter.setReviewCount(reviews.size());
+            headerAdapter.setReviewCount(
+                    reviews == null ? 0 : reviews.size()
+            );
         }
     };
 
@@ -154,7 +181,7 @@ public class ComicReviewActivity extends BaseActivity {
         recyclerView = findViewById(R.id.rcvComicReviews);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        reviewAdapter = new ComicReviewAdapter();
+        reviewAdapter = new ComicReviewAdapter(reviewInteractionListener);
         headerAdapter = new ComicReviewHeaderAdapter(onReviewClickListener);
         headerAdapter.setComicInfo(comicName, comicCover);
 
@@ -165,9 +192,14 @@ public class ComicReviewActivity extends BaseActivity {
         // ------------ Set up reviewViewModel ------------
 
         reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
-        reviewViewModel.getReviewsByComicId(COMIC_ID).observe(this, reviewsObserver);
-        reviewViewModel.getUsersForComic(COMIC_ID).observe(this, usersObserver);
-        reviewViewModel.getAverageRating(COMIC_ID).observe(this, averageRatingObserver);
+        reviewViewModel.getReviewsByComicId(comicId)
+                .observe(this, reviewsObserver);
+
+        reviewViewModel.getUsersForComic(comicId)
+                .observe(this, usersObserver);
+
+        reviewViewModel.getAverageRating(comicId)
+                .observe(this, averageRatingObserver);
         reviewViewModel.isSameUser.observe(this, isSameUserObserver);
 
         // ------------ Set up authViewModel ------------

@@ -397,10 +397,6 @@ public class ComicListActivity extends BaseActivity {
         comicViewModel.searchComicswithMangaDex(searchQuery);
     }
 
-    public void loadMoreManga() {
-        comicViewModel.loadNextPage();
-    }
-
     private void selectGenreChip(String genreId) {
         for (int i = 0; i < chipGroupGenres.getChildCount(); i++) {
             View view = chipGroupGenres.getChildAt(i);

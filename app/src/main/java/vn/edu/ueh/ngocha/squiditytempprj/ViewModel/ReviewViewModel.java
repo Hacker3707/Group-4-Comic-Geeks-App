@@ -15,9 +15,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Review;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.AuthRepository;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.MangaDexRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.ReviewRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.UserRepository;
 
@@ -143,6 +145,10 @@ public class ReviewViewModel extends AndroidViewModel {
 
     public void insert(Review review) {
         reviewRepository.insert(review);
+    }
+
+    public LiveData<List<Review>> getAllReviewsforUserId(String userId) {
+        return reviewRepository.getReviewsByUserId(userId);
     }
 
 }

@@ -38,19 +38,26 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.ChatRoom;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Review;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Stamp;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.StampType;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicReviewAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.PostAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ComicViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.GenreViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.CommentUsersWatcher;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ChatViewModel;
+import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.ReviewViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.FollowViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
@@ -78,7 +85,9 @@ public class ProfileActivity extends BaseActivity {
     private LinearLayout profileActionButtons;
     private TextView tvProfileEmail;
     private RecyclerView recyclerViewProfilePosts;
+    private RecyclerView recyclerViewProfileComments;
     private PostAdapter postAdapter;
+    private ComicReviewAdapter reviewAdapter;
     private PostViewModel postViewModel;
     private MaterialButton btnEditProfile;
     private TextView tvProfilePostCount;
@@ -99,8 +108,11 @@ public class ProfileActivity extends BaseActivity {
     private com.google.android.material.tabs.TabLayout tabLayout;
     private ChipGroup chipGenreProfile;
     private GenreViewModel genreViewModel;
+    private ReviewViewModel reviewViewModel;
+    private ComicViewModel comicViewModel;
     private List<Genre> allGenres = new ArrayList<>();
     private List<String> selectedGenreIds = new ArrayList<>();
+    private User currentProfile;
     private final ActivityResultLauncher<String> avatarPicker =
             registerForActivityResult(
                     new ActivityResultContracts.GetContent(),
@@ -120,6 +132,8 @@ public class ProfileActivity extends BaseActivity {
                         }
                     }
             );
+
+
     // Id của tài khoản đang đăng nhập, chưa đăng nhập thì dùng "guest"
     private String currentUid() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
@@ -139,6 +153,29 @@ public class ProfileActivity extends BaseActivity {
         }
     };
 
+    private Observer<List<Review>> reviewObserver =
+            new Observer<List<Review>>() {
+                @Override
+                public void onChanged(List<Review> reviews) {
+                    reviewAdapter.setReviews(reviews);
+                    reviewAdapter.setUser(currentProfile);
+
+                    List<String> mangaIds = new ArrayList<>();
+
+                    if (reviews != null) {
+                        for (Review review : reviews) {
+                            if (review != null
+                                    && review.getComicId() != null
+                                    && !mangaIds.contains(review.getComicId())) {
+                                mangaIds.add(review.getComicId());
+                            }
+                        }
+                    }
+
+                    comicViewModel.getComicbyIdList(mangaIds).observe(ProfileActivity.this, comicObserver);
+                }
+            };
+
     private View.OnClickListener onclickGenreChip = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -150,6 +187,14 @@ public class ProfileActivity extends BaseActivity {
             startActivity(intent);
         }
     };
+
+    private Observer<List<MangaData>> comicObserver =
+            new Observer<List<MangaData>>() {
+                @Override
+                public void onChanged(List<MangaData> comics) {
+                    reviewAdapter.setComics(comics);
+                }
+            };
 
     private void renderSelectedGenres() {
         if (chipGenreProfile == null) {
@@ -193,6 +238,37 @@ public class ProfileActivity extends BaseActivity {
         );
     }
 
+    public ComicReviewAdapter.OnReviewClickListener reviewInteractionListener = new ComicReviewAdapter.OnReviewClickListener() {
+        @Override
+        public void onUserClick(String userId) {
+            if (userId == null || userId.trim().isEmpty()) {
+                return;
+            }
+
+            Intent intent = new Intent(
+                    ProfileActivity.this,
+                    ProfileActivity.class
+            );
+
+            intent.putExtra(ProfileActivity.EXTRA_USER_ID, userId);
+            startActivity(intent);
+        }
+
+        @Override
+        public void onComicChipClick(String comicId) {
+            Intent intent = new Intent(
+                    ProfileActivity.this,
+                    ComicDetailActivity.class
+            );
+
+            intent.putExtra("comic_id", comicId);
+            intent.putExtra("search_option", "MangaDex");
+
+            startActivity(intent);
+        }
+
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -228,6 +304,11 @@ public class ProfileActivity extends BaseActivity {
 
 
         tabLayout = findViewById(R.id.tabLayout);
+
+        if (tabLayout != null && tabLayout.getTabAt(1) != null) {
+            tabLayout.selectTab(tabLayout.getTabAt(1));
+        }
+
         profileActionButtons = findViewById(R.id.profileActionButtons);
 
         btnEditProfile = findViewById(R.id.btnEditProfile);
@@ -272,6 +353,28 @@ public class ProfileActivity extends BaseActivity {
         chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
+        // 1. Khởi tạo RecyclerView
+        recyclerViewProfileComments = findViewById(R.id.rcvProfileReviews);
+
+        reviewAdapter = new ComicReviewAdapter(reviewInteractionListener);
+        reviewAdapter.setupInProfile();
+
+
+        if (recyclerViewProfileComments != null) {
+            recyclerViewProfileComments.setLayoutManager(
+                    new LinearLayoutManager(this)
+            );
+            recyclerViewProfileComments.setAdapter(reviewAdapter);
+        }
+
+        // 2. Sau đó mới đăng ký Observer
+        reviewViewModel = new ViewModelProvider(this)
+                .get(ReviewViewModel.class);
+        comicViewModel = new ViewModelProvider(this).get(ComicViewModel.class);
+
+        reviewViewModel.getAllReviewsforUserId(currentUid())
+                .observe(this, reviewObserver);
+
         tvProfilePostCount = findViewById(R.id.tvProfilePostCount);
 
         FirebaseUser currentUser =
@@ -292,26 +395,34 @@ public class ProfileActivity extends BaseActivity {
         if (tabLayout != null) {
             tabLayout.addOnTabSelectedListener(
                     new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
-
                         @Override
                         public void onTabSelected(
                                 com.google.android.material.tabs.TabLayout.Tab tab) {
 
                             if (tab == null) return;
 
-                            boolean showIntroduction = tab.getPosition() == 0;
+                            int position = tab.getPosition();
 
                             if (layoutIntroductionDetails != null) {
                                 layoutIntroductionDetails.setVisibility(
-                                        showIntroduction ? View.VISIBLE : View.GONE
+                                        position == 0 ? View.VISIBLE : View.GONE
                                 );
                             }
 
                             if (recyclerViewProfilePosts != null) {
                                 recyclerViewProfilePosts.setVisibility(
-                                        showIntroduction ? View.GONE : View.VISIBLE
+                                        position == 1 ? View.VISIBLE : View.GONE
                                 );
                             }
+
+                            if (recyclerViewProfileComments != null) {
+                                recyclerViewProfileComments.setVisibility(
+                                        position == 3 ? View.VISIBLE : View.GONE
+                                );
+                            }
+
+                            // Tab COLLECTION (position 2) cần có view riêng
+                            // và được hiển thị tại đây khi bạn đã xác định view đó.
                         }
 
                         @Override
@@ -466,6 +577,12 @@ public class ProfileActivity extends BaseActivity {
 
             currentCoverUrl = state.coverUrl == null
                     ? "" : state.coverUrl;
+
+            currentProfile = new User();
+            currentProfile.setUserId(currentUid());
+            currentProfile.setUsername(username);
+            currentProfile.setEmail(email);
+            currentProfile.setAvatarUrl(currentAvatarUrl);
         });
 
 
