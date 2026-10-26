@@ -1,0 +1,609 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/group_header"
+    tools:context=".View.activity.GroupViewActivity">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/group_header"
+    android:orientation="vertical">
+
+    <!-- Thanh tiêu đề -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@color/group_header"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="8dp">
+
+        <ImageView
+            android:id="@+id/imgBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="@string/group_cd_back"
+            android:padding="8dp"
+            android:src="@drawable/ic_group_back"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/txtTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:fontFamily="@font/jersey25_regular"
+            android:maxLines="1"
+            android:text="@string/group_title_default"
+            android:textColor="@color/white"
+            android:textSize="24sp" />
+
+        <ImageView
+            android:id="@+id/imgSearch"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="@string/group_cd_search"
+            android:padding="8dp"
+            android:src="@drawable/ic_group_search"
+            app:tint="@color/white" />
+
+        <ImageView
+            android:id="@+id/imgMore"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="@string/group_cd_more"
+            android:padding="8dp"
+            android:src="@drawable/ic_group_more_vert"
+            app:tint="@color/white" />
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/white"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Ảnh bìa + avatar + thông tin group -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgCover"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:contentDescription="@string/group_cd_cover"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/group_cover_placeholder" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgAvatar"
+                    android:layout_width="92dp"
+                    android:layout_height="92dp"
+                    android:layout_marginStart="17dp"
+                    android:layout_marginTop="100dp"
+                    android:contentDescription="@string/group_cd_avatar"
+                    android:padding="2dp"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    app:shapeAppearanceOverlay="@style/GroupCircleImage"
+                    app:strokeColor="@color/white"
+                    app:strokeWidth="4dp" />
+
+                <TextView
+                    android:id="@+id/txtAvatarLetter"
+                    android:layout_width="92dp"
+                    android:layout_height="92dp"
+                    android:layout_marginStart="17dp"
+                    android:layout_marginTop="100dp"
+                    android:background="@drawable/bg_group_avatar_letter"
+                    android:fontFamily="@font/jersey25_regular"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="48sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="125dp"
+                    android:layout_marginTop="124dp"
+                    android:layout_marginEnd="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtGroupName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/jersey25_regular"
+                        android:maxLines="1"
+                        android:textColor="@color/group_name"
+                        android:textSize="24sp" />
+
+                    <TextView
+                        android:id="@+id/txtMembers"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="@font/inter"
+                        android:textColor="@color/group_meta"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/txtDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/inter"
+                        android:maxLines="3"
+                        android:textColor="@color/group_text"
+                        android:textSize="13sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/btnJoin"
+                            android:layout_width="108dp"
+                            android:layout_height="46dp"
+                            android:background="@drawable/bg_group_join_button"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:fontFamily="@font/jersey25_regular"
+                            android:gravity="center"
+                            android:text="@string/group_joined"
+                            android:textColor="@color/white"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:id="@+id/btnMoreGroup"
+                            android:layout_width="40dp"
+                            android:layout_height="34dp"
+                            android:layout_marginStart="24dp"
+                            android:background="@drawable/bg_group_more_button"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:gravity="center"
+                            android:text="@string/group_more_dots"
+                            android:textColor="@color/group_text"
+                            android:textSize="18sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Chip thể loại (làm cố định, chưa có dữ liệu) -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/chipContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_group_chip"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="14dp"
+                        android:paddingTop="7dp"
+                        android:paddingEnd="14dp"
+                        android:paddingBottom="7dp"
+                        android:tag="anime"
+                        android:text="@string/group_chip_anime"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:textColor="@color/group_chip_text_selector"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_group_chip"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="14dp"
+                        android:paddingTop="7dp"
+                        android:paddingEnd="14dp"
+                        android:paddingBottom="7dp"
+                        android:tag="manga"
+                        android:text="@string/group_chip_manga"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:textColor="@color/group_chip_text_selector"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_group_chip"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="14dp"
+                        android:paddingTop="7dp"
+                        android:paddingEnd="14dp"
+                        android:paddingBottom="7dp"
+                        android:tag="lightnovel"
+                        android:text="@string/group_chip_light_novel"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:textColor="@color/group_chip_text_selector"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_group_chip"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="14dp"
+                        android:paddingTop="7dp"
+                        android:paddingEnd="14dp"
+                        android:paddingBottom="7dp"
+                        android:tag="discussion"
+                        android:text="@string/group_chip_discussion"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:textColor="@color/group_chip_text_selector"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_group_chip"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="14dp"
+                        android:paddingTop="7dp"
+                        android:paddingEnd="14dp"
+                        android:paddingBottom="7dp"
+                        android:layout_marginEnd="6dp"
+                        android:tag="otaku"
+                        android:text="@string/group_chip_otaku"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:textColor="@color/group_chip_text_selector"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_group_chip"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="14dp"
+                        android:paddingTop="7dp"
+                        android:paddingEnd="14dp"
+                        android:paddingBottom="7dp"
+                        android:tag="other"
+                        android:text="@string/group_chip_other"
+                        android:textColor="@color/group_chip_text_selector"
+                        android:textSize="11sp" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="14dp"
+                android:background="@color/group_divider" />
+
+            <!-- 5 tab -->
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                app:tabIndicatorColor="@color/group_tab_indicator"
+                app:tabIndicatorFullWidth="false"
+                app:tabIndicatorHeight="3dp"
+                app:tabMinWidth="0dp"
+                app:tabMode="fixed"
+                app:tabPaddingEnd="2dp"
+                app:tabPaddingStart="2dp"
+                app:tabSelectedTextAppearance="@style/GroupTabTextSelected"
+                app:tabSelectedTextColor="@color/group_tab_selected"
+                app:tabTextAppearance="@style/GroupTabText"
+                app:tabTextColor="@color/group_text">
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/group_tab_posts" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/group_tab_members" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/group_tab_events" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/group_tab_files" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/group_tab_about" />
+            </com.google.android.material.tabs.TabLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/group_divider" />
+
+            <!-- Ô viết bài -->
+            <LinearLayout
+                android:id="@+id/composerLayout"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="17dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginEnd="17dp"
+                android:background="@drawable/bg_group_composer"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:contentDescription="@string/group_cd_avatar"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/group_avatar_sample"
+                    app:shapeAppearanceOverlay="@style/GroupCircleImage" />
+
+                <EditText
+                    android:id="@+id/edtComposer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:fontFamily="@font/inter"
+                    android:hint="@string/group_composer_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    android:minHeight="40dp"
+                    android:textColor="@color/group_text"
+                    android:textColorHint="@color/group_composer_hint"
+                    android:textSize="12sp" />
+
+                <ImageView
+                    android:id="@+id/btnSendPost"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:contentDescription="@string/group_cd_send"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_group_send"
+                    app:tint="@color/group_send_blue" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/group_more_dots"
+                    android:textColor="@color/group_composer_dots"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <!-- Dòng hướng dẫn hashtag (chỉ hiện ở tab Bài viết) -->
+            <TextView
+                android:id="@+id/txtTagHelp"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginEnd="20dp"
+                android:fontFamily="@font/inter"
+                android:text="@string/group_tag_help"
+                android:textColor="@color/group_meta"
+                android:textSize="11sp" />
+
+            <!-- Gợi ý chủ đề: hiện khi người dùng gõ dấu # trong ô viết bài -->
+            <HorizontalScrollView
+                android:id="@+id/tagSuggestionBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="17dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="17dp"
+                android:scrollbars="none"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/tagSuggestionContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_group_chip"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="12dp"
+                        android:paddingTop="6dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="6dp"
+                        android:tag="@string/group_tag_anime"
+                        android:text="@string/group_tag_anime"
+                        android:textColor="@color/group_chip_text"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_group_chip"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="12dp"
+                        android:paddingTop="6dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="6dp"
+                        android:tag="@string/group_tag_manga"
+                        android:text="@string/group_tag_manga"
+                        android:textColor="@color/group_chip_text"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_group_chip"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="12dp"
+                        android:paddingTop="6dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="6dp"
+                        android:tag="@string/group_tag_light_novel"
+                        android:text="@string/group_tag_light_novel"
+                        android:textColor="@color/group_chip_text"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_group_chip"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="12dp"
+                        android:paddingTop="6dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="6dp"
+                        android:tag="@string/group_tag_discussion"
+                        android:text="@string/group_tag_discussion"
+                        android:textColor="@color/group_chip_text"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_group_chip"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="12dp"
+                        android:paddingTop="6dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="6dp"
+                        android:tag="@string/group_tag_otaku"
+                        android:text="@string/group_tag_otaku"
+                        android:textColor="@color/group_chip_text"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Ô tìm thành viên (chỉ hiện ở tab Thành viên) -->
+            <EditText
+                android:id="@+id/edtSearchMember"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginStart="17dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginEnd="17dp"
+                android:background="@drawable/bg_group_composer"
+                android:drawableStart="@drawable/ic_group_search"
+                android:drawablePadding="8dp"
+                android:drawableTint="@color/group_meta"
+                android:fontFamily="@font/inter"
+                android:hint="@string/group_member_search_hint"
+                android:imeOptions="actionSearch"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:singleLine="true"
+                android:textColor="@color/group_text"
+                android:textColorHint="@color/group_composer_hint"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <!-- Danh sách bài viết / thành viên -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rcvGroupContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:paddingStart="17dp"
+                android:paddingTop="16dp"
+                android:paddingEnd="17dp"
+                android:paddingBottom="24dp" />
+
+            <TextView
+                android:id="@+id/txtEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
+                android:gravity="center"
+                android:padding="32dp"
+                android:text="@string/group_empty_other"
+                android:textColor="@color/group_meta"
+                android:textSize="13sp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>
+
+    <!-- Nút + đăng bài trong group (bấm để mở / đóng ô soạn bài) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabGroupPost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/group_post_in_group_cd"
+        android:src="@android:drawable/ic_input_add"
+        android:visibility="gone"
+        app:backgroundTint="#786FF8"
+        app:elevation="6dp"
+        app:fabCustomSize="60dp"
+        app:tint="#FFFFFF" />
+</FrameLayout>

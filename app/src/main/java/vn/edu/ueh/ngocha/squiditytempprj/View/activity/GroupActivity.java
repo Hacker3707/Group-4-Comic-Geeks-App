@@ -1,6 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -114,7 +116,23 @@ public class GroupActivity extends BaseActivity {
                 startActivity(intent);
             }
         });
-        rcvGroups.setLayoutManager(new LinearLayoutManager(this));
+        // Xoay ngang thì chia 2 cột cho đỡ trống, dọc thì 1 cột
+        boolean landscape = getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
+        if (landscape) {
+            rcvGroups.setLayoutManager(new GridLayoutManager(this, 2));
+            final int gap = (int) (6 * getResources().getDisplayMetrics().density);
+            rcvGroups.addItemDecoration(new RecyclerView.ItemDecoration() {
+                @Override
+                public void getItemOffsets(android.graphics.Rect outRect, View view,
+                                           RecyclerView parent, RecyclerView.State state) {
+                    outRect.left = gap;
+                    outRect.right = gap;
+                }
+            });
+        } else {
+            rcvGroups.setLayoutManager(new LinearLayoutManager(this));
+        }
         rcvGroups.setAdapter(groupAdapter);
     }
 
