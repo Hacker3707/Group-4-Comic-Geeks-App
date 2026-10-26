@@ -4,13 +4,13 @@
     <string name="group_members_count">%1$d Members</string>
     <string name="group_join">Join</string>
     <string name="group_joined">♧ Joined</string>
-    <string name="group_more_dots">⋯</string>
+    <string name="group_more_dots" translatable="false">⋯</string>
 
-    <string name="group_chip_anime">Anime</string>
-    <string name="group_chip_manga">Manga</string>
-    <string name="group_chip_light_novel">Light Novel</string>
-    <string name="group_chip_discussion">Discussion</string>
-    <string name="group_chip_otaku">Otaku</string>
+    <string name="group_chip_anime" translatable="false">Anime</string>
+    <string name="group_chip_manga" translatable="false">Manga</string>
+    <string name="group_chip_light_novel" translatable="false">Light Novel</string>
+    <string name="group_chip_discussion" translatable="false">Discussion</string>
+    <string name="group_chip_otaku" translatable="false">Otaku</string>
 
     <string name="group_tab_posts">Posts</string>
     <string name="group_tab_members">Members</string>
@@ -27,7 +27,7 @@
     <string name="group_member_you">%1$s (You)</string>
     <string name="group_empty_other">Nothing here yet</string>
 
-    <string name="group_post_dots">•••</string>
+    <string name="group_post_dots" translatable="false">•••</string>
     <string name="group_post_topic">Discussion</string>
     <string name="group_post_say">Say something... くコ:彡</string>
 

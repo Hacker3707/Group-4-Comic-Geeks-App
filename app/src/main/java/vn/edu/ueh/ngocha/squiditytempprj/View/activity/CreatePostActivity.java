@@ -348,8 +348,10 @@ public class CreatePostActivity extends AppCompatActivity {
             String query,
             Map<String, String> titleToIdMap
     ) {
+        List<String> includes = new ArrayList<>();
+        includes.add("cover_art");
         if (query == null || query.trim().isEmpty()) {
-            comicViewModel.searchManga("", 5, 0, "cover_art");
+            comicViewModel.searchManga("", 5, 0, includes);
             return;
         }
 
@@ -357,7 +359,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 query.trim(),
                 5,
                 0,
-                "cover_art"
+                includes
         );
     }
 

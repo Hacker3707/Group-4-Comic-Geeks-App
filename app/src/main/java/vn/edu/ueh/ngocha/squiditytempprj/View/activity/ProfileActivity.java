@@ -278,6 +278,7 @@ public class ProfileActivity extends BaseActivity {
 
             intent.putExtra("comic_id", comicId);
             intent.putExtra("search_option", "MangaDex");
+            intent.putExtra("from_activity", "ProfileActivity");
 
             startActivity(intent);
         }

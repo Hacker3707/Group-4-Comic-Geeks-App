@@ -5,6 +5,7 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.OnConflictStrategy;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 
 @Dao
 public interface ComicDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertComic(Comic comic);
 
     @Query("SELECT * FROM comics")
