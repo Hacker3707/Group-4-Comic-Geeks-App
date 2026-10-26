@@ -430,4 +430,6 @@
     <string name="follow_list_following">Đang theo dõi</string>
     <string name="follow_list_empty">Chưa có ai.</string>
     <string name="follow_list_loading">Đang tải...</string>
+    <string name="follow_list_follow">Theo dõi</string>
+    <string name="follow_list_unfollow">Bỏ theo dõi</string>
 </resources>

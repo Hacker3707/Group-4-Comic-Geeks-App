@@ -1,6 +1,8 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
+import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
+import android.content.res.Configuration;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -70,9 +72,15 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
  *   intent.putExtra(GroupViewActivity.EXTRA_GROUP_ID, groupId);
  *   startActivity(intent);
  */
-public class GroupViewActivity extends AppCompatActivity {
+public class GroupViewActivity extends BaseActivity {
 
     public static final String EXTRA_GROUP_ID = "group_id";
+
+    // BaseActivity lo khung bên trái (menu cố định khi xoay ngang) và nạp layout này vào khung nội dung
+    @Override
+    protected int getContentLayoutId() {
+        return R.layout.group_view_activity;
+    }
 
     // TODO: user thử, dùng chung với GroupActivity. Thay bằng user đang đăng nhập khi có đăng nhập
     private final String CURRENT_USER_ID = GroupActivity.currentUserId();
@@ -91,6 +99,7 @@ public class GroupViewActivity extends AppCompatActivity {
     private static final int TAB_POSTS = 0;
     private static final int TAB_MEMBERS = 1;
     private static final String STATE_SELECTED_TAB = "selected_tab";
+    private static final String STATE_SELECTED_TAG = "selected_tag";
 
     private GroupViewModel groupViewModel;
     private PostViewModel postViewModel;
@@ -149,14 +158,9 @@ public class GroupViewActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // BaseActivity đã setContentView (khung menu bên trái + nội dung group)
         super.onCreate(savedInstanceState);
-        // Thanh tiêu đề màu tím đậm nên dùng biểu tượng sáng ở thanh trạng thái
-        EdgeToEdge.enable(
-                this,
-                SystemBarStyle.dark(Color.TRANSPARENT),
-                SystemBarStyle.dark(Color.TRANSPARENT)
-        );
-        setContentView(R.layout.group_view_activity);
+        setupBaseFrame();
 
         groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
         if (groupId == null) {
@@ -171,6 +175,7 @@ public class GroupViewActivity extends AppCompatActivity {
         setupListeners();
         setupChips();
         setupComposerHashtag();
+        restoreSelectedChip(savedInstanceState);
 
         groupViewModel = new ViewModelProvider(this).get(GroupViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
@@ -205,6 +210,23 @@ public class GroupViewActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STATE_SELECTED_TAB, selectedTab);
+        // Giữ chủ đề đang lọc khi xoay màn hình
+        outState.putString(STATE_SELECTED_TAG, selectedTagKey);
+    }
+
+    // Xoay màn hình thì chọn lại chip chủ đề đang lọc (Activity được tạo lại nên chip bị mất trạng thái)
+    private void restoreSelectedChip(Bundle savedInstanceState) {
+        if (savedInstanceState == null) {
+            return;
+        }
+        selectedTagKey = savedInstanceState.getString(STATE_SELECTED_TAG);
+        if (selectedTagKey == null) {
+            return;
+        }
+        for (int i = 0; i < chipContainer.getChildCount(); i++) {
+            View chip = chipContainer.getChildAt(i);
+            chip.setSelected(selectedTagKey.equals(chip.getTag()));
+        }
     }
 
     @Override
@@ -229,6 +251,38 @@ public class GroupViewActivity extends AppCompatActivity {
     // Khởi tạo giao diện
     // =================================
 
+    // Màn group có thanh tiêu đề riêng nên ẩn app bar của BaseActivity,
+    // bỏ lề của khung nội dung và tô nền tím cho vùng status bar
+    private void setupBaseFrame() {
+        View appBar = findViewById(R.id.appBar);
+        if (appBar != null) {
+            appBar.setVisibility(View.GONE);
+        }
+        activityContent.setPadding(0, 0, 0, 0);
+
+        int headerColor = getResources().getColor(R.color.group_header);
+        View mainContainer = findViewById(R.id.mainContainer);
+        if (mainContainer != null) {
+            mainContainer.setBackgroundColor(headerColor);
+        }
+        View landscapeContent = findViewById(R.id.landscapeMainContent);
+        if (landscapeContent != null) {
+            landscapeContent.setBackgroundColor(headerColor);
+        }
+
+        boolean landscape = getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
+        if (!landscape) {
+            // Dọc: thanh tiêu đề tím đậm nên dùng biểu tượng sáng ở thanh trạng thái
+            EdgeToEdge.enable(
+                    this,
+                    SystemBarStyle.dark(Color.TRANSPARENT),
+                    SystemBarStyle.dark(Color.TRANSPARENT)
+            );
+        }
+    }
+
+    // Chỉ xử lý phần đáy (thanh điều hướng + bàn phím); phần trên đã do BaseActivity lo
     private void setupInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
@@ -238,7 +292,7 @@ public class GroupViewActivity extends AppCompatActivity {
                         Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
                         Insets keyboard = insets.getInsets(WindowInsetsCompat.Type.ime());
                         int bottom = Math.max(systemBars.bottom, keyboard.bottom);
-                        v.setPadding(systemBars.left, systemBars.top, systemBars.right, bottom);
+                        v.setPadding(0, 0, 0, bottom);
                         return insets;
                     }
                 });

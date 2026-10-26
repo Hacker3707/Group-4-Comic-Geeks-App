@@ -331,4 +331,6 @@
     <string name="follow_list_following">Following</string>
     <string name="follow_list_empty">Nobody here yet.</string>
     <string name="follow_list_loading">Loading...</string>
+    <string name="follow_list_follow">Follow</string>
+    <string name="follow_list_unfollow">Unfollow</string>
 </resources>
