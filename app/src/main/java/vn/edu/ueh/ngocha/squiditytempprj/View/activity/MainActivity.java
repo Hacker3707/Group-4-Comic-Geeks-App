@@ -24,6 +24,7 @@ import com.google.android.material.imageview.ShapeableImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.widget.TextView;
+import android.widget.EditText;
 
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.firebase.auth.FirebaseUser;
@@ -334,21 +335,48 @@ public class MainActivity extends BaseActivity {
                 bottomSheetDialog.setContentView(R.layout.layout_comment_sheet);
 
                 RecyclerView rvComments = bottomSheetDialog.findViewById(R.id.recyclerViewComments);
+                EditText edtCommentInput = bottomSheetDialog.findViewById(R.id.edtCommentInput);
+                ImageButton btnSend = bottomSheetDialog.findViewById(R.id.btnSendCommentSheet);
+
                 if (rvComments != null) {
                     rvComments.setLayoutManager(new LinearLayoutManager(MainActivity.this));
                 }
 
-                CommentAdapter commentAdapter = new CommentAdapter(new ArrayList<>());
+                // Biến lưu trạng thái đang trả lời bình luận (Reply Comment)
+                final String[] activeParentId = {null};
+                final String[] activeReplyUsername = {null};
+
+                CommentAdapter commentAdapter = new CommentAdapter(new ArrayList<>(), commentClicked -> {
+                    activeParentId[0] = commentClicked.getCommentId();
+
+                    // 👉 Lấy tên hiển thị của người viết comment đó để khi gửi sẽ lưu tên đẹp thay vì UID
+                    // (Bạn có thể lấy từ UserViewModel hoặc gọi UserDisplayUtils nếu đã có map, hoặc tạm thời lưu userId để Adapter tự tra cứu qua Map users)
+                    activeReplyUsername[0] = commentClicked.getUserId();
+
+                    if (edtCommentInput != null) {
+                        edtCommentInput.requestFocus();
+                        edtCommentInput.setHint("Nhập câu trả lời...");
+
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        if (imm != null) {
+                            imm.showSoftInput(edtCommentInput, InputMethodManager.SHOW_IMPLICIT);
+                        }
+                    }
+                    Toast.makeText(MainActivity.this, "Đang trả lời bình luận...", Toast.LENGTH_SHORT).show();
+                });
+
                 if (rvComments != null) {
                     rvComments.setAdapter(commentAdapter);
                 }
-                // Hiện đúng tên + ảnh tài khoản của người bình luận
+
+                // Hiển thị đúng tên + ảnh tài khoản của người bình luận theo thời gian thực
                 CommentUsersWatcher usersWatcher = new CommentUsersWatcher(
                         MainActivity.this,
                         new ViewModelProvider(MainActivity.this).get(UserViewModel.class),
                         commentAdapter);
                 bottomSheetDialog.setOnDismissListener(d -> usersWatcher.stop());
 
+                // 👉 QUAN TRỌNG: Lắng nghe và đổ danh sách bình luận từ Firestore lên RecyclerView
                 if (post.getPostId() != null) {
                     postViewModel.getCommentsByPostId(post.getPostId()).observe(MainActivity.this, realComments -> {
                         if (realComments != null) {
@@ -360,6 +388,36 @@ public class MainActivity extends BaseActivity {
                         }
                     });
                 }
+
+                // Xử lý sự kiện khi bấm nút Gửi trong BottomSheet (Hỗ trợ cả Comment mới và Reply Comment)
+                if (btnSend != null && edtCommentInput != null) {
+                    btnSend.setOnClickListener(v -> {
+                        String commentText = edtCommentInput.getText().toString().trim();
+                        if (!commentText.isEmpty()) {
+                            String randomCommentId = UUID.randomUUID().toString();
+                            Comment newComment = new Comment(randomCommentId, currentUid(), post.getPostId(), commentText);
+
+                            // Nếu đang trong chế độ trả lời, gán thêm Parent ID và tên người nhận
+                            if (activeParentId[0] != null) {
+                                newComment.setParentId(activeParentId[0]);
+                                newComment.setReplyToUsername(activeReplyUsername[0]);
+                            }
+
+                            postViewModel.addComment(newComment, post);
+
+                            // Reset lại ô nhập và trạng thái sau khi gửi
+                            edtCommentInput.setText("");
+                            edtCommentInput.setHint("Viết bình luận...");
+                            activeParentId[0] = null;
+                            activeReplyUsername[0] = null;
+
+                            Toast.makeText(MainActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this, "Vui lòng nhập nội dung!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
                 bottomSheetDialog.show();
             }
 
@@ -536,7 +594,7 @@ public class MainActivity extends BaseActivity {
                 (FrameLayout.LayoutParams) searchOverlay.getLayoutParams();
 
         float density = getResources().getDisplayMetrics().density;
-        // 👉 Đã sửa lỗi cú pháp ở dòng này (bỏ dấu trừ thừa và viết chuẩn công thức density)
+        // Công thức chuẩn xác, không còn lỗi cú pháp
         int topMargin = statusBarInset + (int) (125 * density);
 
         params.topMargin = topMargin;

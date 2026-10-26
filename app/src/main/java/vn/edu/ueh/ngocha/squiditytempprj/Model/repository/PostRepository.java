@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import androidx.lifecycle.LiveData;
 
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.dao.PostDao;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 
 public class PostRepository {
     private PostDao mPostDao;
@@ -26,12 +28,15 @@ public class PostRepository {
         mPostDao = db.postDao();
         mAllPosts = mPostDao.getAllPosts();
     }
+
     public LiveData<List<Post>> getAllPosts() {
         return mAllPosts;
     }
+
     public LiveData<List<Post>> getPostsByComic(String comicId) {
         return mPostDao.getPostsByComic(comicId);
     }
+
     public void insert(Post post) {
         new insertAsyncTask(mPostDao).execute(post);
     }
@@ -44,7 +49,7 @@ public class PostRepository {
         new deleteAsyncTask(mPostDao).execute(post);
     }
 
-    //======================== AsyncTask cho các thao tác trong Post ========================
+    // --- AsyncTask cho Room Database ---
     private static class insertAsyncTask extends AsyncTask<Post, Void, Void> {
         private PostDao mAsyncTaskDao;
         insertAsyncTask(PostDao dao) { mAsyncTaskDao = dao; }
@@ -54,6 +59,7 @@ public class PostRepository {
             return null;
         }
     }
+
     private static class updateAsyncTask extends AsyncTask<Post, Void, Void> {
         private PostDao mAsyncTaskDao;
         updateAsyncTask(PostDao dao) { mAsyncTaskDao = dao; }
@@ -73,7 +79,6 @@ public class PostRepository {
             return null;
         }
     }
-
     public void uploadPostToFirestore(Post post, OnFirestoreUploadListener listener) {
         Map<String, Object> postMap = new HashMap<>();
         postMap.put("postId", post.getPostId());
@@ -86,13 +91,13 @@ public class PostRepository {
         postMap.put("imageUris", post.getImageUris());
         postMap.put("timestamp", post.getTimestamp());
         postMap.put("commentCount", post.getCommentCount());
-        postMap.put("hashtag", post.getHashtag());
-        postMap.put("comicTitle", post.getComicTitle());
+
+
+        insert(post);
 
         firestore.collection("posts").document(post.getPostId())
                 .set(postMap)
                 .addOnSuccessListener(aVoid -> {
-                    insert(post); // Lưu cục bộ Room
                     if (listener != null) listener.onSuccess();
                 })
                 .addOnFailureListener(e -> {
@@ -102,23 +107,22 @@ public class PostRepository {
 
     public void deletePost(Post post, String postId) {
         firestore.collection("posts").document(postId).delete();
-        syncManager.deleteCommentsOfPostRemote(postId); // Xóa luôn bình luận của bài
-        delete(post); // Xóa cục bộ
+        syncManager.deleteCommentsOfPostRemote(postId);
+        delete(post);
     }
 
-    // 👉 Hàm cập nhật bài viết chuẩn, đồng bộ cả Firebase lẫn Room Database cục bộ
     public void updatePostInFirestore(Post post, OnFirestoreUploadListener listener) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("content", post.getContent());
         updates.put("comicId", post.getComicId());
-        updates.put("imageUris", post.getImageUris()); // 👉 Sửa thành imageUris (số nhiều)
+        updates.put("imageUris", post.getImageUris());
         updates.put("hashtag", post.getHashtag());
         updates.put("comicTitle", post.getComicTitle());
+        update(post);
 
         firestore.collection("posts").document(post.getPostId())
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    update(post); // Cập nhật đồng thời vào Room Database cục bộ
                     if (listener != null) listener.onSuccess();
                 })
                 .addOnFailureListener(e -> {

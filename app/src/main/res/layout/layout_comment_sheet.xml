@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:background="@drawable/bottom_sheet_background"
     android:paddingTop="8dp"
-    android:paddingBottom="24dp">
+    android:paddingBottom="16dp">
 
     <!-- Thanh kéo nhỏ ở trên cùng -->
     <View
@@ -15,9 +15,7 @@
         android:layout_width="40dp"
         android:layout_height="4dp"
         android:background="#D0D0D0"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_gravity="center_horizontal" />
 
     <!-- Tiêu đề Bình luận -->
     <TextView
@@ -28,30 +26,60 @@
         android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="#333333"
-        android:layout_marginTop="12dp"
-        app:layout_constraintTop_toBottomOf="@id/dragHandle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp" />
 
     <View
         android:id="@+id/dividerHeader"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#EEEEEE"
-        android:layout_marginTop="12dp"
-        app:layout_constraintTop_toBottomOf="@id/tvSheetTitle" />
+        android:layout_marginTop="12dp" />
 
-    <!-- Danh sách bình luận -->
+    <!-- Danh sách bình luận (Sử dụng weight hoặc chiều cao tối đa để co giãn mượt mà) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewComments"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxHeight="400dp"
-        android:padding="16dp"
+        android:layout_height="320dp"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
         android:clipToPadding="false"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/dividerHeader"
-        app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/item_comment" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Thanh nhập nội dung bình luận / trả lời nằm ở đáy -->
+    <LinearLayout
+        android:id="@+id/layoutCommentInputContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:background="#FFFFFF">
+
+        <EditText
+            android:id="@+id/edtCommentInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/comment_input_bg"
+            android:hint="Viết bình luận..."
+            android:textSize="14sp"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="10dp"
+            android:maxLines="4"
+            android:inputType="textLongMessage|textCapSentences" />
+
+        <ImageButton
+            android:id="@+id/btnSendCommentSheet"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_send"
+            app:tint="#5E35B1"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:contentDescription="Gửi bình luận" />
+    </LinearLayout>
+
+</LinearLayout>
