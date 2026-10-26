@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import com.google.android.gms.tasks.Task;
@@ -10,6 +11,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import android.net.Uri;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.EventListener;
@@ -218,6 +222,50 @@ public class UserProfileRepository {
                             .document(uid)
                             .set(data, SetOptions.merge());
                 });
+    }
+
+
+    /**
+     * Lấy thông tin một người dùng theo UID Firebase.
+     * Không thay đổi profile state đang được các màn hình khác sử dụng.
+     */
+    public LiveData<User> getUserById(String uid) {
+        MutableLiveData<User> result = new MutableLiveData<>();
+
+        if (uid == null || uid.trim().isEmpty()) {
+            result.setValue(null);
+            return result;
+        }
+
+        final String userId = uid.trim();
+
+        getProfile(userId)
+                .addOnSuccessListener(document -> {
+                    if (document == null || !document.exists()) {
+                        result.setValue(null);
+                        return;
+                    }
+
+                    User user = document.toObject(User.class);
+
+                    if (user != null) {
+                        // Luôn lấy UID từ ID document Firestore.
+                        user.setUserId(document.getId());
+
+                        // Không để màn hình khác vô tình hiển thị email
+                        // của người dùng được tra cứu.
+                        user.setEmail(null);
+
+                        result.setValue(user);
+                    } else {
+                        result.setValue(null);
+                    }
+                })
+                .addOnFailureListener(error -> {
+                    result.setValue(null);
+                });
+
+        return result;
     }
 
     public Task<Void> updateProfileDetails(
