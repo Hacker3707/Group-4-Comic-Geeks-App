@@ -306,6 +306,11 @@ public class ComicListActivity extends BaseActivity {
         }
     };
 
+    @Override
+    public boolean hideAppBar() {
+        return true;
+    }
+
 
     // =========================================================
     // --------------------- onCreate --------------------------

@@ -47,6 +47,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected DrawerLayout drawerLayout;
     protected NavigationView navigationView;
+    protected View appBar;
     protected TextView tvDrawerUsername;
     protected TextView tvDrawerEmail;
     protected TextView tvMainUsername;
@@ -72,6 +73,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         return false;
     }
 
+    protected boolean hideAppBar() { return false; }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,15 +86,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         navigationView = findViewById(R.id.navigationView);
         activityContent = findViewById(R.id.activityContent);
         baseOverlayContainer = findViewById(R.id.baseOverlayContainer);
+        appBar = findViewById(R.id.appBar);
 
         NtfChannel.setup(this);
         NotificationPopup.attach(this, findViewById(R.id.btnNotification));
 
         View mainContainer = findViewById(R.id.mainContainer);
-
-        Log.d("BaseActivity", "drawerLayout = " + drawerLayout);
-        Log.d("BaseActivity", "navigationView = " + navigationView);
-        Log.d("BaseActivity", "mainContainer = " + mainContainer);
 
         if (drawerLayout == null || navigationView == null
                 || mainContainer == null || activityContent == null || baseOverlayContainer == null) {
@@ -164,6 +164,10 @@ public abstract class BaseActivity extends AppCompatActivity {
                     return insets;
                 }
         );
+
+        if (hideAppBar()) {
+            appBar.setVisibility(View.GONE);
+        }
 
         ViewCompat.requestApplyInsets(drawerLayout);
 

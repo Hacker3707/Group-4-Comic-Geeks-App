@@ -190,13 +190,19 @@ public class ProfileActivity extends BaseActivity {
         }
     };
 
-    private Observer<List<MangaData>> comicObserver =
-            new Observer<List<MangaData>>() {
-                @Override
-                public void onChanged(List<MangaData> comics) {
-                    reviewAdapter.setComics(comics);
-                }
-            };
+    private Observer<List<MangaData>> comicObserver = new Observer<List<MangaData>>() {
+        @Override
+        public void onChanged(List<MangaData> comics) {
+            reviewAdapter.setComics(comics);
+        }
+    };
+
+    private Observer<User> profileObserver = new Observer<User>() {
+        @Override
+        public void onChanged(User user) {
+            currentProfile = user;
+        }
+    };
 
     private void renderSelectedGenres() {
         if (chipGenreProfile == null) {
@@ -355,6 +361,19 @@ public class ProfileActivity extends BaseActivity {
         chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
+        FirebaseUser me = FirebaseAuth.getInstance()
+                .getCurrentUser();
+
+        String fromIntent = getIntent()
+                .getStringExtra(EXTRA_USER_ID);
+
+        targetUserId = (fromIntent == null || fromIntent.trim().isEmpty())
+                ? me.getUid()
+                : fromIntent.trim();
+
+        isOwnProfile = targetUserId.equals(me.getUid());
+        currentProfileUserId = targetUserId;
+
         // 1. Khởi tạo RecyclerView
         recyclerViewProfileComments = findViewById(R.id.rcvProfileReviews);
 
@@ -374,7 +393,9 @@ public class ProfileActivity extends BaseActivity {
                 .get(ReviewViewModel.class);
         comicViewModel = new ViewModelProvider(this).get(ComicViewModel.class);
 
-        reviewViewModel.getAllReviewsforUserId(currentUid())
+        profileViewModel.getUserById(targetUserId).observe(this, profileObserver);
+
+        reviewViewModel.getAllReviewsforUserId(targetUserId)
                 .observe(this, reviewObserver);
 
         tvProfilePostCount = findViewById(R.id.tvProfilePostCount);
@@ -580,11 +601,6 @@ public class ProfileActivity extends BaseActivity {
             currentCoverUrl = state.coverUrl == null
                     ? "" : state.coverUrl;
 
-            currentProfile = new User();
-            currentProfile.setUserId(currentUid());
-            currentProfile.setUsername(username);
-            currentProfile.setEmail(email);
-            currentProfile.setAvatarUrl(currentAvatarUrl);
         });
 
 
@@ -765,13 +781,6 @@ public class ProfileActivity extends BaseActivity {
     // =================================
     private void setupFollow() {
         String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        String fromIntent = getIntent().getStringExtra(EXTRA_USER_ID);
-        targetUserId = (fromIntent == null || fromIntent.isEmpty()) ? myUid : fromIntent;
-        isOwnProfile = targetUserId.equals(myUid);
-        currentProfileUserId = targetUserId;
-        if (!isOwnProfile) {
-            currentProfileUsername = "";
-        }
 
         tvFollowersCount = findViewById(R.id.tvFollowersCount);
         tvFollowingCount = findViewById(R.id.tvFollowingCount);
