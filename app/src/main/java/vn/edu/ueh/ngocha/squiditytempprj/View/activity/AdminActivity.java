@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -75,7 +76,7 @@ public class AdminActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
         if (me == null) {
-            Toast.makeText(this, "Bạn cần đăng nhập", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Str.t(R.string.common_login_required), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -97,10 +98,10 @@ public class AdminActivity extends AppCompatActivity {
         rvAdmin.setAdapter(adapter);
 
         TabLayout tabs = findViewById(R.id.adminTabs);
-        tabs.addTab(tabs.newTab().setText("Tổng quan"));
-        tabs.addTab(tabs.newTab().setText("Người dùng"));
-        tabs.addTab(tabs.newTab().setText("Bài viết"));
-        tabs.addTab(tabs.newTab().setText("Nhóm"));
+        tabs.addTab(tabs.newTab().setText(Str.t(R.string.admin_tab_overview)));
+        tabs.addTab(tabs.newTab().setText(Str.t(R.string.common_user)));
+        tabs.addTab(tabs.newTab().setText(Str.t(R.string.admin_tab_posts)));
+        tabs.addTab(tabs.newTab().setText(Str.t(R.string.admin_tab_groups)));
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -125,13 +126,13 @@ public class AdminActivity extends AppCompatActivity {
                         startListening();
                         render();
                     } else {
-                        Toast.makeText(this, "Chỉ admin mới vào được trang này",
+                        Toast.makeText(this, Str.t(R.string.admin_only_page),
                                 Toast.LENGTH_LONG).show();
                         finish();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Không kiểm tra được quyền admin", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, Str.t(R.string.admin_check_failed), Toast.LENGTH_LONG).show();
                     finish();
                 });
     }
@@ -187,11 +188,11 @@ public class AdminActivity extends AppCompatActivity {
             for (DocumentSnapshot u : users) {
                 if (Boolean.TRUE.equals(u.getBoolean("banned"))) banned++;
             }
-            tvStatUsers.setText("Người dùng: " + users.size());
-            tvStatBanned.setText("Tài khoản bị cấm: " + banned);
-            tvStatPosts.setText("Bài viết: " + posts.size());
-            tvStatGroups.setText("Nhóm: " + groups.size());
-            tvStatComments.setText("Bình luận: " + commentCount);
+            tvStatUsers.setText(Str.t(R.string.admin_stat_users, users.size()));
+            tvStatBanned.setText(Str.t(R.string.admin_stat_banned, banned));
+            tvStatPosts.setText(Str.t(R.string.admin_stat_posts, posts.size()));
+            tvStatGroups.setText(Str.t(R.string.admin_stat_groups, groups.size()));
+            tvStatComments.setText(Str.t(R.string.admin_stat_comments, commentCount));
             return;
         }
 
@@ -204,9 +205,9 @@ public class AdminActivity extends AppCompatActivity {
                 boolean admin = ROLE_ADMIN.equals(u.getString("role"));
                 Row r = new Row();
                 r.id = u.getId();
-                r.title = nonEmpty(u.getString("username"), "(chưa đặt tên)");
+                r.title = nonEmpty(u.getString("username"), Str.t(R.string.admin_no_name));
                 r.subtitle = nonEmpty(u.getString("email"), u.getId());
-                r.badge = banned ? "Bị cấm" : (admin ? "Admin" : "");
+                r.badge = banned ? Str.t(R.string.admin_badge_banned) : (admin ? "Admin" : "");
                 r.badgeColor = banned ? Color.parseColor("#C62828") : Color.parseColor("#493373");
                 rows.add(r);
             }
@@ -216,10 +217,10 @@ public class AdminActivity extends AppCompatActivity {
                         ? names.get(p.getString("userId")) : nonEmpty(p.getString("userId"), "?");
                 Row r = new Row();
                 r.id = p.getId();
-                r.title = nonEmpty(p.getString("content"), "(bài chỉ có ảnh)");
-                r.subtitle = "Bởi " + author;
+                r.title = nonEmpty(p.getString("content"), Str.t(R.string.admin_image_only_post));
+                r.subtitle = Str.t(R.string.admin_by, author);
                 boolean inGroup = p.getString("groupId") != null && !p.getString("groupId").isEmpty();
-                r.badge = inGroup ? "Trong nhóm" : "";
+                r.badge = inGroup ? Str.t(R.string.admin_in_group) : "";
                 r.badgeColor = Color.parseColor("#493373");
                 rows.add(r);
             }
@@ -229,8 +230,8 @@ public class AdminActivity extends AppCompatActivity {
                         ? names.get(g.getString("creatorId")) : nonEmpty(g.getString("creatorId"), "?");
                 Row r = new Row();
                 r.id = g.getId();
-                r.title = nonEmpty(g.getString("groupName"), "(nhóm không tên)");
-                r.subtitle = "Tạo bởi " + creator;
+                r.title = nonEmpty(g.getString("groupName"), Str.t(R.string.admin_group_no_name));
+                r.subtitle = Str.t(R.string.admin_created_by, creator);
                 r.badge = "";
                 rows.add(r);
             }
@@ -276,7 +277,7 @@ public class AdminActivity extends AppCompatActivity {
 
     private void showUserActions(Row row) {
         if (row.id.equals(myUid)) {
-            Toast.makeText(this, "Bạn không thể thao tác với chính mình", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Str.t(R.string.group_member_self), Toast.LENGTH_SHORT).show();
             return;
         }
         DocumentSnapshot u = find(users, row.id);
@@ -284,24 +285,24 @@ public class AdminActivity extends AppCompatActivity {
         final boolean banned = Boolean.TRUE.equals(u.getBoolean("banned"));
         final boolean admin = ROLE_ADMIN.equals(u.getString("role"));
         String[] options = {
-                banned ? "Bỏ cấm tài khoản" : "Cấm tài khoản",
-                admin ? "Gỡ quyền admin" : "Cấp quyền admin"
+                banned ? Str.t(R.string.admin_unban) : Str.t(R.string.admin_ban),
+                admin ? Str.t(R.string.admin_revoke) : Str.t(R.string.admin_grant)
         };
         new AlertDialog.Builder(this)
                 .setTitle(row.title)
                 .setItems(options, (dialog, which) -> {
                     if (which == 0) {
                         db.collection("users").document(row.id).update("banned", !banned);
-                        Toast.makeText(this, banned ? "Đã bỏ cấm" : "Đã cấm tài khoản",
+                        Toast.makeText(this, banned ? Str.t(R.string.admin_unbanned) : Str.t(R.string.admin_banned),
                                 Toast.LENGTH_SHORT).show();
                     } else {
                         db.collection("users").document(row.id)
                                 .update("role", admin ? "USER" : ROLE_ADMIN);
-                        Toast.makeText(this, admin ? "Đã gỡ quyền admin" : "Đã cấp quyền admin",
+                        Toast.makeText(this, admin ? Str.t(R.string.admin_revoked) : Str.t(R.string.admin_granted),
                                 Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("Đóng", null)
+                .setNegativeButton(Str.t(R.string.common_close), null)
                 .show();
     }
 
@@ -309,17 +310,17 @@ public class AdminActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(row.subtitle)
                 .setMessage(row.title)
-                .setPositiveButton("Xóa bài viết", (d, w) -> confirmDeletePost(row))
-                .setNegativeButton("Đóng", null)
+                .setPositiveButton(Str.t(R.string.admin_delete_post), (d, w) -> confirmDeletePost(row))
+                .setNegativeButton(Str.t(R.string.common_close), null)
                 .show();
     }
 
     private void confirmDeletePost(Row row) {
         new AlertDialog.Builder(this)
-                .setTitle("Xóa bài viết?")
-                .setMessage("Bài viết và bình luận của bài sẽ bị xóa khỏi toàn bộ app.")
-                .setNegativeButton("Hủy", null)
-                .setPositiveButton("Xóa", (d, w) -> deletePost(row.id))
+                .setTitle(Str.t(R.string.admin_delete_post_q))
+                .setMessage(Str.t(R.string.admin_delete_post_msg))
+                .setNegativeButton(Str.t(R.string.common_cancel), null)
+                .setPositiveButton(Str.t(R.string.common_delete), (d, w) -> deletePost(row.id))
                 .show();
     }
 
@@ -332,19 +333,19 @@ public class AdminActivity extends AppCompatActivity {
                     }
                     batch.delete(db.collection("posts").document(postId));
                     batch.commit().addOnSuccessListener(v ->
-                            Toast.makeText(this, "Đã xóa bài viết", Toast.LENGTH_SHORT).show());
+                            Toast.makeText(this, Str.t(R.string.admin_post_deleted), Toast.LENGTH_SHORT).show());
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Không xóa được: " + e.getMessage(),
+                        Toast.makeText(this, Str.t(R.string.admin_delete_failed, e.getMessage()),
                                 Toast.LENGTH_LONG).show());
     }
 
     private void confirmDeleteGroup(Row row) {
         new AlertDialog.Builder(this)
-                .setTitle("Giải tán nhóm \"" + row.title + "\"?")
-                .setMessage("Thành viên và toàn bộ bài viết trong nhóm sẽ bị xóa. Không thể hoàn tác.")
-                .setNegativeButton("Hủy", null)
-                .setPositiveButton("Giải tán", (d, w) -> deleteGroup(row.id))
+                .setTitle(Str.t(R.string.admin_dissolve_title, row.title))
+                .setMessage(Str.t(R.string.admin_dissolve_msg))
+                .setNegativeButton(Str.t(R.string.common_cancel), null)
+                .setPositiveButton(Str.t(R.string.admin_dissolve), (d, w) -> deleteGroup(row.id))
                 .show();
     }
 
@@ -358,10 +359,10 @@ public class AdminActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot p : groupPosts) batch.delete(p.getReference());
                             batch.delete(db.collection("groups").document(groupId));
                             batch.commit().addOnSuccessListener(v ->
-                                    Toast.makeText(this, "Đã giải tán nhóm", Toast.LENGTH_SHORT).show());
+                                    Toast.makeText(this, Str.t(R.string.group_dissolve_success), Toast.LENGTH_SHORT).show());
                         }))
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Không xóa được: " + e.getMessage(),
+                        Toast.makeText(this, Str.t(R.string.admin_delete_failed, e.getMessage()),
                                 Toast.LENGTH_LONG).show());
     }
 

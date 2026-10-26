@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -278,9 +279,7 @@ public class ComicListActivity extends BaseActivity {
 
                         if (!SEARCH_QUERY.isEmpty() && mangaDataList.isEmpty()) {
                             tvSearchResult.setText(
-                                    "Searched for "
-                                            + SEARCH_QUERY
-                                            + " successfully!"
+                                    Str.t(R.string.comic_searched_for, SEARCH_QUERY)
                             );
                         }
                     }
@@ -292,7 +291,7 @@ public class ComicListActivity extends BaseActivity {
         public void onChanged(Boolean isLoadingnow) {
             if (isLoadingnow != null && isLoadingnow) {
                 String searchQuery = etSearch.getText().toString();
-                tvSearchResult.setText("Loading results for: " + searchQuery + "...");
+                tvSearchResult.setText(Str.t(R.string.comic_loading_results, searchQuery));
             }
         }
     };

@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -252,7 +253,7 @@ public class SearchActivity extends BaseActivity {
 
         if (query.isEmpty()) {
             clearResults();
-            showEmpty("Nhập từ khóa để tìm kiếm");
+            showEmpty(Str.t(R.string.search_enter_keyword));
             return;
         }
 
@@ -275,7 +276,7 @@ public class SearchActivity extends BaseActivity {
             }
         }
         postAdapter.setPosts(result);
-        updateEmptyState(result.isEmpty(), "Không tìm thấy bài viết nào");
+        updateEmptyState(result.isEmpty(), Str.t(R.string.search_no_posts));
     }
 
     private void searchUsers(String query) {
@@ -286,7 +287,7 @@ public class SearchActivity extends BaseActivity {
                 userViewModel.loadAllUsers();
             }
             userAdapter.setUsers(new ArrayList<User>());
-            showEmpty("Đang tải danh sách người dùng...");
+            showEmpty(Str.t(R.string.search_loading_users));
             return;
         }
         List<User> result = new ArrayList<User>();
@@ -296,7 +297,7 @@ public class SearchActivity extends BaseActivity {
             }
         }
         userAdapter.setUsers(result);
-        updateEmptyState(result.isEmpty(), "Không tìm thấy người dùng nào");
+        updateEmptyState(result.isEmpty(), Str.t(R.string.search_no_users));
     }
 
     private void searchGroups(String query) {
@@ -308,7 +309,7 @@ public class SearchActivity extends BaseActivity {
             }
         }
         groupAdapter.setGroups(result);
-        updateEmptyState(result.isEmpty(), "Không tìm thấy nhóm nào");
+        updateEmptyState(result.isEmpty(), Str.t(R.string.search_no_groups));
     }
 
     // =================================

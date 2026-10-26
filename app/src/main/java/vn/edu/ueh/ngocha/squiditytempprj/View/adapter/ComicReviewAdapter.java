@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -144,7 +145,7 @@ public class ComicReviewAdapter
             String formattedDate = reviewDateFormat.format(reviewDate);
             holder.txtReviewDate.setText(formattedDate);
         } else {
-            holder.txtReviewDate.setText("Đang cập nhật...");
+            holder.txtReviewDate.setText(Str.t(R.string.comic_review_updating));
         }
 
         // Chuyển điểm từ String sang float
@@ -189,7 +190,7 @@ public class ComicReviewAdapter
             }
 
         } else {
-            holder.txtReviewerName.setText("Anonymous");
+            holder.txtReviewerName.setText(Str.t(R.string.review_anonymous));
             holder.imgvAvatar.setImageResource(
                     R.drawable.comic_background
             );
@@ -219,7 +220,7 @@ public class ComicReviewAdapter
             }
 
             holder.chipComic.setText(
-                    title == null ? "Unknown Comic" : "📖 " + title
+                    title == null ? Str.t(R.string.review_unknown_comic) : "📖 " + title
             );
 
             holder.chipComic.setTag(comic.getId());
@@ -227,7 +228,7 @@ public class ComicReviewAdapter
             holder.chipComic.setOnClickListener(onComicChipClickListener);
 
         } else {
-            holder.chipComic.setText("Comic Unfound");
+            holder.chipComic.setText(Str.t(R.string.review_comic_unfound));
             holder.chipComic.setTag(null);
             holder.chipComic.setEnabled(false);
             holder.chipComic.setOnClickListener(null);

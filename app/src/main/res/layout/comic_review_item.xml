@@ -24,7 +24,7 @@
             android:layout_gravity="top"
             android:layout_marginEnd="12dp"
             android:background="#FFFFFF"
-            android:contentDescription="Reviewer avatar"
+            android:contentDescription="@string/comic_reviewer_avatar_cd"
             android:scaleType="centerCrop"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
             app:strokeColor="#FFFFFF"
@@ -56,7 +56,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
-                    android:text="posted a review about:"
+                    android:text="@string/comic_posted_review"
                     android:visibility="gone" />
 
             </LinearLayout>
@@ -80,7 +80,7 @@
                     android:fontFamily="@font/jersey25_regular"
                     android:maxWidth="280dp"
                     android:maxLines="1"
-                    android:text="📖 Linked Comic"
+                    android:text="@string/post_linked_comic"
                     android:textColor="#493373"
                     android:textSize="16sp"
                     android:visibility="visible"

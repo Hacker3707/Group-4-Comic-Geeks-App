@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,7 +56,7 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Us
 
         String name = user.getUsername();
         if (name == null || name.trim().isEmpty()) {
-            name = "Người dùng";
+            name = Str.t(R.string.common_user);
         }
         holder.tvUserName.setText(name);
 

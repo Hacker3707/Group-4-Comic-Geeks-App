@@ -39,7 +39,7 @@
             android:paddingEnd="8dp"
             android:maxLines="1"
             android:ellipsize="end"
-            android:text="Khách"
+            android:text="@string/common_guest"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:textStyle="bold" />

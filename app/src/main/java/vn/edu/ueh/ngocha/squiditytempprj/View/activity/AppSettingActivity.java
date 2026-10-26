@@ -11,10 +11,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 
 public class AppSettingActivity extends AppCompatActivity {
 
@@ -61,6 +63,18 @@ public class AppSettingActivity extends AppCompatActivity {
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.preferences, rootKey);
             showAppVersion();
+            setupLanguage();
+        }
+
+        // Đổi ngôn ngữ toàn app: English <-> Tiếng Việt
+        private void setupLanguage() {
+            ListPreference language = findPreference("language");
+            if (language == null) return;
+            language.setValue(Str.getLanguage());
+            language.setOnPreferenceChangeListener((preference, newValue) -> {
+                Str.setLanguage(String.valueOf(newValue));
+                return true;
+            });
         }
 
         @Override

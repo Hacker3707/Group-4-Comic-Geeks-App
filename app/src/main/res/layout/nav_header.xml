@@ -50,7 +50,7 @@
             android:shadowRadius="3"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Khách"
+            android:text="@string/common_guest"
             android:textColor="#FFFFFF"
             android:textSize="22sp"
             android:textStyle="bold" />

@@ -6,21 +6,21 @@
     <PreferenceCategory
         android:key="category_account"
         android:layout="@layout/preference_setting_category"
-        android:title="Account">
+        android:title="@string/pref_account">
 
         <Preference
             android:key="reset_password"
             android:icon="@drawable/ic_setting_lock"
             android:layout="@layout/preference_setting_item"
-            android:summary="Send a reset link to your email"
-            android:title="Reset password" />
+            android:summary="@string/pref_reset_password_summary"
+            android:title="@string/pref_reset_password" />
 
         <Preference
             android:key="logout"
             android:icon="@drawable/ic_setting_logout"
             android:layout="@layout/preference_setting_item"
-            android:summary="Sign out of this device"
-            android:title="Log out" />
+            android:summary="@string/pref_logout_summary"
+            android:title="@string/pref_logout" />
 
     </PreferenceCategory>
 
@@ -28,16 +28,16 @@
     <PreferenceCategory
         android:key="category_general"
         android:layout="@layout/preference_setting_category"
-        android:title="Preferences">
+        android:title="@string/pref_preferences">
 
         <ListPreference
             android:key="language"
-            android:defaultValue="vi"
+            android:defaultValue="en"
             android:entries="@array/language_entries"
             android:entryValues="@array/language_values"
             android:icon="@drawable/ic_setting_language"
             android:layout="@layout/preference_setting_item"
-            android:title="Language"
+            android:title="@string/pref_language"
             app:useSimpleSummaryProvider="true" />
 
         <ListPreference
@@ -47,7 +47,7 @@
             android:entryValues="@array/theme_values"
             android:icon="@drawable/ic_setting_palette"
             android:layout="@layout/preference_setting_item"
-            android:title="App Theme"
+            android:title="@string/pref_theme"
             app:useSimpleSummaryProvider="true" />
 
         <SwitchPreferenceCompat
@@ -55,16 +55,16 @@
             android:defaultValue="true"
             android:icon="@drawable/ic_setting_notifications"
             android:layout="@layout/preference_setting_plain"
-            android:summary="Get alerts about new activity"
-            android:title="Enable notifications"
+            android:summary="@string/pref_notifications_summary"
+            android:title="@string/pref_notifications"
             android:widgetLayout="@layout/preference_setting_switch_widget" />
 
         <Preference
             android:key="clear_cache"
             android:icon="@drawable/ic_setting_cache"
             android:layout="@layout/preference_setting_item"
-            android:summary="Free up space used by images and temporary data"
-            android:title="Clear cache" />
+            android:summary="@string/pref_clear_cache_summary"
+            android:title="@string/pref_clear_cache" />
 
     </PreferenceCategory>
 
@@ -72,20 +72,20 @@
     <PreferenceCategory
         android:key="category_privacy"
         android:layout="@layout/preference_setting_category"
-        android:title="Privacy">
+        android:title="@string/pref_privacy">
 
         <Preference
             android:key="blocked_users"
             android:icon="@drawable/ic_setting_block"
             android:layout="@layout/preference_setting_item"
-            android:summary="Manage people you have blocked"
-            android:title="Blocked users" />
+            android:summary="@string/pref_blocked_summary"
+            android:title="@string/pref_blocked" />
 
         <Preference
             android:key="privacy_policy"
             android:icon="@drawable/ic_setting_shield"
             android:layout="@layout/preference_setting_item"
-            android:title="Privacy Policy" />
+            android:title="@string/pref_privacy_policy" />
 
     </PreferenceCategory>
 
@@ -93,13 +93,13 @@
     <PreferenceCategory
         android:key="category_about"
         android:layout="@layout/preference_setting_category"
-        android:title="About">
+        android:title="@string/pref_about">
 
         <Preference
             android:key="help"
             android:icon="@drawable/ic_setting_help"
             android:layout="@layout/preference_setting_item"
-            android:title="Help" />
+            android:title="@string/pref_help" />
 
         <Preference
             android:key="app_version"
@@ -107,25 +107,25 @@
             android:layout="@layout/preference_setting_plain"
             android:selectable="false"
             android:summary="1.0.0"
-            android:title="App version" />
+            android:title="@string/pref_app_version" />
 
         <Preference
             android:key="app_info"
             android:icon="@drawable/ic_setting_info"
             android:layout="@layout/preference_setting_item"
-            android:title="App info" />
+            android:title="@string/pref_app_info" />
 
         <Preference
             android:key="app_license"
             android:icon="@drawable/ic_setting_license"
             android:layout="@layout/preference_setting_item"
-            android:title="App license" />
+            android:title="@string/pref_app_license" />
 
         <Preference
             android:key="app_credits"
             android:icon="@drawable/ic_setting_credits"
             android:layout="@layout/preference_setting_item"
-            android:title="App credits" />
+            android:title="@string/pref_app_credits" />
 
     </PreferenceCategory>
 
@@ -133,14 +133,14 @@
     <PreferenceCategory
         android:key="category_danger"
         android:layout="@layout/preference_setting_category"
-        android:title="Danger zone">
+        android:title="@string/pref_danger_zone">
 
         <Preference
             android:key="delete_account"
             android:icon="@drawable/ic_setting_delete_account"
             android:layout="@layout/preference_setting_danger"
-            android:summary="Permanently delete your account and data"
-            android:title="Delete account" />
+            android:summary="@string/pref_delete_summary"
+            android:title="@string/pref_delete" />
 
     </PreferenceCategory>
 

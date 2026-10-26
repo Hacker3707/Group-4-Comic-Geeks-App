@@ -15,7 +15,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:contentDescription="Ảnh xem trước" />
+        android:contentDescription="@string/image_preview_cd" />
 
     <ImageButton
         android:id="@+id/btnRemoveImage"
@@ -29,6 +29,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
-        android:contentDescription="Xóa ảnh" />
+        android:contentDescription="@string/group_image_remove" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

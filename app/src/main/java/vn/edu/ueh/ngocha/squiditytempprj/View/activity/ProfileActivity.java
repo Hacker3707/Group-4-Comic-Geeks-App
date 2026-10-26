@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.FollowListDialog;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -339,7 +341,7 @@ public class ProfileActivity extends BaseActivity {
             if (tvIntroBio != null) {
                 tvIntroBio.setText(
                         introduction == null || introduction.trim().isEmpty()
-                                ? "Chưa có giới thiệu bản thân"
+                                ? Str.t(R.string.profile_no_about)
                                 : introduction.trim()
                 );
             }
@@ -488,7 +490,7 @@ public class ProfileActivity extends BaseActivity {
             renderSelectedGenres();
 
             String username = state.username == null ? "" : state.username.trim();
-            if (username.isEmpty()) username = "Người dùng";
+            if (username.isEmpty()) username = Str.t(R.string.common_user);
 
             String email = state.email == null ? "" : state.email.trim();
 
@@ -501,22 +503,22 @@ public class ProfileActivity extends BaseActivity {
 
             if (tvIntroEmail != null) {
                 tvIntroEmail.setText(
-                        email.isEmpty() ? "Chưa cập nhật" : email
+                        email.isEmpty() ? Str.t(R.string.common_not_updated) : email
                 );
             }
 
             if (tvIntroGender != null) {
                 tvIntroGender.setText(
                         state.gender == null || state.gender.trim().isEmpty()
-                                ? "Chưa cập nhật"
-                                : state.gender
+                                ? Str.t(R.string.common_not_updated)
+                                : Str.gender(state.gender)
                 );
             }
 
             if (tvIntroBirthDate != null) {
                 tvIntroBirthDate.setText(
                         state.birthDate == null || state.birthDate.trim().isEmpty()
-                                ? "Chưa cập nhật"
+                                ? Str.t(R.string.common_not_updated)
                                 : state.birthDate
                 );
             }
@@ -631,7 +633,7 @@ public class ProfileActivity extends BaseActivity {
                 Stamp newStamp = new Stamp(randomStampId, currentUid(), StampType.LIKE);
                 newStamp.setPostId(post.getPostId());
                 postViewModel.addStamp(newStamp, post);
-                Toast.makeText(ProfileActivity.this, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProfileActivity.this, Str.t(R.string.post_stamped), Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -640,9 +642,9 @@ public class ProfileActivity extends BaseActivity {
                     String randomCommentId = UUID.randomUUID().toString();
                     Comment newComment = new Comment(randomCommentId, currentUid(), post.getPostId(), commentText.trim());
                     postViewModel.addComment(newComment, post);
-                    Toast.makeText(ProfileActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProfileActivity.this, Str.t(R.string.post_comment_sent), Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(ProfileActivity.this, "Vui lòng nhập nội dung bình luận!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProfileActivity.this, Str.t(R.string.post_comment_empty), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -686,7 +688,7 @@ public class ProfileActivity extends BaseActivity {
             public void onDeletePost(Post post) {
                 if (post != null) {
                     postViewModel.deletePost(post);
-                    Toast.makeText(ProfileActivity.this, "Đã xóa bài viết!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProfileActivity.this, Str.t(R.string.post_deleted), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -804,7 +806,13 @@ public class ProfileActivity extends BaseActivity {
         followViewModel.getFollowingCount().observe(this, count ->
                 tvFollowingCount.setText(String.valueOf(count == null ? 0 : count)));
         followViewModel.getIsFollowing().observe(this, following ->
-                btnFollow.setText(Boolean.TRUE.equals(following) ? "Following" : "+ Follow"));
+                btnFollow.setText(Boolean.TRUE.equals(following) ? Str.t(R.string.common_following) : Str.t(R.string.common_follow_plus)));
+
+        // Bấm vào số Followers / Following để xem danh sách người đó
+        ((View) tvFollowersCount.getParent()).setOnClickListener(
+                v -> FollowListDialog.show(this, targetUserId, true));
+        ((View) tvFollowingCount.getParent()).setOnClickListener(
+                v -> FollowListDialog.show(this, targetUserId, false));
 
         followViewModel.observeProfile(targetUserId);
     }

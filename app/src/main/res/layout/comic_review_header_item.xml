@@ -22,7 +22,7 @@
             android:layout_height="220dp"
             android:layout_marginLeft="5dp"
             android:background="@drawable/bg_comic_small_card"
-            android:contentDescription="Comic cover"
+            android:contentDescription="@string/comic_cover_cd"
             android:scaleType="centerCrop"
             android:src="@drawable/comic_background" />
 
@@ -38,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/jersey25_regular"
-                android:text="Title"
+                android:text="@string/comic_title_label"
                 android:textColor="#49316B"
                 android:textSize="20sp" />
 
@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:fontFamily="@font/jersey25_regular"
-                android:text="Ratings:"
+                android:text="@string/comic_ratings_colon"
                 android:textColor="#49316B"
                 android:textSize="20sp" />
 
@@ -82,7 +82,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Not rated yet"
+                android:text="@string/comic_not_rated"
                 android:textColor="#49316B"
                 android:textSize="14sp" />
 
@@ -92,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:layout_marginTop="10dp"
-                android:text="Review it here!" />
+                android:text="@string/comic_review_here" />
 
         </LinearLayout>
     </LinearLayout>

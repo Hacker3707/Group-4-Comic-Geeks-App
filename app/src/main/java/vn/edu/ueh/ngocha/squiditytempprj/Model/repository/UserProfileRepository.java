@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
+import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -94,7 +96,7 @@ public class UserProfileRepository {
                         }
 
                         throw new IllegalStateException(
-                                "Không thể tải ảnh lên Firebase Storage."
+                                Str.t(R.string.profile_err_storage_upload)
                         );
                     }
 
@@ -138,7 +140,7 @@ public class UserProfileRepository {
 
         if (user == null || !uid.equals(user.getUid())) {
             throw new IllegalStateException(
-                    "Không tìm thấy tài khoản đang đăng nhập."
+                    Str.t(R.string.profile_err_no_account)
             );
         }
 
@@ -157,7 +159,7 @@ public class UserProfileRepository {
                         }
 
                         throw new IllegalStateException(
-                                "Không thể cập nhật tên tài khoản."
+                                Str.t(R.string.profile_err_update_name)
                         );
                     }
 
@@ -182,7 +184,7 @@ public class UserProfileRepository {
 
         if (user == null || !uid.equals(user.getUid())) {
             throw new IllegalStateException(
-                    "Không tìm thấy tài khoản đang đăng nhập."
+                    Str.t(R.string.profile_err_no_account)
             );
         }
 
@@ -198,7 +200,7 @@ public class UserProfileRepository {
                         if (error != null) throw error;
 
                         throw new IllegalStateException(
-                                "Không thể cập nhật tên tài khoản."
+                                Str.t(R.string.profile_err_update_name)
                         );
                     }
 

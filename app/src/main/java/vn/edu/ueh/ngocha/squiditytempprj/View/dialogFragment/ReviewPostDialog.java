@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.dialogFragment;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -81,7 +82,7 @@ public class ReviewPostDialog extends DialogFragment {
                 reviewViewModel.delete(oldReview);
                 Toast.makeText(
                         requireContext(),
-                        "Review deleted!",
+                        Str.t(R.string.review_deleted),
                         Toast.LENGTH_SHORT
                 ).show();
                 dismiss();
@@ -104,7 +105,7 @@ public class ReviewPostDialog extends DialogFragment {
 
             if (rating == 0) {
                 txtGuide.setVisibility(View.VISIBLE);
-                txtGuide.setText("Please rate the comic!");
+                txtGuide.setText(Str.t(R.string.review_rate_prompt));
                 Animation shake = AnimationUtils.loadAnimation(
                         requireContext(),
                         R.anim.shake
@@ -121,7 +122,7 @@ public class ReviewPostDialog extends DialogFragment {
 
             Toast.makeText(
                     requireContext(),
-                    "Review information is ready!",
+                    Str.t(R.string.review_ready),
                     Toast.LENGTH_SHORT
             ).show();
 
@@ -133,17 +134,17 @@ public class ReviewPostDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             if (!isEditing) {
-                Toast.makeText(v.getContext(), "You're in Edit Mode!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), Str.t(R.string.review_edit_mode), Toast.LENGTH_SHORT).show();
                 ratingBar.setIsIndicator(true);
                 etReviewContent.setEnabled(true);
                 txtReviewDate.setVisibility(View.GONE);
-                btnEdit.setText("Cancel");
+                btnEdit.setText(Str.t(R.string.common_cancel));
                 btnSave.setEnabled(true);
                 isEditing = true;
             }
             else {
                 btnSave.setEnabled(false);
-                btnEdit.setText("Edit");
+                btnEdit.setText(Str.t(R.string.common_edit));
 
                 ratingBar.setIsIndicator(true);
                 ratingBar.setRating(oldReview.getReviewRating());
@@ -153,7 +154,7 @@ public class ReviewPostDialog extends DialogFragment {
 
                 txtReviewDate.setVisibility(View.VISIBLE);
                 txtReviewDate.setText(
-                        "Reviewed on: " + oldReview.getReviewDate()
+                        Str.t(R.string.review_reviewed_on, oldReview.getReviewDate())
                 );
                 isEditing = false;
             }
@@ -172,8 +173,8 @@ public class ReviewPostDialog extends DialogFragment {
 
             reviewViewModel.update(new Review(comicId, userId, content, rating));
             btnSave.setEnabled(false);
-            btnSave.setText("Saved");
-            Toast.makeText(v.getContext(), "Review saved!", Toast.LENGTH_SHORT).show();
+            btnSave.setText(Str.t(R.string.common_saved));
+            Toast.makeText(v.getContext(), Str.t(R.string.review_saved), Toast.LENGTH_SHORT).show();
             dismiss();
         }
     };
@@ -195,10 +196,10 @@ public class ReviewPostDialog extends DialogFragment {
                 btnConfirm.setVisibility(View.GONE);
                 lnEditSaveReview.setVisibility(View.VISIBLE);
 
-                btnEdit.setText("Edit");
+                btnEdit.setText(Str.t(R.string.common_edit));
                 btnEdit.setEnabled(true);
 
-                btnSave.setText("Save");
+                btnSave.setText(Str.t(R.string.common_save));
                 btnSave.setEnabled(false);
 
                 ratingBar.setRating(review.getReviewRating());
@@ -210,7 +211,7 @@ public class ReviewPostDialog extends DialogFragment {
                 if (review.getReviewDate() != null) {
                     txtReviewDate.setVisibility(View.VISIBLE);
                     txtReviewDate.setText(
-                            "Reviewed on: " + review.getReviewDate()
+                            Str.t(R.string.review_reviewed_on, review.getReviewDate())
                     );
                 }
 

@@ -79,13 +79,23 @@ public abstract class AppDatabase extends RoomDatabase {
                 }
             };
 
+    static final Migration MIGRATION_7_8 =
+            new Migration(7, 8) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase db) {
+                    db.execSQL("ALTER TABLE notifications ADD COLUMN actor_id TEXT");
+                    db.execSQL("ALTER TABLE notifications ADD COLUMN actor_name TEXT");
+                    db.execSQL("ALTER TABLE notifications ADD COLUMN post_id TEXT");
+                }
+            };
+
     public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                             AppDatabase.class, "squidity_database")
-                            .addMigrations(MIGRATION_6_7)
+                            .addMigrations(MIGRATION_6_7, MIGRATION_7_8)
                             .addCallback(oncreateCallback)
                             .fallbackToDestructiveMigration()
                             .build();

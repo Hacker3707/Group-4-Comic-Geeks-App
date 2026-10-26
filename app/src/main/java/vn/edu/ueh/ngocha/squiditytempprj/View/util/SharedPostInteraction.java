@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.util;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.Intent;
 import android.widget.Toast;
 
@@ -51,13 +52,13 @@ public class SharedPostInteraction implements PostAdapter.OnPostInteractionListe
         Stamp stamp = new Stamp(UUID.randomUUID().toString(), currentUid(), StampType.LIKE);
         stamp.setPostId(post.getPostId());
         postViewModel.addStamp(stamp, post);
-        Toast.makeText(activity, "Đã thả Stamp!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(activity, Str.t(R.string.post_stamped), Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onCommentSend(Post post, String commentText) {
         if (commentText == null || commentText.trim().isEmpty()) {
-            Toast.makeText(activity, "Vui lòng nhập nội dung bình luận!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, Str.t(R.string.post_comment_empty), Toast.LENGTH_SHORT).show();
             return;
         }
         Comment comment = new Comment(UUID.randomUUID().toString(), currentUid(),
@@ -68,7 +69,7 @@ public class SharedPostInteraction implements PostAdapter.OnPostInteractionListe
         } else {
             postViewModel.addComment(comment, post);
         }
-        Toast.makeText(activity, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(activity, Str.t(R.string.post_comment_sent), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -109,7 +110,7 @@ public class SharedPostInteraction implements PostAdapter.OnPostInteractionListe
     public void onDeletePost(Post post) {
         if (post != null) {
             postViewModel.deletePost(post);
-            Toast.makeText(activity, "Đã xóa bài viết!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, Str.t(R.string.post_deleted), Toast.LENGTH_SHORT).show();
         }
     }
 

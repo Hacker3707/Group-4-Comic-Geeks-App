@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.ViewModel;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
+import vn.edu.ueh.ngocha.squiditytempprj.R;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
@@ -141,7 +143,7 @@ public class FollowViewModel extends AndroidViewModel {
                     // Follow mới thì báo cho người được follow
                     String actorName = notificationRepository.currentActorName(currentUserId);
                     notificationRepository.sendNotification(targetUserId, currentUserId, actorName,
-                            NotificationType.FOLLOW, null, actorName + " đã theo dõi bạn");
+                            NotificationType.FOLLOW, null, Str.t(R.string.notif_followed_you, actorName));
                 }
                 refresh(currentUserId, targetUserId);
             }

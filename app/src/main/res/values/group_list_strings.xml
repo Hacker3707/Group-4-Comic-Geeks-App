@@ -2,26 +2,26 @@
 <resources>
     <!-- Màn danh sách group -->
     <string name="group_list_title">Groups</string>
-    <string name="group_search_hint">Tìm nhóm...</string>
-    <string name="group_list_empty">Chưa có nhóm nào. Bấm dấu + để tạo nhóm mới.</string>
-    <string name="group_cd_add">Tạo nhóm</string>
-    <string name="group_cd_group_cover">Ảnh bìa nhóm</string>
+    <string name="group_search_hint">Search groups...</string>
+    <string name="group_list_empty">No groups yet. Tap + to create a new group.</string>
+    <string name="group_cd_add">Create group</string>
+    <string name="group_cd_group_cover">Group cover photo</string>
 
     <!-- Màn tạo group -->
-    <string name="create_group_title">Tạo nhóm</string>
-    <string name="create_group_name_label">Tên nhóm</string>
-    <string name="create_group_name_hint">Ví dụ: Manga Lovers</string>
-    <string name="create_group_desc_label">Mô tả</string>
-    <string name="create_group_desc_hint">Giới thiệu về nhóm...</string>
-    <string name="create_group_cover_label">Ảnh bìa (không bắt buộc)</string>
+    <string name="create_group_title">Create group</string>
+    <string name="create_group_name_label">Group name</string>
+    <string name="create_group_name_hint">e.g. Manga Lovers</string>
+    <string name="create_group_desc_label">Description</string>
+    <string name="create_group_desc_hint">About the group...</string>
+    <string name="create_group_cover_label">Cover photo (optional)</string>
     <string name="create_group_cover_hint">https://...</string>
-    <string name="create_group_submit">Tạo nhóm</string>
-    <string name="group_image_pick_cover">Chạm để chọn ảnh bìa từ thư viện</string>
-    <string name="group_image_pick_avatar">Chọn ảnh</string>
-    <string name="group_image_remove">Xóa ảnh</string>
-    <string name="group_image_uploading">Đang tải ảnh lên...</string>
-    <string name="group_image_upload_failed">Không tải được ảnh lên. Kiểm tra kết nối mạng rồi thử lại.</string>
-    <string name="group_image_read_failed">Không đọc được ảnh đã chọn.</string>
-    <string name="create_group_error_name">Vui lòng nhập tên nhóm</string>
-    <string name="create_group_success">Đã tạo nhóm</string>
+    <string name="create_group_submit">Create group</string>
+    <string name="group_image_pick_cover">Tap to choose a cover photo from your gallery</string>
+    <string name="group_image_pick_avatar">Choose photo</string>
+    <string name="group_image_remove">Remove image</string>
+    <string name="group_image_uploading">Uploading image...</string>
+    <string name="group_image_upload_failed">Couldn\'t upload the image. Check your connection and try again.</string>
+    <string name="group_image_read_failed">Couldn\'t read the selected image.</string>
+    <string name="create_group_error_name">Please enter a group name</string>
+    <string name="create_group_success">Group created</string>
 </resources>

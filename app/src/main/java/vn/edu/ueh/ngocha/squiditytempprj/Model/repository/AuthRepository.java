@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
+import vn.edu.ueh.ngocha.squiditytempprj.R;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -12,7 +14,7 @@ public class AuthRepository {
         FirebaseUser user = firebaseAuth.getCurrentUser();
 
         if (user == null) {
-            throw new IllegalStateException("Chưa có tài khoản Firebase.");
+            throw new IllegalStateException(Str.t(R.string.auth_no_firebase_account));
         }
 
         UserProfileChangeRequest request =

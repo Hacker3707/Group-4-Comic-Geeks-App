@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.menu;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -252,12 +253,12 @@ public abstract class BaseActivity extends AppCompatActivity {
                             if (authViewModel.getCurrentUser() == null) {
 
                                 new AlertDialog.Builder(BaseActivity.this)
-                                        .setTitle("Yêu cầu đăng nhập")
-                                        .setMessage("Bạn cần đăng nhập để xem profile.")
-                                        .setNegativeButton("Hủy", (dialog, which) -> {
+                                        .setTitle(Str.t(R.string.common_login_required_title))
+                                        .setMessage(Str.t(R.string.login_required_profile))
+                                        .setNegativeButton(Str.t(R.string.common_cancel), (dialog, which) -> {
                                             dialog.dismiss();
                                         })
-                                        .setPositiveButton("Đăng nhập", (dialog, which) -> {
+                                        .setPositiveButton(Str.t(R.string.common_login), (dialog, which) -> {
                                             Intent intent = new Intent(
                                                     BaseActivity.this,
                                                     AuthActivity.class
@@ -327,7 +328,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
             if (btnAuthAction != null) {
                 btnAuthAction.setText(
-                        state.loggedIn ? "Đăng xuất" : "Đăng nhập / Đăng ký"
+                        state.loggedIn ? Str.t(R.string.common_logout) : Str.t(R.string.auth_login_register)
                 );
             }
 
@@ -409,7 +410,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             startActivity(intent);
         } catch (Exception e) {
             Log.e("BaseActivity", "Không mở được AuthActivity", e);
-            Toast.makeText(this, "Không mở được màn hình đăng nhập", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Str.t(R.string.auth_open_failed), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -422,15 +423,15 @@ public abstract class BaseActivity extends AppCompatActivity {
                 openAuthActivity();
             } else {
                 new AlertDialog.Builder(BaseActivity.this)
-                        .setTitle("Đăng xuất")
-                        .setMessage("Bạn có chắc muốn đăng xuất không?")
-                        .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
-                        .setPositiveButton("Đăng xuất", (dialog, which) -> {
+                        .setTitle(Str.t(R.string.common_logout))
+                        .setMessage(Str.t(R.string.logout_confirm))
+                        .setNegativeButton(Str.t(R.string.common_cancel), (dialog, which) -> dialog.dismiss())
+                        .setPositiveButton(Str.t(R.string.common_logout), (dialog, which) -> {
                             authViewModel.logout();
                             profileViewModel.loadCurrentProfile();
                             Toast.makeText(
                                     BaseActivity.this,
-                                    "Đã đăng xuất",
+                                    Str.t(R.string.logged_out),
                                     Toast.LENGTH_SHORT
                             ).show();
                         })

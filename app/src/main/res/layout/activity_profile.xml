@@ -41,7 +41,7 @@
                         android:layout_width="0dp"
                         android:layout_height="180dp"
                         android:background="#FFB3C6"
-                        android:contentDescription="Ảnh bìa hồ sơ"
+                        android:contentDescription="@string/profile_cover_cd"
                         android:scaleType="centerCrop"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -68,7 +68,7 @@
                         android:layout_height="150dp"
                         android:layout_marginTop="140dp"
                         android:background="#FFFFFF"
-                        android:contentDescription="Ảnh đại diện"
+                        android:contentDescription="@string/common_avatar"
                         android:elevation="4dp"
                         android:outlineSpotShadowColor="#035D62"
                         android:padding="3dp"
@@ -86,7 +86,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="@drawable/bg_profile_edit_button"
-                        android:contentDescription="Đổi ảnh đại diện"
+                        android:contentDescription="@string/profile_change_avatar"
                         android:src="@android:drawable/ic_menu_edit"
                         android:visibility="gone"
                         android:elevation="5dp"
@@ -100,7 +100,7 @@
                         android:layout_height="40dp"
                         android:layout_margin="12dp"
                         android:background="@drawable/bg_profile_edit_button"
-                        android:contentDescription="Đổi ảnh bìa"
+                        android:contentDescription="@string/profile_change_cover"
                         android:src="@android:drawable/ic_menu_edit"
                         android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="@id/imgProfileAvatar"
@@ -208,7 +208,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/jersey25_regular"
-                                    android:text="Posts"
+                                    android:text="@string/profile_posts"
                                     android:textColor="#3F51B5"
                                     android:textSize="17sp" />
                             </LinearLayout>
@@ -247,7 +247,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/jersey25_regular"
-                                    android:text="Followers"
+                                    android:text="@string/profile_followers"
                                     android:textColor="#FFFFFF"
                                     android:textSize="17sp" />
                             </LinearLayout>
@@ -286,7 +286,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/jersey25_regular"
-                                    android:text="Following"
+                                    android:text="@string/profile_following"
                                     android:textColor="#3F51B5"
                                     android:textSize="17sp" />
                             </LinearLayout>
@@ -312,7 +312,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/jersey25_regular"
-                            android:text="+ Follow"
+                            android:text="@string/follow_button_follow"
                             android:textColor="#FFFFFF"
                             android:textSize="20sp"
                             app:backgroundTint="#7A6CFA"
@@ -326,7 +326,7 @@
                             android:layout_marginStart="8dp"
                             android:layout_marginLeft="5dp"
                             android:fontFamily="@font/jersey25_regular"
-                            android:text="Message"
+                            android:text="@string/profile_message"
                             android:textColor="#493373"
                             android:textSize="20sp"
                             app:backgroundTint="#FFFFFF"
@@ -357,7 +357,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Signature"
+                            android:text="@string/profile_signature"
                             android:textColor="#333333"
                             android:textStyle="bold" />
 
@@ -368,7 +368,7 @@
                             android:layout_marginTop="6dp"
                             android:ellipsize="end"
                             android:maxLines="2"
-                            android:text="I have nothing to say~"
+                            android:text="@string/profile_bio_default"
                             android:textColor="#666666" />
 
                     </LinearLayout>
@@ -397,7 +397,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Favorite Genres"
+                            android:text="@string/profile_fav_genres"
                             android:textColor="#333333"
                             android:textStyle="bold" />
 
@@ -431,22 +431,22 @@
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="INTRO" />
+                        android:text="@string/profile_tab_intro" />
 
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="POSTS" />
+                        android:text="@string/profile_tab_posts" />
 
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="LIKED POSTS" />
+                        android:text="@string/profile_tab_liked" />
 
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="REVIEWS" />
+                        android:text="@string/profile_tab_reviews" />
 
                 </com.google.android.material.tabs.TabLayout>
 
@@ -462,7 +462,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Thông tin cá nhân"
+                        android:text="@string/profile_personal_info"
                         android:textColor="#493373"
                         android:textSize="18sp"
                         android:textStyle="bold"
@@ -471,7 +471,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Tên hiển thị"
+                        android:text="@string/profile_display_name"
                         android:textStyle="bold"
                         android:textColor="#777777" />
 
@@ -479,14 +479,14 @@
                         android:id="@+id/tvIntroUsername"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Chưa cập nhật"
+                        android:text="@string/common_not_updated"
                         android:textColor="#333333"
                         android:paddingBottom="12dp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Email"
+                        android:text="@string/common_email"
                         android:textStyle="bold"
                         android:textColor="#777777" />
 
@@ -494,14 +494,14 @@
                         android:id="@+id/tvIntroEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Chưa cập nhật"
+                        android:text="@string/common_not_updated"
                         android:textColor="#333333"
                         android:paddingBottom="12dp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Giới tính"
+                        android:text="@string/profile_gender"
                         android:textStyle="bold"
                         android:textColor="#777777" />
 
@@ -509,14 +509,14 @@
                         android:id="@+id/tvIntroGender"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Chưa cập nhật"
+                        android:text="@string/common_not_updated"
                         android:textColor="#333333"
                         android:paddingBottom="12dp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Ngày sinh"
+                        android:text="@string/profile_birth_date"
                         android:textStyle="bold"
                         android:textColor="#777777" />
 
@@ -524,14 +524,14 @@
                         android:id="@+id/tvIntroBirthDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Chưa cập nhật"
+                        android:text="@string/common_not_updated"
                         android:textColor="#333333"
                         android:paddingBottom="12dp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Giới thiệu bản thân"
+                        android:text="@string/profile_about_me"
                         android:textStyle="bold"
                         android:textColor="#777777" />
 
@@ -539,7 +539,7 @@
                         android:id="@+id/tvIntroBio"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Chưa có giới thiệu"
+                        android:text="@string/profile_no_intro"
                         android:textColor="#333333"
                         android:paddingTop="6dp"
                         android:paddingBottom="16dp" />
@@ -583,7 +583,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginRight="35dp"
         android:layout_marginBottom="35dp"
-        android:contentDescription="Tạo bài viết mới"
+        android:contentDescription="@string/post_create_new"
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="#786FF8"
         app:elevation="6dp"

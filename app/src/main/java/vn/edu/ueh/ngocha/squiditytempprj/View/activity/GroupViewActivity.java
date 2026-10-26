@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -922,14 +923,14 @@ public class GroupViewActivity extends AppCompatActivity {
                 edtComposer.setText("");
                 composerOpen = false;
                 updateComposerVisibility();
-                Toast.makeText(GroupViewActivity.this, "Đã đăng bài", Toast.LENGTH_SHORT).show();
+                Toast.makeText(GroupViewActivity.this, Str.t(R.string.group_post_published), Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(String error) {
                 // Giữ nguyên nội dung để người dùng bấm gửi lại
                 btnSend.setEnabled(true);
-                Toast.makeText(GroupViewActivity.this, "Không đăng được bài: " + error, Toast.LENGTH_LONG).show();
+                Toast.makeText(GroupViewActivity.this, Str.t(R.string.group_post_failed, error), Toast.LENGTH_LONG).show();
             }
         });
     }

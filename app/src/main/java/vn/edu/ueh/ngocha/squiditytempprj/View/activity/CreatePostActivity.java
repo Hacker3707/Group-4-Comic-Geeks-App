@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -63,7 +64,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private final String[] selectedComicInfo = new String[2];
     private PostViewModel postViewModel;
     private String currentUserId = "";
-    private String currentUsername = "Khách";
+    private String currentUsername = Str.t(R.string.common_guest);
     private String currentAvatarUrl = "";
 
     private View btnAddImage;
@@ -159,7 +160,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
                 Toast.makeText(
                         CreatePostActivity.this,
-                        "Đã liên kết truyện: " + selectedTitle,
+                        Str.t(R.string.post_comic_linked, selectedTitle),
                         Toast.LENGTH_SHORT
                 ).show();
             }
@@ -180,7 +181,7 @@ public class CreatePostActivity extends AppCompatActivity {
         isEditMode = getIntent().getBooleanExtra("is_edit_mode", false);
         groupId = getIntent().getStringExtra("group_id");
         if (groupId != null && !groupId.isEmpty() && !isEditMode) {
-            edtPostHashtag.setHint("Chủ đề: #Anime, #Manga, #LightNovel, #Discussion, #Otaku");
+            edtPostHashtag.setHint(Str.t(R.string.post_group_hashtag_hint));
         }
         editPostId = getIntent().getStringExtra("post_id");
         String oldContent = getIntent().getStringExtra("post_content");
@@ -199,7 +200,7 @@ public class CreatePostActivity extends AppCompatActivity {
             if (oldHashtag != null) {
                 edtPostHashtag.setText(oldHashtag);
             }
-            btnPublish.setText("Cập nhật bài viết");
+            btnPublish.setText(Str.t(R.string.post_update_btn));
 
             if (oldImageUrls != null && !oldImageUrls.isEmpty()) {
                 for (String url : oldImageUrls) {
@@ -221,7 +222,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
                         Toast.makeText(
                                 this,
-                                "Đã chọn " + selectedImageUris.size() + " ảnh!",
+                                Str.t(R.string.post_images_selected, selectedImageUris.size()),
                                 Toast.LENGTH_SHORT
                         ).show();
                     }
@@ -249,7 +250,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 }
 
                 if (content.isEmpty() && selectedImageUris.isEmpty()) {
-                    Toast.makeText(this, "Vui lòng nhập nội dung hoặc chọn ít nhất 1 ảnh!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, Str.t(R.string.post_err_empty), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -268,7 +269,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 final String postContent = finalContent;
 
                 if (isEditMode && editPostId != null) {
-                    progressDialog.setMessage("Đang cập nhật bài viết...");
+                    progressDialog.setMessage(Str.t(R.string.post_updating));
                     progressDialog.show();
 
                     List<String> finalImageUrls = new ArrayList<>();
@@ -296,7 +297,7 @@ public class CreatePostActivity extends AppCompatActivity {
                     String newPostId = UUID.randomUUID().toString();
 
                     if (!selectedImageUris.isEmpty()) {
-                        progressDialog.setMessage("Đang tải ảnh lên mây...");
+                        progressDialog.setMessage(Str.t(R.string.post_uploading_images));
                         progressDialog.show();
 
                         uploadMultipleImagesToStorage(newPostId, imageUrls -> {
@@ -307,7 +308,7 @@ public class CreatePostActivity extends AppCompatActivity {
                             uploadPostToCloud(newPost, progressDialog);
                         }, progressDialog);
                     } else {
-                        progressDialog.setMessage("Đang đăng bài viết...");
+                        progressDialog.setMessage(Str.t(R.string.post_publishing));
                         progressDialog.show();
 
                         Post newPost = new Post(newPostId, currentUid(), currentComicId, postContent, null);
@@ -319,7 +320,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 }
 
             } catch (Exception e) {
-                Toast.makeText(this, "Lỗi ngoại lệ: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, Str.t(R.string.post_err_exception, e.getMessage()), Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
         });
@@ -386,7 +387,7 @@ public class CreatePostActivity extends AppCompatActivity {
                     }))
                     .addOnFailureListener(e -> {
                         progressDialog.dismiss();
-                        Toast.makeText(this, "Lỗi tải ảnh: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, Str.t(R.string.post_err_image, e.getMessage()), Toast.LENGTH_SHORT).show();
                     });
         }
     }
@@ -397,14 +398,14 @@ public class CreatePostActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess() {
                     progressDialog.dismiss();
-                    Toast.makeText(CreatePostActivity.this, "Đăng bài thành công!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CreatePostActivity.this, Str.t(R.string.post_published), Toast.LENGTH_SHORT).show();
                     finish();
                 }
 
                 @Override
                 public void onFailure(String error) {
                     progressDialog.dismiss();
-                    Toast.makeText(CreatePostActivity.this, "Lỗi Firestore: " + error, Toast.LENGTH_LONG).show();
+                    Toast.makeText(CreatePostActivity.this, Str.t(R.string.post_err_firestore, error), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -429,14 +430,14 @@ public class CreatePostActivity extends AppCompatActivity {
         if (postViewModel != null) {
             postViewModel.updatePost(updatedPost);
             progressDialog.dismiss();
-            Toast.makeText(CreatePostActivity.this, "Cập nhật bài viết thành công!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(CreatePostActivity.this, Str.t(R.string.post_updated), Toast.LENGTH_SHORT).show();
 
             Intent resultIntent = new Intent();
             setResult(RESULT_OK, resultIntent);
             finish();
         } else {
             progressDialog.dismiss();
-            Toast.makeText(CreatePostActivity.this, "Lỗi: PostViewModel bị null!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(CreatePostActivity.this, Str.t(R.string.post_err_viewmodel), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -451,7 +452,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
         if (user == null) {
             currentUserId = "";
-            currentUsername = "Khách";
+            currentUsername = Str.t(R.string.common_guest);
 
             if (tvUsername != null) {
                 tvUsername.setText(currentUsername);

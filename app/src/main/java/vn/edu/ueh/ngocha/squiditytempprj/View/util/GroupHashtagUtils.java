@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.util;
 
+import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -88,7 +90,7 @@ public final class GroupHashtagUtils {
         } else if (TAG_OTAKU.equals(tagKey)) {
             return "Otaku";
         }
-        return "Khác";
+        return Str.t(R.string.group_chip_other);
     }
 
     // Nhãn chủ đề của một bài viết, ví dụ "Manga, Anime" hoặc "Khác"

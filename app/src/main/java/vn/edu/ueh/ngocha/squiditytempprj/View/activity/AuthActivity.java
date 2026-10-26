@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -100,21 +101,21 @@ public class AuthActivity extends AppCompatActivity {
         registerMode = isRegisterMode;
 
         if (registerMode) {
-            tvAuthHeaderTitle.setText("SIGN UP");
-            btnAuthSubmit.setText("ĐĂNG KÝ");
-            tvModeToggle.setText("Đã có tài khoản? Đăng nhập");
+            tvAuthHeaderTitle.setText(Str.t(R.string.auth_header_sign_up));
+            btnAuthSubmit.setText(Str.t(R.string.auth_register_btn));
+            tvModeToggle.setText(Str.t(R.string.auth_toggle_to_login));
 
             usernameContainer.setVisibility(View.VISIBLE);
             confirmPasswordContainer.setVisibility(View.VISIBLE);
-            btnGoogleSignIn.setText("Đăng ký bằng Google");
+            btnGoogleSignIn.setText(Str.t(R.string.auth_google_sign_up));
         } else {
-            tvAuthHeaderTitle.setText("SIGN IN");
-            btnAuthSubmit.setText("ĐĂNG NHẬP");
-            tvModeToggle.setText("Chưa có tài khoản? Đăng ký");
+            tvAuthHeaderTitle.setText(Str.t(R.string.auth_header_sign_in));
+            btnAuthSubmit.setText(Str.t(R.string.auth_sign_in));
+            tvModeToggle.setText(Str.t(R.string.auth_toggle_to_register));
 
             usernameContainer.setVisibility(View.GONE);
             confirmPasswordContainer.setVisibility(View.GONE);
-            btnGoogleSignIn.setText("Đăng nhập bằng Google");
+            btnGoogleSignIn.setText(Str.t(R.string.auth_google_sign_in));
         }
 
         clearStatus();
@@ -128,37 +129,37 @@ public class AuthActivity extends AppCompatActivity {
         String confirmPassword = etConfirmPassword.getText().toString();
 
         if (registerMode && TextUtils.isEmpty(username)) {
-            showError("Vui lòng nhập họ và tên.");
+            showError(Str.t(R.string.auth_err_name));
             etUsername.requestFocus();
             return;
         }
 
         if (TextUtils.isEmpty(email)) {
-            showError("Vui lòng nhập email.");
+            showError(Str.t(R.string.auth_err_email));
             etEmail.requestFocus();
             return;
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            showError("Email không đúng định dạng.");
+            showError(Str.t(R.string.auth_err_email_format));
             etEmail.requestFocus();
             return;
         }
 
         if (TextUtils.isEmpty(password)) {
-            showError("Vui lòng nhập mật khẩu.");
+            showError(Str.t(R.string.auth_err_password));
             etPassword.requestFocus();
             return;
         }
 
         if (registerMode && password.length() < 8) {
-            showError("Mật khẩu phải có ít nhất 8 ký tự.");
+            showError(Str.t(R.string.auth_err_password_short));
             etPassword.requestFocus();
             return;
         }
 
         if (registerMode && !password.equals(confirmPassword)) {
-            showError("Mật khẩu xác nhận không khớp.");
+            showError(Str.t(R.string.auth_err_password_mismatch));
             etConfirmPassword.requestFocus();
             return;
         }
@@ -216,7 +217,7 @@ public class AuthActivity extends AppCompatActivity {
                                 || !GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
                                 .equals(credential.getType())) {
                             setLoading(false);
-                            showError("Không nhận được thông tin tài khoản Google hợp lệ.");
+                            showError(Str.t(R.string.auth_err_google_invalid));
                             return;
                         }
 
@@ -236,7 +237,7 @@ public class AuthActivity extends AppCompatActivity {
                         } catch (Exception e) {
                             Log.e("AuthActivity", "Lỗi đọc Google ID token", e);
                             setLoading(false);
-                            showError("Không thể đọc thông tin tài khoản Google.");
+                            showError(Str.t(R.string.auth_err_google_read));
                         }
                     }
 
@@ -244,7 +245,7 @@ public class AuthActivity extends AppCompatActivity {
                     public void onError(GetCredentialException e) {
                         Log.e("AuthActivity", "Credential Manager thất bại", e);
                         setLoading(false);
-                        showError("Không thể đăng nhập Google: " + e.getMessage());
+                        showError(Str.t(R.string.auth_google_failed_with, e.getMessage()));
                     }
                 }
         );
@@ -252,27 +253,27 @@ public class AuthActivity extends AppCompatActivity {
 
     private String getErrorMessage(Exception exception) {
         if (exception == null) {
-            return "Có lỗi xảy ra. Vui lòng thử lại.";
+            return Str.t(R.string.auth_err_generic);
         }
 
         String message = exception.getMessage();
 
         if (message == null) {
-            return "Có lỗi xảy ra. Vui lòng thử lại.";
+            return Str.t(R.string.auth_err_generic);
         }
 
         if (message.contains("email address is already in use")) {
-            return "Email này đã được đăng ký.";
+            return Str.t(R.string.auth_err_email_taken);
         }
 
         if (message.contains("password is invalid")
                 || message.contains("no user record")
                 || message.contains("invalid-credential")) {
-            return "Email hoặc mật khẩu không đúng.";
+            return Str.t(R.string.auth_err_wrong_credentials);
         }
 
         if (message.contains("network")) {
-            return "Không có kết nối mạng. Vui lòng thử lại.";
+            return Str.t(R.string.auth_err_network);
         }
 
         return message;
@@ -283,7 +284,7 @@ public class AuthActivity extends AppCompatActivity {
         btnGoogleSignIn.setEnabled(!loading);
 
         if (loading) {
-            tvAuthStatus.setText("Đang xử lý...");
+            tvAuthStatus.setText(Str.t(R.string.auth_processing));
             tvAuthStatus.setVisibility(View.VISIBLE);
         }
     }
@@ -312,7 +313,7 @@ public class AuthActivity extends AppCompatActivity {
                 setRegisterMode(false);
                 etPassword.setText("");
                 etConfirmPassword.setText("");
-                showSuccess("Đăng ký thành công! Hãy đăng nhập.");
+                showSuccess(Str.t(R.string.auth_register_success));
             }
         });
     }

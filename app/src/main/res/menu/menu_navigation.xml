@@ -9,7 +9,7 @@
         android:layout_gravity="center"
         android:layout_margin="15dp"
         android:orderInCategory="40"
-        android:title="Admin"
+        android:title="@string/nav_admin"
         android:visible="false"
         app:showAsAction="ifRoom" />
 
@@ -20,7 +20,7 @@
         android:fontFamily="@font/jersey25_regular"
         android:icon="@drawable/ic_user"
         android:orderInCategory="1"
-        android:title="My Profile"
+        android:title="@string/nav_profile"
         app:showAsAction="ifRoom" />
 
     <item
@@ -30,7 +30,7 @@
         android:layout_gravity="center"
         android:layout_margin="15dp"
         android:orderInCategory="2"
-        android:title="Chat"
+        android:title="@string/nav_chat"
         app:showAsAction="ifRoom" />
 
     <item
@@ -40,7 +40,7 @@
         android:fontFamily="@font/jersey25_regular"
         android:icon="@drawable/ic_group_new2"
         android:orderInCategory="30"
-        android:title="Groups"
+        android:title="@string/nav_groups"
         app:showAsAction="ifRoom" />
 
     <item
@@ -50,7 +50,7 @@
         android:fontFamily="@font/jersey25_regular"
         android:icon="@drawable/ic_comic_new"
         android:orderInCategory="30"
-        android:title="Comics"
+        android:title="@string/nav_comics"
         app:showAsAction="ifRoom" />
 
     <item

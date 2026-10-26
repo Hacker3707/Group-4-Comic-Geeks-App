@@ -1,5 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.ViewModel;
 
+import vn.edu.ueh.ngocha.squiditytempprj.R;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.net.Uri;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -104,7 +106,7 @@ public class UserProfileViewModel extends AndroidViewModel {
         if (isBlank(username)) {
             username = email.contains("@")
                     ? email.substring(0, email.indexOf("@"))
-                    : "Người dùng";
+                    : Str.t(R.string.common_user);
         }
 
         String avatarUrl = user.getPhotoUrl() == null
@@ -155,8 +157,7 @@ public class UserProfileViewModel extends AndroidViewModel {
                             && uid.equals(currentUser.getUid())) {
                         profile.setValue(fallback);
                         message.setValue(
-                                "Không thể tải hồ sơ: "
-                                        + getErrorText(error)
+                                Str.t(R.string.profile_err_load, getErrorText(error))
                         );
                     }
                 });
@@ -173,7 +174,7 @@ public class UserProfileViewModel extends AndroidViewModel {
         }
 
         final ProfileUiState fallback = new ProfileUiState(
-                "Người dùng", "", "", "", "", "", "", true, Collections.emptyList());
+                Str.t(R.string.common_user), "", "", "", "", "", "", true, Collections.emptyList());
         profile.setValue(fallback);
 
         repository.getProfile(uid)
@@ -242,14 +243,14 @@ public class UserProfileViewModel extends AndroidViewModel {
         String dateOfBirth = birthDate == null ? "" : birthDate.trim();
 
         if (name.isEmpty()) {
-            message.setValue("Vui lòng nhập tên hiển thị.");
+            message.setValue(Str.t(R.string.profile_err_name_required));
             return;
         }
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null) {
-            message.setValue("Vui lòng đăng nhập trước.");
+            message.setValue(Str.t(R.string.common_login_first));
             return;
         }
 
@@ -266,8 +267,7 @@ public class UserProfileViewModel extends AndroidViewModel {
             if (!task.isSuccessful()) {
                 saving.setValue(false);
                 message.setValue(
-                        "Lưu hồ sơ thất bại: "
-                                + getErrorText(task.getException())
+                        Str.t(R.string.profile_err_save_failed, getErrorText(task.getException()))
                 );
                 return;
             }
@@ -283,10 +283,10 @@ public class UserProfileViewModel extends AndroidViewModel {
 
                 if (!authTask.isSuccessful()) {
                     message.setValue(
-                            "Đã lưu thông tin nhưng chưa đồng bộ tên đăng nhập."
+                            Str.t(R.string.profile_saved_name_not_synced)
                     );
                 } else {
-                    message.setValue("Đã lưu hồ sơ.");
+                    message.setValue(Str.t(R.string.profile_saved));
                 }
 
                 loadCurrentProfile();
@@ -299,14 +299,14 @@ public class UserProfileViewModel extends AndroidViewModel {
         String name = username == null ? "" : username.trim();
 
         if (name.isEmpty()) {
-            message.setValue("Vui lòng nhập tên hiển thị.");
+            message.setValue(Str.t(R.string.profile_err_name_required));
             return;
         }
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null) {
-            message.setValue("Vui lòng đăng nhập trước.");
+            message.setValue(Str.t(R.string.common_login_first));
             return;
         }
 
@@ -318,8 +318,7 @@ public class UserProfileViewModel extends AndroidViewModel {
                     if (!task.isSuccessful()) {
                         saving.setValue(false);
                         message.setValue(
-                                "Không thể cập nhật tên: "
-                                        + getErrorText(task.getException())
+                                Str.t(R.string.profile_err_update_name_with, getErrorText(task.getException()))
                         );
                         return;
                     }
@@ -334,8 +333,8 @@ public class UserProfileViewModel extends AndroidViewModel {
                                 saving.setValue(false);
                                 message.setValue(
                                         authTask.isSuccessful()
-                                                ? "Đã cập nhật tên hồ sơ."
-                                                : "Đã lưu tên nhưng chưa đồng bộ Firebase Auth."
+                                                ? Str.t(R.string.profile_name_updated)
+                                                : Str.t(R.string.profile_name_not_synced)
                                 );
                                 loadCurrentProfile();
                             });
@@ -347,7 +346,7 @@ public class UserProfileViewModel extends AndroidViewModel {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null) {
-            message.setValue("Vui lòng đăng nhập trước.");
+            message.setValue(Str.t(R.string.common_login_first));
             return;
         }
 
@@ -358,7 +357,7 @@ public class UserProfileViewModel extends AndroidViewModel {
 
         if (isBlank(username)) {
             username = user.getEmail() == null
-                    ? "Người dùng"
+                    ? Str.t(R.string.common_user)
                     : user.getEmail().split("@")[0];
         }
 
@@ -369,12 +368,11 @@ public class UserProfileViewModel extends AndroidViewModel {
                     saving.setValue(false);
 
                     if (task.isSuccessful()) {
-                        message.setValue("Đã lưu hồ sơ.");
+                        message.setValue(Str.t(R.string.profile_saved));
                         loadCurrentProfile();
                     } else {
                         message.setValue(
-                                "Không thể lưu hồ sơ: "
-                                        + getErrorText(task.getException())
+                                Str.t(R.string.profile_err_cant_save, getErrorText(task.getException()))
                         );
                     }
                 });
@@ -385,7 +383,7 @@ public class UserProfileViewModel extends AndroidViewModel {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null || isBlank(avatarUrl)) {
-            message.setValue("Không có tài khoản hoặc URL ảnh không hợp lệ.");
+            message.setValue(Str.t(R.string.profile_err_account_or_url));
             return;
         }
 
@@ -395,8 +393,7 @@ public class UserProfileViewModel extends AndroidViewModel {
                         loadCurrentProfile();
                     } else {
                         message.setValue(
-                                "Không thể lưu ảnh đại diện: "
-                                        + getErrorText(task.getException())
+                                Str.t(R.string.profile_err_save_avatar, getErrorText(task.getException()))
                         );
                     }
                 });
@@ -407,7 +404,7 @@ public class UserProfileViewModel extends AndroidViewModel {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null || isBlank(coverUrl)) {
-            message.setValue("Không có tài khoản hoặc URL ảnh không hợp lệ.");
+            message.setValue(Str.t(R.string.profile_err_account_or_url));
             return;
         }
 
@@ -417,8 +414,7 @@ public class UserProfileViewModel extends AndroidViewModel {
                         loadCurrentProfile();
                     } else {
                         message.setValue(
-                                "Không thể lưu ảnh bìa: "
-                                        + getErrorText(task.getException())
+                                Str.t(R.string.profile_err_save_cover, getErrorText(task.getException()))
                         );
                     }
                 });
@@ -435,14 +431,14 @@ public class UserProfileViewModel extends AndroidViewModel {
     // Tải ảnh lên Storage rồi lưu URL vào Firestore.
     private void uploadImage(Uri imageUri, String folder) {
         if (imageUri == null) {
-            message.setValue("Bạn chưa chọn ảnh.");
+            message.setValue(Str.t(R.string.profile_err_no_image));
             return;
         }
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null) {
-            message.setValue("Vui lòng đăng nhập trước.");
+            message.setValue(Str.t(R.string.common_login_first));
             return;
         }
 
@@ -469,8 +465,7 @@ public class UserProfileViewModel extends AndroidViewModel {
                         if (!task.isSuccessful()) {
                             saving.setValue(false);
                             message.setValue(
-                                    "Tải ảnh thành công nhưng không lưu được URL: "
-                                            + getErrorText(task.getException())
+                                    Str.t(R.string.profile_err_url_not_saved, getErrorText(task.getException()))
                             );
                             return;
                         }
@@ -493,7 +488,7 @@ public class UserProfileViewModel extends AndroidViewModel {
                 .addOnFailureListener(error -> {
                     saving.setValue(false);
                     message.setValue(
-                            "Không thể tải ảnh lên: " + getErrorText(error)
+                            Str.t(R.string.profile_err_upload, getErrorText(error))
                     );
                 });
     }
@@ -502,8 +497,8 @@ public class UserProfileViewModel extends AndroidViewModel {
         saving.setValue(false);
         message.setValue(
                 "covers".equals(folder)
-                        ? "Đã cập nhật ảnh bìa."
-                        : "Đã cập nhật ảnh đại diện."
+                        ? Str.t(R.string.profile_cover_updated)
+                        : Str.t(R.string.profile_avatar_updated)
         );
         loadCurrentProfile();
     }
@@ -514,7 +509,7 @@ public class UserProfileViewModel extends AndroidViewModel {
 
     private String getErrorText(Exception error) {
         if (error == null || error.getMessage() == null) {
-            return "Vui lòng thử lại.";
+            return Str.t(R.string.common_try_again);
         }
         return error.getMessage();
     }
@@ -554,7 +549,7 @@ public class UserProfileViewModel extends AndroidViewModel {
 
         public static ProfileUiState guest() {
             return new ProfileUiState(
-                    "Khách",
+                    Str.t(R.string.common_guest),
                     "",
                     "",
                     "",
@@ -580,14 +575,14 @@ public class UserProfileViewModel extends AndroidViewModel {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user == null) {
-            message.setValue("Vui lòng đăng nhập trước.");
+            message.setValue(Str.t(R.string.common_login_first));
             return;
         }
 
         String name = username == null ? "" : username.trim();
 
         if (name.isEmpty()) {
-            message.setValue("Vui lòng nhập tên hiển thị.");
+            message.setValue(Str.t(R.string.profile_err_name_required));
             return;
         }
 
@@ -616,8 +611,7 @@ public class UserProfileViewModel extends AndroidViewModel {
             if (!task.isSuccessful()) {
                 saving.setValue(false);
                 message.setValue(
-                        "Lưu hồ sơ thất bại: "
-                                + getErrorText(task.getException())
+                        Str.t(R.string.profile_err_save_failed, getErrorText(task.getException()))
                 );
                 return;
             }
@@ -634,10 +628,10 @@ public class UserProfileViewModel extends AndroidViewModel {
                 saving.setValue(false);
 
                 if (authTask.isSuccessful()) {
-                    message.setValue("Đã lưu hồ sơ.");
+                    message.setValue(Str.t(R.string.profile_saved));
                 } else {
                     message.setValue(
-                            "Đã lưu hồ sơ nhưng chưa đồng bộ tên Firebase Auth."
+                            Str.t(R.string.profile_saved_auth_not_synced)
                     );
                 }
 

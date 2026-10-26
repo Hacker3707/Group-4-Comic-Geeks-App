@@ -60,7 +60,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="20dp"
-            android:text="Đăng nhập / Đăng ký"
+            android:text="@string/auth_login_register"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="16sp"

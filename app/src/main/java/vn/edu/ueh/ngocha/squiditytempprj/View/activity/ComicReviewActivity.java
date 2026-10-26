@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -215,7 +216,7 @@ public class ComicReviewActivity extends BaseActivity {
         if (userId == null || userId.isEmpty()) {
             Toast.makeText(
                     this,
-                    "Bạn chưa đăng nhập Firebase!",
+                    Str.t(R.string.comic_review_not_logged_in),
                     Toast.LENGTH_LONG
             ).show();
             return;
