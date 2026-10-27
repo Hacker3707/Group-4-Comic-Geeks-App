@@ -30,6 +30,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
     private static final int TYPE_RECEIVED = 0;
     private static final int TYPE_SENT = 1;
 
+    public interface OnMessageLongClickListener {
+        void onMessageLongClick(Message message, boolean sentByMe);
+    }
+
+    private OnMessageLongClickListener longClickListener;
+
+    public void setOnMessageLongClickListener(OnMessageLongClickListener listener) {
+        this.longClickListener = listener;
+    }
+
     private List<Message> messages = new ArrayList<>();
     private final String currentUserId;
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
@@ -76,6 +86,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
             holder.tvMessage.setVisibility(View.VISIBLE);
             holder.tvMessage.setText(content);
         }
+
+        final boolean sentByMe = currentUserId != null && currentUserId.equals(message.getSenderId());
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (longClickListener != null) {
+                    longClickListener.onMessageLongClick(message, sentByMe);
+                }
+                return true;
+            }
+        });
 
         if (message.getTimestamp() != null) {
             holder.tvMessageTime.setText(timeFormat.format(message.getTimestamp()));

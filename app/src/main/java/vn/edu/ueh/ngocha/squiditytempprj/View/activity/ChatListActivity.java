@@ -106,6 +106,24 @@ public class ChatListActivity extends BaseActivity {
         chatRoomAdapter = new ChatItemAdapter(currentUserId, onChatRoomClickListener);
         rcvChatRooms.setLayoutManager(new LinearLayoutManager(this));
         rcvChatRooms.setAdapter(chatRoomAdapter);
+        chatRoomAdapter.setOnChatRoomLongClickListener(new ChatItemAdapter.OnChatRoomLongClickListener() {
+            @Override
+            public void onChatRoomLongClick(final ChatRoom chatRoom, String otherUserName) {
+                new AlertDialog.Builder(ChatListActivity.this)
+                        .setTitle(Str.t(R.string.chat_delete_conv_title))
+                        .setMessage(Str.t(R.string.chat_delete_conv_msg, otherUserName))
+                        .setNegativeButton(Str.t(R.string.common_cancel), null)
+                        .setPositiveButton(Str.t(R.string.common_delete), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                chatViewModel.clearConversation(chatRoom.getChatRoomId());
+                                Toast.makeText(ChatListActivity.this,
+                                        Str.t(R.string.chat_conv_deleted), Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .show();
+            }
+        });
 
         chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);

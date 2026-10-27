@@ -245,7 +245,10 @@ public class NotificationRepository {
                         }
                         for (DocumentChange change : snapshots.getDocumentChanges()) {
                             if (change.getType() == DocumentChange.Type.ADDED) {
-                                insert(toNotification(change.getDocument()));
+                                Notification incoming = toNotification(change.getDocument());
+                                if (!BlockList.isBlocked(application, incoming.getActorId())) {
+                                    insert(incoming);
+                                }
                             }
                         }
                     }

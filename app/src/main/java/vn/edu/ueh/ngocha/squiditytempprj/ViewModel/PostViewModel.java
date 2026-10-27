@@ -102,9 +102,36 @@ public class PostViewModel extends AndroidViewModel {
         if (text != null && text.length() > 40) {
             text = text.substring(0, 40) + "...";
         }
-        notificationRepository.sendNotification(post.getUserId(), comment.getUserId(), actorName,
-                NotificationType.COMMENT, post.getPostId(),
-                Str.t(R.string.notif_commented, actorName, text));
+        final String actorId = comment.getUserId();
+        final String postOwnerId = post.getUserId();
+        final String postId = post.getPostId();
+        final String shownText = text;
+        final String actor = actorName;
+        if (comment.getParentId() == null || comment.getParentId().trim().isEmpty()) {
+            notificationRepository.sendNotification(postOwnerId, actorId, actor,
+                    NotificationType.COMMENT, postId,
+                    Str.t(R.string.notif_commented, actor, shownText));
+            return;
+        }
+        // Đây là câu trả lời một bình luận: báo cho người viết bình luận gốc
+        FirebaseFirestore.getInstance().collection("comments").document(comment.getParentId()).get()
+                .addOnCompleteListener(task -> {
+                    String parentAuthor = null;
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        parentAuthor = task.getResult().getString("userId");
+                    }
+                    if (parentAuthor != null) {
+                        notificationRepository.sendNotification(parentAuthor, actorId, actor,
+                                NotificationType.COMMENT, postId,
+                                Str.t(R.string.notif_replied, actor, shownText));
+                    }
+                    // Chủ bài viết vẫn được báo có bình luận mới (trừ khi đã nhận thông báo trả lời ở trên)
+                    if (postOwnerId != null && !postOwnerId.equals(parentAuthor)) {
+                        notificationRepository.sendNotification(postOwnerId, actorId, actor,
+                                NotificationType.COMMENT, postId,
+                                Str.t(R.string.notif_commented, actor, shownText));
+                    }
+                });
     }
 
     public LiveData<List<Comment>> getAllComments() {

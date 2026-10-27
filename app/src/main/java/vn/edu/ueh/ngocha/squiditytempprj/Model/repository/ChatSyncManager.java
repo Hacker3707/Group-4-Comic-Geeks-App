@@ -74,8 +74,85 @@ public class ChatSyncManager {
     private final Set<String> fetchedUserIds = new HashSet<>();
     private FirebaseAuth.AuthStateListener authStateListener;
 
+    private final Context appContext;
+
     private ChatSyncManager(Context appContext) {
+        this.appContext = appContext;
         db = AppDatabase.getDatabase(appContext);
+    }
+
+    // =================================
+    // Xóa tin nhắn / cuộc trò chuyện (lưu trên máy)
+    // =================================
+
+    private android.content.SharedPreferences localPrefs() {
+        return appContext.getSharedPreferences("chat_local_prefs", Context.MODE_PRIVATE);
+    }
+
+    private boolean isRoomCleared(String roomId) {
+        return localPrefs().getLong("cleared_" + roomId, 0L) > 0L;
+    }
+
+    private boolean isBeforeCleared(String roomId, Date time) {
+        long cleared = localPrefs().getLong("cleared_" + roomId, 0L);
+        return cleared > 0L && time != null && time.getTime() <= cleared;
+    }
+
+    private boolean isHidden(String messageId) {
+        return localPrefs().getStringSet("hidden_messages", new HashSet<String>()).contains(messageId);
+    }
+
+    /** Xóa toàn bộ cuộc trò chuyện ở phía mình. Tin nhắn mới hơn sẽ tạo lại cuộc trò chuyện. */
+    public void clearConversation(final String roomId) {
+        if (roomId == null) {
+            return;
+        }
+        localPrefs().edit().putLong("cleared_" + roomId, System.currentTimeMillis()).apply();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                db.messageDao().deleteMessagesByChatRoomId(roomId);
+                db.chatRoomDao().deleteById(roomId);
+            }
+        });
+    }
+
+    /** Xóa một tin nhắn ở phía mình. */
+    public void hideMessage(final String messageId) {
+        Set<String> hidden = new HashSet<>(
+                localPrefs().getStringSet("hidden_messages", new HashSet<String>()));
+        hidden.add(messageId);
+        localPrefs().edit().putStringSet("hidden_messages", hidden).apply();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                db.messageDao().deleteById(messageId);
+            }
+        });
+    }
+
+    /** Xóa một tin nhắn của mình với mọi người (xóa luôn trên Firestore). */
+    public void deleteMessageEverywhere(final String messageId) {
+        firestore.collection(MESSAGES).document(messageId).delete()
+                .addOnFailureListener(logFailure("Xóa tin nhắn thất bại"));
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                db.messageDao().deleteById(messageId);
+            }
+        });
+    }
+
+    private void ensureRoom(String roomId, List<?> participants) {
+        if (participants == null || participants.size() != 2) {
+            return;
+        }
+        String a = String.valueOf(participants.get(0));
+        String b = String.valueOf(participants.get(1));
+        boolean aFirst = a.compareTo(b) <= 0;
+        db.chatRoomDao().insertChatRoom(new ChatRoom(roomId, aFirst ? a : b, aFirst ? b : a));
+        fetchUser(a);
+        fetchUser(b);
     }
 
     // =================================
@@ -184,6 +261,11 @@ public class ChatSyncManager {
                             if (user1Id == null || user2Id == null) {
                                 continue;
                             }
+                            // Cuộc trò chuyện đã xóa hoặc người đã chặn thì không đưa lại vào danh sách
+                            String otherId = user1Id.equals(uid) ? user2Id : user1Id;
+                            if (isRoomCleared(roomId) || BlockList.isBlocked(appContext, otherId)) {
+                                continue;
+                            }
                             executor.execute(new Runnable() {
                                 @Override
                                 public void run() {
@@ -212,6 +294,16 @@ public class ChatSyncManager {
                             return;
                         }
                         for (DocumentChange change : snapshots.getDocumentChanges()) {
+                            if (change.getType() == DocumentChange.Type.REMOVED) {
+                                final String removedId = change.getDocument().getId();
+                                executor.execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        db.messageDao().deleteById(removedId);
+                                    }
+                                });
+                                continue;
+                            }
                             if (change.getType() != DocumentChange.Type.ADDED) {
                                 continue;
                             }
@@ -222,6 +314,11 @@ public class ChatSyncManager {
                                 continue;
                             }
                             Date time = doc.getDate("timestamp");
+                            if (isHidden(doc.getId()) || BlockList.isBlocked(appContext, senderId)
+                                    || isBeforeCleared(chatRoomId, time)) {
+                                continue;
+                            }
+                            final List<?> roomParticipants = (List<?>) doc.get("participants");
                             // Tin của chính mình coi như đã đọc
                             final Message message = new Message(
                                     doc.getId(),
@@ -234,6 +331,7 @@ public class ChatSyncManager {
                                 @Override
                                 public void run() {
                                     db.messageDao().insertMessage(message);
+                                    ensureRoom(message.getChatRoomId(), roomParticipants);
                                 }
                             });
                         }
