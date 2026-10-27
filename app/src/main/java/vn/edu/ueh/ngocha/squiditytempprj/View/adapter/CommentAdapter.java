@@ -57,13 +57,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         holder.tvCommentUsername.setText(UserDisplayUtils.displayName(user, fallback));
         holder.tvCommentContent.setText(comment.getContent());
 
-        // 👉 Xử lý thụt lề (Indentation) giống phong cách Facebook cho bình luận trả lời (reply)
+        // 👉 Xử lý thụt lề (Indentation) chuẩn phong cách Facebook cho bình luận trả lời (reply)
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
         float density = holder.itemView.getContext().getResources().getDisplayMetrics().density;
 
         if (comment.getParentId() != null && !comment.getParentId().trim().isEmpty()) {
-            // Nếu là bình luận con -> Thụt lề sang phải 36dp
-            layoutParams.leftMargin = (int) (36 * density);
+            // Nếu là bình luận con -> Thụt lề sang phải 32dp (đã sửa lỗi thiếu dấu nhân *)
+            layoutParams.leftMargin = (int) (32 * density);
+
             holder.tvReplyInfo.setVisibility(View.VISIBLE);
 
             // Lấy thông tin User của người được trả lời
@@ -77,8 +78,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 
             holder.tvReplyInfo.setText(Str.t(R.string.comment_reply_to, targetDisplayName));
         } else {
-            // Nếu là bình luận gốc -> Sát lề trái hoàn toàn
+            // Nếu là bình luận gốc -> Sát lề trái hoàn toàn (0dp)
             layoutParams.leftMargin = (int) (0 * density);
+
             holder.tvReplyInfo.setVisibility(View.GONE);
         }
         holder.itemView.setLayoutParams(layoutParams);

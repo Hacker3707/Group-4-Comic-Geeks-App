@@ -38,8 +38,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
@@ -48,7 +50,9 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupMember;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.GroupRole;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Stamp;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.PostRepository;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.StampRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.GroupMemberAdapter;
@@ -85,7 +89,6 @@ public class GroupViewActivity extends BaseActivity {
     // TODO: user thử, dùng chung với GroupActivity. Thay bằng user đang đăng nhập khi có đăng nhập
     private final String CURRENT_USER_ID = GroupActivity.currentUserId();
 
-    // Khi nhóm/thành viên thay đổi trên Firestore thì tải lại trang nhóm này
     private final GroupSyncManager.OnSyncListener syncListener = new GroupSyncManager.OnSyncListener() {
         @Override
         public void onGroupsSynced() {
@@ -137,9 +140,7 @@ public class GroupViewActivity extends BaseActivity {
     private String myMembershipId = null;
     private boolean isAdminUser = false;
 
-    // Chủ đề đang được chọn ở hàng chip (null = hiện tất cả bài viết)
     private String selectedTagKey = null;
-    // Vị trí dấu # mà người dùng đang gõ trong ô viết bài (-1 = không đang gõ hashtag)
     private int hashStart = -1;
 
     private final List<Post> allPosts = new ArrayList<>();
@@ -147,10 +148,8 @@ public class GroupViewActivity extends BaseActivity {
     private final List<Post> groupPosts = new ArrayList<>();
     private final List<Post> visiblePosts = new ArrayList<>();
     private final List<GroupMember> groupMembers = new ArrayList<>();
-    // Danh sách thành viên sau khi lọc theo ô tìm kiếm
     private final List<GroupMember> visibleMembers = new ArrayList<>();
 
-    // Tên + ảnh của mọi người trong nhóm (key = userId), cập nhật theo thời gian thực từ Firestore
     private final Map<String, User> userMap = new HashMap<>();
     private LiveData<Map<String, User>> userLive = null;
     private Observer<Map<String, User>> userObserver;
@@ -164,7 +163,6 @@ public class GroupViewActivity extends BaseActivity {
 
         groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
         if (groupId == null) {
-            // Không biết xem group nào thì đóng màn hình
             finish();
             return;
         }
@@ -189,14 +187,12 @@ public class GroupViewActivity extends BaseActivity {
                 }
                 memberAdapter.setUsers(userMap);
                 postAdapter.setUsers(userMap);
-                // Vẽ lại tab đang mở (tên mới cũng ảnh hưởng đến kết quả tìm kiếm)
                 showSelectedTab();
             }
         };
         observeData();
         loadGroupData();
 
-        // Xoay màn hình thì mở lại đúng tab đang xem (Activity bị tạo lại nên selectedTab bị reset)
         if (savedInstanceState != null) {
             int savedTab = savedInstanceState.getInt(STATE_SELECTED_TAB, TAB_POSTS);
             TabLayout.Tab tab = tabLayout.getTabAt(savedTab);
@@ -232,7 +228,6 @@ public class GroupViewActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Quay lại từ trang cài đặt thì tải lại thông tin nhóm (đã sửa hoặc đã giải tán)
         if (groupId != null && groupViewModel != null) {
             groupViewModel.loadGroup(groupId);
         }
@@ -313,7 +308,6 @@ public class GroupViewActivity extends BaseActivity {
         composerLayout = findViewById(R.id.composerLayout);
         edtComposer = findViewById(R.id.edtComposer);
         fabGroupPost = findViewById(R.id.fabGroupPost);
-        // Nút + mở màn Tạo bài viết (cùng giao diện với trang chủ), bài sẽ thuộc group này
         fabGroupPost.setOnClickListener(v -> {
             if (groupId == null) {
                 return;
@@ -355,7 +349,6 @@ public class GroupViewActivity extends BaseActivity {
             }
         });
 
-        // Bấm kính lúp trên thanh tiêu đề: chuyển sang tab Thành viên và focus ô tìm kiếm
         findViewById(R.id.imgSearch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -372,15 +365,12 @@ public class GroupViewActivity extends BaseActivity {
             }
         });
 
-        // Gõ đến đâu lọc thành viên đến đó (không phân biệt hoa/thường, bỏ dấu)
         edtSearchMember.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -421,19 +411,13 @@ public class GroupViewActivity extends BaseActivity {
             }
 
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-                // Không cần xử lý
-            }
+            public void onTabUnselected(TabLayout.Tab tab) {}
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-                // Không cần xử lý
-            }
+            public void onTabReselected(TabLayout.Tab tab) {}
         });
     }
 
-    // Chip chủ đề: bấm để lọc các bài viết có hashtag tương ứng, bấm lần nữa để hiện tất cả.
-    // Bài không có hashtag hợp lệ nằm trong chip "Khác".
     private void setupChips() {
         View.OnClickListener chipClickListener = new View.OnClickListener() {
             @Override
@@ -458,16 +442,11 @@ public class GroupViewActivity extends BaseActivity {
         }
     }
 
-    // =================================
-    // Lấy dữ liệu từ ViewModel
-    // =================================
-
     private void observeData() {
         groupViewModel.getSelectedGroup().observe(this, new Observer<Group>() {
             @Override
             public void onChanged(Group group) {
                 if (group == null) {
-                    // Nhóm đã bị giải tán hoặc không còn tồn tại
                     finish();
                     return;
                 }
@@ -502,13 +481,15 @@ public class GroupViewActivity extends BaseActivity {
             }
         });
 
-        // LiveData cho biết user hiện tại có phải admin của group không
         groupViewModel.getIsAdmin().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean admin) {
                 isAdminUser = Boolean.TRUE.equals(admin);
             }
         });
+
+        // 👉 Tích hợp đồng bộ trạng thái Stamp cho GroupViewActivity
+        StampRepository stampRepository = new StampRepository(getApplication());
 
         postViewModel.getAllPosts().observe(this, new Observer<List<Post>>() {
             @Override
@@ -519,13 +500,34 @@ public class GroupViewActivity extends BaseActivity {
                 }
                 filterPostsOfGroup();
                 watchUsers();
+
+                if (posts != null && !posts.isEmpty()) {
+                    Set<String> myStampedPostIds = new HashSet<>();
+                    for (Post post : posts) {
+                        if (post.getPostId() != null) {
+                            stampRepository.getStampsByPost(post.getPostId()).observe(GroupViewActivity.this, stamps -> {
+                                if (stamps != null) {
+                                    for (Stamp s : stamps) {
+                                        if (s.getUserId() != null && s.getUserId().equals(CURRENT_USER_ID)) {
+                                            myStampedPostIds.add(post.getPostId());
+                                            break;
+                                        }
+                                    }
+                                    if (postAdapter != null) {
+                                        postAdapter.setStampedPostIds(myStampedPostIds);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+
                 if (selectedTab == TAB_POSTS) {
                     showSelectedTab();
                 }
             }
         });
 
-        // Bình luận của các bài viết (hiện ngay trong khung bài)
         postViewModel.getAllComments().observe(this, new Observer<List<Comment>>() {
             @Override
             public void onChanged(List<Comment> comments) {
@@ -539,7 +541,6 @@ public class GroupViewActivity extends BaseActivity {
         });
     }
 
-    // Gom bình luận theo bài viết, cũ trước mới sau
     private Map<String, List<Comment>> groupCommentsByPost() {
         Map<String, List<Comment>> result = new HashMap<>();
         for (Comment comment : allComments) {
@@ -564,19 +565,6 @@ public class GroupViewActivity extends BaseActivity {
         return result;
     }
 
-    private void sendComment(Post post, String content) {
-        Comment comment = new Comment(UUID.randomUUID().toString(), CURRENT_USER_ID,
-                post.getPostId(), content);
-        if (CURRENT_USER_ID.equals(post.getUserId())) {
-            // Bình luận bài của chính mình thì không cần báo cho mình
-            postViewModel.addComment(comment);
-        } else {
-            postViewModel.addComment(comment, post);
-        }
-    }
-
-    // Theo dõi tên + ảnh của mọi người đang xuất hiện trong nhóm (thành viên và tác giả bài viết).
-    // Chỉ đăng ký lại khi danh sách người thay đổi.
     private void watchUsers() {
         TreeSet<String> ids = new TreeSet<>();
         for (GroupMember member : groupMembers) {
@@ -610,7 +598,6 @@ public class GroupViewActivity extends BaseActivity {
         userLive.observe(this, userObserver);
     }
 
-    // Tên hiển thị của một userId (chưa tải được thì hiện chữ dự phòng)
     private String displayNameOf(String userId) {
         return UserDisplayUtils.displayName(
                 userMap.get(userId), getString(R.string.group_member_unknown_name));
@@ -623,7 +610,6 @@ public class GroupViewActivity extends BaseActivity {
         showSelectedTab();
     }
 
-    // Post chưa có hàm lấy theo group nên lọc ở đây dựa trên groupId
     private void filterPostsOfGroup() {
         groupPosts.clear();
         if (groupId == null) {
@@ -636,10 +622,6 @@ public class GroupViewActivity extends BaseActivity {
         }
     }
 
-    // =================================
-    // Hiển thị dữ liệu
-    // =================================
-
     private void bindGroup(Group group) {
         if (group == null) {
             return;
@@ -648,7 +630,6 @@ public class GroupViewActivity extends BaseActivity {
         txtGroupName.setText(group.getGroupName());
         txtDescription.setText(group.getDescription());
 
-        // Có link ảnh đại diện thì hiện ảnh, chưa có thì dùng chữ cái đầu của tên nhóm
         String name = group.getGroupName();
         if (name == null || name.trim().isEmpty()) {
             txtAvatarLetter.setText("?");
@@ -668,7 +649,6 @@ public class GroupViewActivity extends BaseActivity {
             txtAvatarLetter.setVisibility(View.VISIBLE);
         }
 
-        // Chỉ admin của app và người tạo nhóm mới thấy nút cài đặt nhóm
         boolean canManage = GroupPermissionUtils.canManageGroup(CURRENT_USER_ID, group);
         if (canManage) {
             btnMoreGroup.setVisibility(View.VISIBLE);
@@ -678,7 +658,6 @@ public class GroupViewActivity extends BaseActivity {
             imgMore.setVisibility(View.GONE);
         }
 
-        // Có link ảnh bìa thì tải ảnh của nhóm, chưa có thì dùng nền tím mặc định
         String coverUrl = group.getCoverImageUrl();
         if (coverUrl != null && !coverUrl.trim().isEmpty()) {
             Glide.with(GroupViewActivity.this)
@@ -692,7 +671,6 @@ public class GroupViewActivity extends BaseActivity {
         }
     }
 
-    // Kiểm tra user hiện tại đã tham gia group chưa để đổi nút Join/Joined
     private void updateMembership() {
         isMember = false;
         myMembershipId = null;
@@ -712,7 +690,6 @@ public class GroupViewActivity extends BaseActivity {
 
     private void showSelectedTab() {
         if (selectedTab != TAB_MEMBERS) {
-            // Rời tab Thành viên thì ẩn và xoá ô tìm kiếm (selectedTab khác MEMBERS nên không lặp)
             edtSearchMember.setVisibility(View.GONE);
             if (edtSearchMember.length() > 0) {
                 edtSearchMember.setText("");
@@ -741,14 +718,11 @@ public class GroupViewActivity extends BaseActivity {
                 showContent(!visibleMembers.isEmpty(), R.string.group_empty_member_search);
             }
         } else {
-            // Sự kiện, File, Giới thiệu: chưa có dữ liệu
             hideComposerExtras();
             showContent(false, R.string.group_empty_other);
         }
     }
 
-    // groupPosts đã theo thứ tự mới nhất trước (PostDao sắp xếp theo timestamp giảm dần),
-    // lọc theo chủ đề vẫn giữ nguyên thứ tự đó
     private void buildVisiblePosts() {
         visiblePosts.clear();
         for (Post post : groupPosts) {
@@ -759,7 +733,6 @@ public class GroupViewActivity extends BaseActivity {
         }
     }
 
-    // Lọc groupMembers theo từ khoá trong ô tìm kiếm (rỗng = hiện tất cả)
     private void buildVisibleMembers() {
         visibleMembers.clear();
         String query = SearchTextUtils.normalize(edtSearchMember.getText().toString());
@@ -770,9 +743,7 @@ public class GroupViewActivity extends BaseActivity {
         }
     }
 
-    // Ô soạn bài chỉ hiện khi bấm nút +, bấm lần nữa (hoặc đăng xong) thì thu lại
     private void updateComposerVisibility() {
-        // Không còn ô soạn bài nhanh trong group, đăng bài qua nút +
         composerLayout.setVisibility(View.GONE);
         txtTagHelp.setVisibility(View.GONE);
         tagSuggestionBar.setVisibility(View.GONE);
@@ -785,21 +756,13 @@ public class GroupViewActivity extends BaseActivity {
         tagSuggestionBar.setVisibility(View.GONE);
     }
 
-    // =================================
-    // Hashtag khi soạn bài
-    // =================================
-
     private void setupComposerHashtag() {
         edtComposer.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Không cần xử lý
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Không cần xử lý
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -818,7 +781,6 @@ public class GroupViewActivity extends BaseActivity {
         }
     }
 
-    // Khi người dùng đang gõ "#..." thì hiện các chủ đề hợp lệ để chọn
     private void updateTagSuggestions() {
         Editable text = edtComposer.getText();
         int cursor = edtComposer.getSelectionStart();
@@ -826,7 +788,6 @@ public class GroupViewActivity extends BaseActivity {
             cursor = text.length();
         }
 
-        // Tìm dấu # gần nhất ở phía trước con trỏ (không bị ngắt bởi khoảng trắng)
         hashStart = -1;
         int i = cursor - 1;
         while (i >= 0) {
@@ -846,7 +807,6 @@ public class GroupViewActivity extends BaseActivity {
             return;
         }
 
-        // Chỉ hiện chủ đề khớp phần đã gõ; không khớp cái nào thì hiện đủ để người dùng chọn
         String typed = text.subSequence(hashStart + 1, cursor).toString();
         int matchCount = 0;
         for (int k = 0; k < tagSuggestionContainer.getChildCount(); k++) {
@@ -867,7 +827,6 @@ public class GroupViewActivity extends BaseActivity {
         tagSuggestionBar.setVisibility(View.VISIBLE);
     }
 
-    // Thay phần "#..." đang gõ bằng chủ đề người dùng vừa chọn
     private void insertHashtag(String tag) {
         Editable text = edtComposer.getText();
         int cursor = edtComposer.getSelectionStart();
@@ -893,18 +852,12 @@ public class GroupViewActivity extends BaseActivity {
         }
     }
 
-    // =================================
-    // Hành động của người dùng
-    // =================================
-
-    // Nút "⋯": mở trang cài đặt nhóm (chỉ hiện với admin của app và người tạo nhóm)
     private void openGroupSettings() {
         Intent intent = new Intent(GroupViewActivity.this, GroupSettingsActivity.class);
         intent.putExtra(GroupSettingsActivity.EXTRA_GROUP_ID, groupId);
         startActivity(intent);
     }
 
-    // Admin bấm vào một thành viên để đổi vai trò hoặc xoá khỏi nhóm
     private void onMemberClicked(GroupMember member) {
         if (!isAdminUser) {
             return;
@@ -961,15 +914,12 @@ public class GroupViewActivity extends BaseActivity {
             return;
         }
 
-        // Chống bấm gửi nhiều lần trong lúc đang đăng
         final View btnSend = findViewById(R.id.btnSendPost);
         btnSend.setEnabled(false);
 
-        // Bài trong nhóm = Post bình thường nhưng có groupId (không gắn truyện, không ảnh)
         Post post = new Post(UUID.randomUUID().toString(), CURRENT_USER_ID, null, content, null);
         post.setGroupId(groupId);
 
-        // Đẩy lên Firestore, thành công thì bài được lưu vào Room và tự hiện trong danh sách
         postViewModel.uploadPostToFirestore(post, new PostRepository.OnFirestoreUploadListener() {
             @Override
             public void onSuccess() {
@@ -982,7 +932,6 @@ public class GroupViewActivity extends BaseActivity {
 
             @Override
             public void onFailure(String error) {
-                // Giữ nguyên nội dung để người dùng bấm gửi lại
                 btnSend.setEnabled(true);
                 Toast.makeText(GroupViewActivity.this, Str.t(R.string.group_post_failed, error), Toast.LENGTH_LONG).show();
             }

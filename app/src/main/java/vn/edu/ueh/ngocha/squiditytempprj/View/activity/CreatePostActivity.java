@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,7 +29,6 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,13 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.api.MangaDexApi;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.api.RetrofitClient;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaResponse;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.PostRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
@@ -76,7 +70,6 @@ public class CreatePostActivity extends AppCompatActivity {
             > imagePickerLauncher;
 
     private boolean isEditMode = false;
-    // Có giá trị khi đăng bài từ trang group (bài sẽ thuộc group này)
     private String groupId = null;
     private String editPostId = null;
 
@@ -260,7 +253,6 @@ public class CreatePostActivity extends AppCompatActivity {
                 String currentComicId = selectedComicInfo[0];
                 String currentComicTitle = selectedComicInfo[1];
                 String finalHashtag = hashtag;
-                // Bài trong group lưu hashtag ngay trong nội dung để lọc theo chủ đề
                 String finalContent = content;
                 if (groupId != null && !groupId.isEmpty() && !isEditMode
                         && !hashtag.isEmpty() && !content.contains(hashtag)) {
@@ -324,6 +316,40 @@ public class CreatePostActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         });
+    }
+
+    // =========================================================================
+    // 👉 BỔ SUNG: Lưu và khôi phục nội dung khi xoay ngang màn hình (Landscape)
+    // =========================================================================
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (edtPostContent != null) {
+            outState.putString("draft_content", edtPostContent.getText().toString());
+        }
+        if (edtPostHashtag != null) {
+            outState.putString("draft_hashtag", edtPostHashtag.getText().toString());
+        }
+        if (edtComicSearch != null) {
+            outState.putString("draft_comic", edtComicSearch.getText().toString());
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        String draftContent = savedInstanceState.getString("draft_content");
+        if (draftContent != null && edtPostContent != null) {
+            edtPostContent.setText(draftContent);
+        }
+        String draftHashtag = savedInstanceState.getString("draft_hashtag");
+        if (draftHashtag != null && edtPostHashtag != null) {
+            edtPostHashtag.setText(draftHashtag);
+        }
+        String draftComic = savedInstanceState.getString("draft_comic");
+        if (draftComic != null && edtComicSearch != null) {
+            edtComicSearch.setText(draftComic);
+        }
     }
 
     private void setupComicAutoComplete() {
@@ -415,7 +441,6 @@ public class CreatePostActivity extends AppCompatActivity {
         }
     }
 
-    // Id của tài khoản đang đăng nhập, chưa đăng nhập thì dùng "guest"
     private String currentUid() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             return "guest";
@@ -464,7 +489,6 @@ public class CreatePostActivity extends AppCompatActivity {
 
         currentUserId = user.getUid();
 
-        // Hiển thị tên tạm từ Firebase Authentication
         String name = user.getDisplayName();
 
         if (name == null || name.trim().isEmpty()) {
@@ -479,7 +503,6 @@ public class CreatePostActivity extends AppCompatActivity {
             tvUsername.setText(currentUsername);
         }
 
-        // Hiển thị avatar từ Firebase Authentication
         if (imgAvatar != null && user.getPhotoUrl() != null) {
             Glide.with(this)
                     .load(user.getPhotoUrl())
@@ -489,7 +512,6 @@ public class CreatePostActivity extends AppCompatActivity {
                     .into(imgAvatar);
         }
 
-        // Đồng bộ theo hồ sơ đã lưu trên Firestore
         FirebaseFirestore.getInstance()
                 .collection("users")
                 .document(currentUserId)

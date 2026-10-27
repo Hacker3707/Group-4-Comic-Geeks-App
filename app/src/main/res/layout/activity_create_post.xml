@@ -1,159 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:fillViewport="true"
     android:background="#FFFFFF"
     android:fitsSystemWindows="true">
 
-    <include
-        android:id="@+id/appBar"
-        layout="@layout/layout_app_bar"
-        android:layout_width="match_parent"
-        android:layout_height="70dp" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:background="#FFFFFF">
-
-        <ImageButton
-            android:id="@+id/btnCancelPost"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/post_cancel_cd"
-            android:padding="8dp"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            app:tint="#493373"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/post_create_title"
-            android:textColor="#493373"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnPublish"
-            app:layout_constraintHorizontal_bias="0.563"
-            app:layout_constraintStart_toEndOf="@id/btnCancelPost"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.533" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPublish"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:minWidth="0dp"
-            android:text="@string/post_publish"
-            android:textColor="#493373"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            app:backgroundTint="#DFC6FF"
-            app:cornerRadius="18dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#E8E3EF" />
-
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/edtPostContent"
-        android:layout_width="match_parent"
-        android:layout_height="350dp"
-        android:background="@android:color/transparent"
-        android:gravity="top|start"
-        android:hint="@string/post_content_hint"
-        android:inputType="textCapSentences|textMultiLine"
-        android:overScrollMode="ifContentScrolls"
-        android:padding="16dp"
-        android:scrollbars="vertical"
-        android:textColor="#333333"
-        android:textColorHint="#999999"
-        android:textSize="16sp" />
-
-
-    <!-- 1. Ô nhập hashtag cho bài viết -->
-    <EditText
-        android:id="@+id/edtPostHashtag"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_search"
-        android:padding="12dp"
-        android:hint="@string/post_hashtag_hint"
-        android:textColor="#333333"
-        android:textSize="14sp"
-        android:maxLines="1"/>
-
-    <!-- 2. Ô tìm kiếm & gợi ý tên truyện để liên kết xem chi tiết -->
-    <com.google.android.material.textfield.MaterialAutoCompleteTextView
-        android:id="@+id/edtComicSearch"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/bg_search"
-        android:completionThreshold="1"
-        android:padding="12dp"
-        android:hint="@string/post_comic_link_hint"
-        android:textColor="#333333"
-        android:textSize="14sp"
-        android:singleLine="true"/>
-
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvImagePreview"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="8dp"/>
-
     <LinearLayout
-        android:id="@+id/btnAddImage"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:background="#F9F9F9"
-        android:gravity="center_vertical"
-        android:clickable="true"
-        android:focusable="true"
-        android:contentDescription="@string/post_add_images">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <ImageView
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@android:drawable/ic_menu_camera"
-            android:contentDescription="@null"
-            app:tint="#493373" />
+        <include
+            android:id="@+id/appBar"
+            layout="@layout/layout_app_bar"
+            android:layout_width="match_parent"
+            android:layout_height="70dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:background="#FFFFFF">
+
+            <ImageButton
+                android:id="@+id/btnCancelPost"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/post_cancel_cd"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="#493373"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/post_create_title"
+                android:textColor="#493373"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnPublish"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@id/btnCancelPost"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPublish"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="0dp"
+                android:text="@string/post_publish"
+                android:textColor="#493373"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:backgroundTint="#DFC6FF"
+                app:cornerRadius="18dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E8E3EF" />
+
+        <!-- 👉 Thay đổi layout_height từ cố định 350dp thành 0dp weight="1" hoặc wrap_content để cuộn mượt khi xoay ngang -->
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtPostContent"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="@android:color/transparent"
+            android:gravity="top|start"
+            android:hint="@string/post_content_hint"
+            android:inputType="textCapSentences|textMultiLine"
+            android:padding="16dp"
+            android:textColor="#333333"
+            android:textColorHint="#999999"
+            android:textSize="16sp" />
+
+        <!-- 1. Ô nhập hashtag cho bài viết -->
+        <EditText
+            android:id="@+id/edtPostHashtag"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:text="@string/post_add_images"
-            android:textColor="#493373"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_search"
+            android:padding="12dp"
+            android:hint="@string/post_hashtag_hint"
+            android:textColor="#333333"
             android:textSize="14sp"
-            android:textStyle="bold" />
+            android:maxLines="1"/>
+
+        <!-- 2. Ô tìm kiếm & gợi ý tên truyện -->
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/edtComicSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_search"
+            android:completionThreshold="1"
+            android:padding="12dp"
+            android:hint="@string/post_comic_link_hint"
+            android:textColor="#333333"
+            android:textSize="14sp"
+            android:singleLine="true"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvImagePreview"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout
+            android:id="@+id/btnAddImage"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="#F9F9F9"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="@string/post_add_images">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@android:drawable/ic_menu_camera"
+                android:contentDescription="@null"
+                app:tint="#493373" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/post_add_images"
+                android:textColor="#493373"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
-</LinearLayout>
+</ScrollView>
