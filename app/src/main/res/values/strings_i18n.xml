@@ -333,4 +333,9 @@
     <string name="follow_list_loading">Loading...</string>
     <string name="follow_list_follow">Follow</string>
     <string name="follow_list_unfollow">Unfollow</string>
+    <string name="admin_post_detail_title">Post details</string>
+    <string name="admin_post_not_found">This post no longer exists</string>
+    <string name="admin_comments_title">Comments (%1$d)</string>
+    <string name="admin_no_comments">No comments yet</string>
+    <string name="admin_post_images">%1$d photo(s)</string>
 </resources>

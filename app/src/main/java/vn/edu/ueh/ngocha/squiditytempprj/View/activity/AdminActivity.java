@@ -1,6 +1,7 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -29,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.GroupCascadeDelete;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 
 /**
@@ -47,6 +49,7 @@ public class AdminActivity extends AppCompatActivity {
     private static final int TAB_USERS = 1;
     private static final int TAB_POSTS = 2;
     private static final int TAB_GROUPS = 3;
+    private static final String STATE_SELECTED_TAB = "admin_selected_tab";
 
     private FirebaseFirestore db;
     private String myUid;
@@ -102,6 +105,14 @@ public class AdminActivity extends AppCompatActivity {
         tabs.addTab(tabs.newTab().setText(Str.t(R.string.common_user)));
         tabs.addTab(tabs.newTab().setText(Str.t(R.string.admin_tab_posts)));
         tabs.addTab(tabs.newTab().setText(Str.t(R.string.admin_tab_groups)));
+        // Xoay màn hình thì chọn lại đúng tab đang xem (chọn trước khi gắn listener để khỏi render thừa)
+        if (savedInstanceState != null) {
+            selectedTab = savedInstanceState.getInt(STATE_SELECTED_TAB, TAB_OVERVIEW);
+        }
+        TabLayout.Tab restoredTab = tabs.getTabAt(selectedTab);
+        if (restoredTab != null) {
+            restoredTab.select();
+        }
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -135,6 +146,12 @@ public class AdminActivity extends AppCompatActivity {
                     Toast.makeText(this, Str.t(R.string.admin_check_failed), Toast.LENGTH_LONG).show();
                     finish();
                 });
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_SELECTED_TAB, selectedTab);
     }
 
     private void startListening() {
@@ -219,6 +236,10 @@ public class AdminActivity extends AppCompatActivity {
                 r.id = p.getId();
                 r.title = nonEmpty(p.getString("content"), Str.t(R.string.admin_image_only_post));
                 r.subtitle = Str.t(R.string.admin_by, author);
+                Object imgs = p.get("imageUris");
+                if (imgs instanceof List && !((List<?>) imgs).isEmpty()) {
+                    r.subtitle = r.subtitle + "  •  " + Str.t(R.string.admin_post_images, ((List<?>) imgs).size());
+                }
                 boolean inGroup = p.getString("groupId") != null && !p.getString("groupId").isEmpty();
                 r.badge = inGroup ? Str.t(R.string.admin_in_group) : "";
                 r.badgeColor = Color.parseColor("#493373");
@@ -262,7 +283,9 @@ public class AdminActivity extends AppCompatActivity {
         if (selectedTab == TAB_USERS) {
             showUserActions(row);
         } else if (selectedTab == TAB_POSTS) {
-            showPostActions(row);
+            Intent intent = new Intent(this, AdminPostDetailActivity.class);
+            intent.putExtra(AdminPostDetailActivity.EXTRA_POST_ID, row.id);
+            startActivity(intent);
         } else if (selectedTab == TAB_GROUPS) {
             confirmDeleteGroup(row);
         }
@@ -306,40 +329,6 @@ public class AdminActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showPostActions(Row row) {
-        new AlertDialog.Builder(this)
-                .setTitle(row.subtitle)
-                .setMessage(row.title)
-                .setPositiveButton(Str.t(R.string.admin_delete_post), (d, w) -> confirmDeletePost(row))
-                .setNegativeButton(Str.t(R.string.common_close), null)
-                .show();
-    }
-
-    private void confirmDeletePost(Row row) {
-        new AlertDialog.Builder(this)
-                .setTitle(Str.t(R.string.admin_delete_post_q))
-                .setMessage(Str.t(R.string.admin_delete_post_msg))
-                .setNegativeButton(Str.t(R.string.common_cancel), null)
-                .setPositiveButton(Str.t(R.string.common_delete), (d, w) -> deletePost(row.id))
-                .show();
-    }
-
-    private void deletePost(String postId) {
-        db.collection("comments").whereEqualTo("postId", postId).get()
-                .addOnSuccessListener(snap -> {
-                    WriteBatch batch = db.batch();
-                    for (QueryDocumentSnapshot c : snap) {
-                        batch.delete(c.getReference());
-                    }
-                    batch.delete(db.collection("posts").document(postId));
-                    batch.commit().addOnSuccessListener(v ->
-                            Toast.makeText(this, Str.t(R.string.admin_post_deleted), Toast.LENGTH_SHORT).show());
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, Str.t(R.string.admin_delete_failed, e.getMessage()),
-                                Toast.LENGTH_LONG).show());
-    }
-
     private void confirmDeleteGroup(Row row) {
         new AlertDialog.Builder(this)
                 .setTitle(Str.t(R.string.admin_dissolve_title, row.title))
@@ -349,21 +338,21 @@ public class AdminActivity extends AppCompatActivity {
                 .show();
     }
 
+    // Xoá group cùng bài viết, bình luận của các bài đó và thành viên trên Firestore
     private void deleteGroup(String groupId) {
-        db.collection("group_members").whereEqualTo("groupId", groupId).get()
-                .addOnSuccessListener(members -> db.collection("posts")
-                        .whereEqualTo("groupId", groupId).get()
-                        .addOnSuccessListener(groupPosts -> {
-                            WriteBatch batch = db.batch();
-                            for (QueryDocumentSnapshot m : members) batch.delete(m.getReference());
-                            for (QueryDocumentSnapshot p : groupPosts) batch.delete(p.getReference());
-                            batch.delete(db.collection("groups").document(groupId));
-                            batch.commit().addOnSuccessListener(v ->
-                                    Toast.makeText(this, Str.t(R.string.group_dissolve_success), Toast.LENGTH_SHORT).show());
-                        }))
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, Str.t(R.string.admin_delete_failed, e.getMessage()),
-                                Toast.LENGTH_LONG).show());
+        GroupCascadeDelete.deleteGroup(db, groupId, new GroupCascadeDelete.Callback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(AdminActivity.this,
+                        Str.t(R.string.group_dissolve_success), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String message) {
+                Toast.makeText(AdminActivity.this,
+                        Str.t(R.string.admin_delete_failed, message), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     // =================================
