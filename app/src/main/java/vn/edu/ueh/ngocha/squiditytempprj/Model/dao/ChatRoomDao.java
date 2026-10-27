@@ -22,6 +22,9 @@ public interface ChatRoomDao {
     @Query("SELECT * FROM chat_rooms WHERE user1_id = :userId OR user2_id = :userId")
     LiveData<List<ChatRoom>> getChatRoomsByUserId(String userId);
 
+    @Query("DELETE FROM chat_rooms WHERE chat_room_id = :chatRoomId")
+    void deleteById(String chatRoomId);
+
     @Query("SELECT * FROM chat_rooms WHERE chat_room_id = :chatRoomId")
     LiveData<ChatRoom> getChatRoomById(String chatRoomId);
 }

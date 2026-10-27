@@ -165,7 +165,10 @@ public class NotificationPopup {
         }
         for (Notification notification : unread) {
             if (handledIds.add(notification.getNotifId()) && !firstUnreadLoad && isRecent(notification)) {
-                NtfChannel.show(activity, notification);
+                if (androidx.preference.PreferenceManager.getDefaultSharedPreferences(activity)
+                        .getBoolean("notifications_enabled", true)) {
+                    NtfChannel.show(activity, notification);
+                }
             }
         }
         firstUnreadLoad = false;

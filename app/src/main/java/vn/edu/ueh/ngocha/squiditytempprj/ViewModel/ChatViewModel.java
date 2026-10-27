@@ -50,6 +50,8 @@ public class ChatViewModel extends AndroidViewModel {
         if (recipientId == null || recipientId.isEmpty()) {
             return;
         }
+        // Đảm bảo cuộc trò chuyện hiện trong danh sách (kể cả sau khi đã xóa trước đó)
+        chatRoomRepository.insert(new ChatRoom(message.getChatRoomId(), message.getSenderId(), recipientId));
         chatSyncManager.pushMessage(message, recipientId);
 
         String senderId = message.getSenderId();
@@ -86,6 +88,19 @@ public class ChatViewModel extends AndroidViewModel {
 
     public void deleteConversation(String chatRoomId) {
         messageRepository.deleteMessagesByChatRoomId(chatRoomId);
+    }
+
+    // Xóa cuộc trò chuyện ở phía mình (không đụng tới máy người kia)
+    public void clearConversation(String chatRoomId) {
+        chatSyncManager.clearConversation(chatRoomId);
+    }
+
+    public void deleteMessageForMe(Message message) {
+        chatSyncManager.hideMessage(message.getMessageId());
+    }
+
+    public void deleteMessageForEveryone(Message message) {
+        chatSyncManager.deleteMessageEverywhere(message.getMessageId());
     }
 
     public void deleteChatRoom(ChatRoom chatRoom) {

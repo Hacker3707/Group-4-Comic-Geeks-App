@@ -358,14 +358,14 @@ public class MainActivity extends BaseActivity {
 
                     if (edtCommentInput != null) {
                         edtCommentInput.requestFocus();
-                        edtCommentInput.setHint("Nhập câu trả lời...");
+                        edtCommentInput.setHint(Str.t(R.string.comment_hint_reply));
 
                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         if (imm != null) {
                             imm.showSoftInput(edtCommentInput, InputMethodManager.SHOW_IMPLICIT);
                         }
                     }
-                    Toast.makeText(MainActivity.this, "Đang trả lời bình luận...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, Str.t(R.string.comment_replying), Toast.LENGTH_SHORT).show();
                 });
 
                 if (rvComments != null) {
@@ -410,13 +410,13 @@ public class MainActivity extends BaseActivity {
 
                             // Reset lại ô nhập và trạng thái sau khi gửi
                             edtCommentInput.setText("");
-                            edtCommentInput.setHint("Viết bình luận...");
+                            edtCommentInput.setHint(Str.t(R.string.comment_hint));
                             activeParentId[0] = null;
                             activeReplyUsername[0] = null;
 
-                            Toast.makeText(MainActivity.this, "Đã gửi bình luận!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, Str.t(R.string.post_comment_sent), Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(MainActivity.this, "Vui lòng nhập nội dung!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, Str.t(R.string.comment_enter_content), Toast.LENGTH_SHORT).show();
                         }
                     });
                 }

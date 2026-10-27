@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/comment_input_bg"
-            android:hint="Viết bình luận..."
+            android:hint="@string/comment_hint"
             android:textSize="14sp"
             android:paddingHorizontal="14dp"
             android:paddingVertical="10dp"
@@ -79,7 +79,7 @@
             android:src="@android:drawable/ic_menu_send"
             app:tint="#5E35B1"
             xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:contentDescription="Gửi bình luận" />
+            android:contentDescription="@string/comment_send_cd" />
     </LinearLayout>
 
 </LinearLayout>

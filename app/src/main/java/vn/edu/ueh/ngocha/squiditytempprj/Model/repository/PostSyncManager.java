@@ -332,6 +332,10 @@ public class PostSyncManager {
         data.put("postId", comment.getPostId());
         data.put("content", comment.getContent());
         data.put("timestamp", comment.getTimestamp());
+        if (comment.getParentId() != null) {
+            data.put("parentId", comment.getParentId());
+            data.put("replyToUsername", comment.getReplyToUsername());
+        }
 
         firestore.collection(COMMENTS).document(comment.getCommentId())
                 .set(data)
@@ -408,6 +412,8 @@ public class PostSyncManager {
         if (timestamp != null) {
             comment.setTimestamp(timestamp);
         }
+        comment.setParentId(doc.getString("parentId"));
+        comment.setReplyToUsername(doc.getString("replyToUsername"));
         return comment;
     }
 }
