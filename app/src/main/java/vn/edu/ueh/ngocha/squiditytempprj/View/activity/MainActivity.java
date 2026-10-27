@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -14,13 +13,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import androidx.appcompat.app.AlertDialog;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.imageview.ShapeableImageView;
 
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -29,25 +25,17 @@ import android.widget.EditText;
 
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.firebase.auth.FirebaseUser;
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.GravityCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Stamp;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.StampType;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.StampRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
@@ -57,10 +45,12 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
-import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.HomeFeedViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.CommentUsersWatcher;
@@ -69,15 +59,10 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
 import java.util.Map;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.PostViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.SearchViewModel;
-import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
-
-import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
-import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends BaseActivity {
-
 
     private MaterialAutoCompleteTextView etMainSearch;
     private LinearLayout layoutSearchBar;
@@ -103,7 +88,6 @@ public class MainActivity extends BaseActivity {
 
     private boolean isSearchOpen = false;
 
-
     @Override
     protected int getContentLayoutId() {
         return R.layout.activity_main_content;
@@ -124,8 +108,7 @@ public class MainActivity extends BaseActivity {
         public void onClick(View view) {
             if (view.getId() == R.id.btnSearch) {
                 toggleSearchBar();
-            }
-            else {
+            } else {
                 performHomeSearch();
             }
         }
@@ -205,7 +188,6 @@ public class MainActivity extends BaseActivity {
         }
     };
 
-    // Hiện mục Admin trong menu nếu là admin; tài khoản bị cấm thì đăng xuất
     private void checkAdminAndBan() {
         if (navigationView == null) {
             return;
@@ -235,7 +217,6 @@ public class MainActivity extends BaseActivity {
                 });
     }
 
-    // Id của tài khoản đang đăng nhập, chưa đăng nhập thì dùng "guest"
     private String currentUid() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             return "guest";
@@ -246,7 +227,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // BaseActivity đã nạp AppBar, Drawer, profile và layout nội dung.
 
         rcvpostlist = findViewById(R.id.rcv_postlist);
         etMainSearch = findViewById(R.id.etMainSearch);
@@ -256,7 +236,6 @@ public class MainActivity extends BaseActivity {
         searchDimOverlay = findViewById(R.id.searchDimOverlay);
         btnDoSearch = findViewById(R.id.btnDoSearch);
 
-        // Search overlay được đưa lên lớp phủ cấp Activity để không bị đẩy xuống dưới AppBar.
         ViewGroup oldSearchParent = (ViewGroup) searchOverlay.getParent();
         ViewGroup oldDimParent = (ViewGroup) searchDimOverlay.getParent();
         if (oldSearchParent != null) oldSearchParent.removeView(searchOverlay);
@@ -290,7 +269,6 @@ public class MainActivity extends BaseActivity {
         etMainSearch.setOnFocusChangeListener(onSearchFocusChangeListener);
         btnDoSearch.setOnClickListener(onSearchClickListener);
 
-        // Nút tạo bài viết ở trang chủ
         FloatingActionButton fabCreatePost = findViewById(R.id.fabCreatePost);
         if (fabCreatePost != null) {
             fabCreatePost.setOnClickListener(v -> {
@@ -336,6 +314,19 @@ public class MainActivity extends BaseActivity {
             public void onViewCommentsClick(Post post) {
                 BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
                 bottomSheetDialog.setContentView(R.layout.layout_comment_sheet);
+                if (bottomSheetDialog.getWindow() != null) {
+                    bottomSheetDialog.getWindow().setSoftInputMode(
+                            android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                    );
+                }
+
+                View bottomSheetInternal = bottomSheetDialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+                if (bottomSheetInternal != null) {
+                    com.google.android.material.bottomsheet.BottomSheetBehavior<View> behavior =
+                            com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheetInternal);
+                    behavior.setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+                    behavior.setSkipCollapsed(true);
+                }
 
                 RecyclerView rvComments = bottomSheetDialog.findViewById(R.id.recyclerViewComments);
                 EditText edtCommentInput = bottomSheetDialog.findViewById(R.id.edtCommentInput);
@@ -345,54 +336,62 @@ public class MainActivity extends BaseActivity {
                     rvComments.setLayoutManager(new LinearLayoutManager(MainActivity.this));
                 }
 
-                // Biến lưu trạng thái đang trả lời bình luận (Reply Comment)
                 final String[] activeParentId = {null};
                 final String[] activeReplyUsername = {null};
 
                 CommentAdapter commentAdapter = new CommentAdapter(new ArrayList<>(), commentClicked -> {
+                    // Gán chính xác ID của comment được chọn làm cha
                     activeParentId[0] = commentClicked.getCommentId();
 
-                    // 👉 Lấy tên hiển thị của người viết comment đó để khi gửi sẽ lưu tên đẹp thay vì UID
-                    // (Bạn có thể lấy từ UserViewModel hoặc gọi UserDisplayUtils nếu đã có map, hoặc tạm thời lưu userId để Adapter tự tra cứu qua Map users)
-                    activeReplyUsername[0] = commentClicked.getUserId();
+                    // Lấy tên người được trả lời
+                    String targetName = commentClicked.getReplyToUsername();
+                    if (targetName == null || targetName.trim().isEmpty()) {
+                        targetName = commentClicked.getUserId();
+                    }
+                    activeReplyUsername[0] = targetName;
 
                     if (edtCommentInput != null) {
+                        edtCommentInput.setHint("Đang trả lời @" + targetName + "...");
                         edtCommentInput.requestFocus();
-                        edtCommentInput.setHint("Nhập câu trả lời...");
+
+                        if (bottomSheetDialog.getWindow() != null) {
+                            bottomSheetDialog.getWindow().setSoftInputMode(
+                                    android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                            );
+                        }
 
                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         if (imm != null) {
                             imm.showSoftInput(edtCommentInput, InputMethodManager.SHOW_IMPLICIT);
                         }
                     }
-                    Toast.makeText(MainActivity.this, "Đang trả lời bình luận...", Toast.LENGTH_SHORT).show();
                 });
 
                 if (rvComments != null) {
                     rvComments.setAdapter(commentAdapter);
                 }
 
-                // Hiển thị đúng tên + ảnh tài khoản của người bình luận theo thời gian thực
                 CommentUsersWatcher usersWatcher = new CommentUsersWatcher(
                         MainActivity.this,
                         new ViewModelProvider(MainActivity.this).get(UserViewModel.class),
                         commentAdapter);
                 bottomSheetDialog.setOnDismissListener(d -> usersWatcher.stop());
 
-                // 👉 QUAN TRỌNG: Lắng nghe và đổ danh sách bình luận từ Firestore lên RecyclerView
                 if (post.getPostId() != null) {
                     postViewModel.getCommentsByPostId(post.getPostId()).observe(MainActivity.this, realComments -> {
                         if (realComments != null) {
-                            commentAdapter.setComments(realComments);
-                            usersWatcher.update(realComments);
-                            if (!realComments.isEmpty() && rvComments != null) {
-                                rvComments.scrollToPosition(realComments.size() - 1);
+                            // Sắp xếp phân cấp để comment con hiển thị ngay dưới comment cha
+                            List<Comment> organizedComments = organizeComments(realComments);
+
+                            commentAdapter.setComments(organizedComments);
+                            usersWatcher.update(organizedComments);
+                            if (!organizedComments.isEmpty() && rvComments != null) {
+                                rvComments.scrollToPosition(organizedComments.size() - 1);
                             }
                         }
                     });
                 }
 
-                // Xử lý sự kiện khi bấm nút Gửi trong BottomSheet (Hỗ trợ cả Comment mới và Reply Comment)
                 if (btnSend != null && edtCommentInput != null) {
                     btnSend.setOnClickListener(v -> {
                         String commentText = edtCommentInput.getText().toString().trim();
@@ -400,7 +399,6 @@ public class MainActivity extends BaseActivity {
                             String randomCommentId = UUID.randomUUID().toString();
                             Comment newComment = new Comment(randomCommentId, currentUid(), post.getPostId(), commentText);
 
-                            // Nếu đang trong chế độ trả lời, gán thêm Parent ID và tên người nhận
                             if (activeParentId[0] != null) {
                                 newComment.setParentId(activeParentId[0]);
                                 newComment.setReplyToUsername(activeReplyUsername[0]);
@@ -408,7 +406,6 @@ public class MainActivity extends BaseActivity {
 
                             postViewModel.addComment(newComment, post);
 
-                            // Reset lại ô nhập và trạng thái sau khi gửi
                             edtCommentInput.setText("");
                             edtCommentInput.setHint("Viết bình luận...");
                             activeParentId[0] = null;
@@ -447,7 +444,6 @@ public class MainActivity extends BaseActivity {
         rcvpostlist.setAdapter(postAdapter);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
-        // Trang chủ chỉ hiện bài của người đã follow, bài trong group đã join và bài của mình
         homeFeedViewModel = new ViewModelProvider(this).get(HomeFeedViewModel.class);
 
         homeFeedViewModel.getGroups().observe(this, new Observer<Map<String, Group>>() {
@@ -464,17 +460,80 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        pendingPostId = getIntent().getStringExtra(EXTRA_POST_ID);
+        StampRepository stampRepository = new StampRepository(getApplication());
         homeFeedViewModel.getFeed().observe(this, new Observer<List<Post>>() {
             @Override
             public void onChanged(List<Post> feedPosts) {
                 if (feedPosts != null) {
                     postAdapter.setPosts(feedPosts);
                     scrollToPendingPost(feedPosts);
+
+                    Set<String> myStampedPostIds = new HashSet<>();
+                    for (Post post : feedPosts) {
+                        if (post.getPostId() != null) {
+                            stampRepository.getStampsByPost(post.getPostId()).observe(MainActivity.this, stamps -> {
+                                if (stamps != null) {
+                                    for (Stamp s : stamps) {
+                                        if (s.getUserId() != null && s.getUserId().equals(currentUid())) {
+                                            myStampedPostIds.add(post.getPostId());
+                                            break;
+                                        }
+                                    }
+                                    if (postAdapter != null) {
+                                        postAdapter.setStampedPostIds(myStampedPostIds);
+                                    }
+                                }
+                            });
+                        }
+                    }
                 }
             }
         });
 
+        pendingPostId = getIntent().getStringExtra(EXTRA_POST_ID);
+    }
+
+    // 📌 Hàm sắp xếp phân cấp bình luận (Parent -> Children)
+    private List<Comment> organizeComments(List<Comment> rawComments) {
+        List<Comment> organized = new ArrayList<>();
+        if (rawComments == null) return organized;
+
+        Map<String, List<Comment>> childrenMap = new HashMap<>();
+        List<Comment> roots = new ArrayList<>();
+
+        for (Comment c : rawComments) {
+            String parentId = c.getParentId();
+            if (parentId == null || parentId.trim().isEmpty()) {
+                roots.add(c);
+            } else {
+                childrenMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(c);
+            }
+        }
+
+        for (Comment root : roots) {
+            organized.add(root);
+            addChildrenRecursive(root.getCommentId(), childrenMap, organized);
+        }
+
+        for (Comment c : rawComments) {
+            if (!organized.contains(c)) {
+                organized.add(c);
+            }
+        }
+
+        return organized;
+    }
+
+    private void addChildrenRecursive(String parentId, Map<String, List<Comment>> childrenMap, List<Comment> organized) {
+        List<Comment> children = childrenMap.get(parentId);
+        if (children != null) {
+            for (Comment child : children) {
+                if (!organized.contains(child)) {
+                    organized.add(child);
+                    addChildrenRecursive(child.getCommentId(), childrenMap, organized);
+                }
+            }
+        }
     }
 
     @Override
@@ -487,7 +546,6 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    // Từ thông báo bấm vào: cuộn tới đúng bài viết trên trang chủ
     private void scrollToPendingPost(List<Post> posts) {
         if (pendingPostId == null) return;
         for (int i = 0; i < posts.size(); i++) {
@@ -516,7 +574,6 @@ public class MainActivity extends BaseActivity {
             profileViewModel.loadCurrentProfile();
         }
         checkAdminAndBan();
-        // Đăng nhập / đăng xuất / đổi tài khoản thì lọc lại feed
         if (homeFeedViewModel != null) {
             homeFeedViewModel.refreshUser();
         }
@@ -532,7 +589,6 @@ public class MainActivity extends BaseActivity {
         if (!isSearchOpen) {
             btnSearch.setImageResource(R.drawable.ic_crossx);
             btnSearch.setContentDescription(Str.t(R.string.search_close_cd));
-            // Mở Search bar
             layoutSearchBar.setVisibility(View.VISIBLE);
             searchDimOverlay.setVisibility(View.VISIBLE);
             searchDimOverlay.setAlpha(0f);
@@ -543,7 +599,6 @@ public class MainActivity extends BaseActivity {
                     .setDuration(320)
                     .start();
 
-            // Đo chiều cao thực tế sau khi layout hoàn tất
             searchOverlay.post(new Runnable() {
                 @Override
                 public void run() {
@@ -572,7 +627,6 @@ public class MainActivity extends BaseActivity {
             });
 
         } else {
-            // Đóng Search bar
             float distance = layoutSearchBar.getHeight();
             btnSearch.setImageResource(R.drawable.ic_search_white);
             btnSearch.setContentDescription(Str.t(R.string.search_open_cd));
@@ -594,7 +648,6 @@ public class MainActivity extends BaseActivity {
                             searchOverlay.setBackgroundColor(getColor(R.color.squidity_transparentwhite));
                             isSearchOpen = false;
                             isSearchAnimating = false;
-
                         }
                     })
                     .start();
@@ -621,7 +674,6 @@ public class MainActivity extends BaseActivity {
                 (FrameLayout.LayoutParams) searchOverlay.getLayoutParams();
 
         float density = getResources().getDisplayMetrics().density;
-        // Công thức chuẩn xác, không còn lỗi cú pháp
         int topMargin = statusBarInset + (int) (125 * density);
 
         params.topMargin = topMargin;
@@ -636,11 +688,9 @@ public class MainActivity extends BaseActivity {
         currentSearchQuery = query;
 
         if (!query.isEmpty()) {
-            // Lưu lịch sử tìm kiếm trang Home
             searchViewModel.savehomeSearch(query);
         }
 
-        // Ẩn bàn phím
         InputMethodManager imm =
                 (InputMethodManager) getSystemService(
                         Context.INPUT_METHOD_SERVICE);
@@ -656,6 +706,5 @@ public class MainActivity extends BaseActivity {
         Intent intent = new Intent(MainActivity.this, SearchActivity.class);
         intent.putExtra("SEARCH_QUERY", query);
         startActivity(intent);
-
     }
 }
