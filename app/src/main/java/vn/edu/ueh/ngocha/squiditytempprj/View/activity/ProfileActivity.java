@@ -70,6 +70,14 @@ public class ProfileActivity extends BaseActivity {
 
     public static final String EXTRA_USER_ID = "user_id";
 
+    private static final String STATE_FOLLOW_SHEET = "follow_sheet_mode";
+    private static final int FOLLOW_SHEET_NONE = 0;
+    private static final int FOLLOW_SHEET_FOLLOWERS = 1;
+    private static final int FOLLOW_SHEET_FOLLOWING = 2;
+    private int followSheetMode = FOLLOW_SHEET_NONE;
+    private BottomSheetDialog followSheet;
+
+    // Follow
     private FollowViewModel followViewModel;
     private ChatViewModel chatViewModel;
     private String targetUserId;
@@ -257,6 +265,9 @@ public class ProfileActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            followSheetMode = savedInstanceState.getInt(STATE_FOLLOW_SHEET, FOLLOW_SHEET_NONE);
+        }
 
         ImageButton btnBackHome = findViewById(R.id.btnBackHome);
         if (btnBackHome != null) {
@@ -677,10 +688,58 @@ public class ProfileActivity extends BaseActivity {
         followViewModel.getIsFollowing().observe(this, following ->
                 btnFollow.setText(Boolean.TRUE.equals(following) ? Str.t(R.string.common_following) : Str.t(R.string.common_follow_plus)));
 
-        ((View) tvFollowersCount.getParent()).setOnClickListener(v -> FollowListDialog.show(this, targetUserId, true));
-        ((View) tvFollowingCount.getParent()).setOnClickListener(v -> FollowListDialog.show(this, targetUserId, false));
+        // Bấm vào số Followers / Following để xem danh sách người đó
+        ((View) tvFollowersCount.getParent()).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openFollowSheet(true);
+            }
+        });
+        ((View) tvFollowingCount.getParent()).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openFollowSheet(false);
+            }
+        });
 
         followViewModel.observeProfile(targetUserId);
+
+        // Vừa xoay màn hình: mở lại danh sách đang xem dở
+        if (followSheetMode != FOLLOW_SHEET_NONE) {
+            openFollowSheet(followSheetMode == FOLLOW_SHEET_FOLLOWERS);
+        }
+    }
+
+    // Mở bottom sheet Followers / Following và nhớ lại để mở lại sau khi xoay màn hình
+    private void openFollowSheet(boolean followers) {
+        if (followSheet != null && followSheet.isShowing()) {
+            followSheet.dismiss();
+        }
+        followSheetMode = followers ? FOLLOW_SHEET_FOLLOWERS : FOLLOW_SHEET_FOLLOWING;
+        followSheet = FollowListDialog.show(this, targetUserId, followers, new Runnable() {
+            @Override
+            public void run() {
+                // Xoay màn hình hoặc đóng Activity thì giữ nguyên để mở lại; người dùng tự đóng thì xoá
+                if (!isChangingConfigurations() && !isFinishing()) {
+                    followSheetMode = FOLLOW_SHEET_NONE;
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_FOLLOW_SHEET, followSheetMode);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (followSheet != null && followSheet.isShowing()) {
+            followSheet.dismiss();
+        }
+        followSheet = null;
+        super.onDestroy();
     }
 
     private void openChatWithTarget() {
