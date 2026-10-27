@@ -1,7 +1,12 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.BlockList;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.net.Uri;
+import android.os.Parcelable;
+import android.content.DialogInterface;
+import android.widget.PopupMenu;
+import androidx.appcompat.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -60,6 +65,9 @@ public class ChatActivity extends AppCompatActivity {
     private String chatRoomId;
     private String currentUserId;
     private String otherUserId;
+    private String chatTitle;
+    private Parcelable savedListState;
+    private static final String STATE_LIST = "state_list";
 
     // Photo Picker của Android: chọn ảnh mà không cần xin quyền đọc bộ nhớ
     private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
@@ -94,6 +102,10 @@ public class ChatActivity extends AppCompatActivity {
         currentUserId = getIntent().getStringExtra(EXTRA_CURRENT_USER_ID);
         otherUserId = getIntent().getStringExtra(EXTRA_OTHER_USER_ID);
         String title = getIntent().getStringExtra(EXTRA_CHAT_TITLE);
+        chatTitle = title;
+        if (savedInstanceState != null) {
+            savedListState = savedInstanceState.getParcelable(STATE_LIST);
+        }
 
         if (chatRoomId == null || currentUserId == null) {
             Toast.makeText(this, Str.t(R.string.chat_missing_room), Toast.LENGTH_SHORT).show();
@@ -115,6 +127,18 @@ public class ChatActivity extends AppCompatActivity {
         layoutManager.setStackFromEnd(true);
         rcvMessages.setLayoutManager(layoutManager);
         rcvMessages.setAdapter(messageAdapter);
+        messageAdapter.setOnMessageLongClickListener(new MessageAdapter.OnMessageLongClickListener() {
+            @Override
+            public void onMessageLongClick(final Message message, boolean sentByMe) {
+                showDeleteMessageDialog(message, sentByMe);
+            }
+        });
+        findViewById(R.id.btnChatMenu).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showChatMenu(v);
+            }
+        });
 
         findViewById(R.id.btnChatBack).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,11 +169,109 @@ public class ChatActivity extends AppCompatActivity {
             public void onChanged(List<Message> messages) {
                 messageAdapter.setMessages(messages);
                 if (messages != null && !messages.isEmpty()) {
-                    rcvMessages.scrollToPosition(messages.size() - 1);
+                    if (savedListState != null) {
+                        // Vừa xoay màn hình: giữ nguyên vị trí đang đọc
+                        rcvMessages.getLayoutManager().onRestoreInstanceState(savedListState);
+                        savedListState = null;
+                    } else {
+                        rcvMessages.scrollToPosition(messages.size() - 1);
+                    }
                     markIncomingAsRead(messages);
                 }
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (rcvMessages != null && rcvMessages.getLayoutManager() != null) {
+            outState.putParcelable(STATE_LIST, rcvMessages.getLayoutManager().onSaveInstanceState());
+        }
+    }
+
+    // Giữ lâu một tin nhắn: xóa ở phía mình, hoặc xóa với mọi người nếu là tin của mình
+    private void showDeleteMessageDialog(final Message message, boolean sentByMe) {
+        final String[] options = sentByMe
+                ? new String[]{Str.t(R.string.chat_msg_delete_for_me), Str.t(R.string.chat_msg_delete_everyone)}
+                : new String[]{Str.t(R.string.chat_msg_delete_for_me)};
+        new AlertDialog.Builder(this)
+                .setTitle(Str.t(R.string.chat_msg_delete_title))
+                .setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == 0) {
+                            chatViewModel.deleteMessageForMe(message);
+                        } else {
+                            chatViewModel.deleteMessageForEveryone(message);
+                        }
+                        Toast.makeText(ChatActivity.this, Str.t(R.string.chat_msg_deleted), Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(Str.t(R.string.common_cancel), null)
+                .show();
+    }
+
+    // Nút ba chấm trên thanh tiêu đề: xóa cuộc trò chuyện, chặn / bỏ chặn
+    private void showChatMenu(View anchor) {
+        PopupMenu popup = new PopupMenu(this, anchor);
+        popup.getMenu().add(0, 1, 0, Str.t(R.string.chat_menu_delete_conversation));
+        if (otherUserId != null) {
+            boolean blocked = BlockList.isBlocked(this, otherUserId);
+            popup.getMenu().add(0, 2, 1, Str.t(blocked ? R.string.chat_menu_unblock : R.string.chat_menu_block));
+        }
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(android.view.MenuItem item) {
+                if (item.getItemId() == 1) {
+                    confirmDeleteConversation();
+                } else if (item.getItemId() == 2) {
+                    toggleBlock();
+                }
+                return true;
+            }
+        });
+        popup.show();
+    }
+
+    private void confirmDeleteConversation() {
+        String name = chatTitle != null ? chatTitle : Str.t(R.string.common_user);
+        new AlertDialog.Builder(this)
+                .setTitle(Str.t(R.string.chat_delete_conv_title))
+                .setMessage(Str.t(R.string.chat_delete_conv_msg, name))
+                .setNegativeButton(Str.t(R.string.common_cancel), null)
+                .setPositiveButton(Str.t(R.string.common_delete), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        chatViewModel.clearConversation(chatRoomId);
+                        Toast.makeText(ChatActivity.this, Str.t(R.string.chat_conv_deleted), Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                })
+                .show();
+    }
+
+    private void toggleBlock() {
+        if (BlockList.isBlocked(this, otherUserId)) {
+            BlockList.remove(this, otherUserId);
+            Toast.makeText(this, Str.t(R.string.chat_unblocked), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String name = chatTitle != null ? chatTitle : Str.t(R.string.common_user);
+        new AlertDialog.Builder(this)
+                .setTitle(Str.t(R.string.chat_block_title, name))
+                .setMessage(Str.t(R.string.chat_block_msg))
+                .setNegativeButton(Str.t(R.string.common_cancel), null)
+                .setPositiveButton(Str.t(R.string.chat_menu_block), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        BlockList.add(ChatActivity.this, otherUserId);
+                        chatViewModel.clearConversation(chatRoomId);
+                        Toast.makeText(ChatActivity.this, Str.t(R.string.chat_blocked), Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                })
+                .show();
     }
 
     private void sendTextMessage() {

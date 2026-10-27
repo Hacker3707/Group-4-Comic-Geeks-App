@@ -29,6 +29,16 @@ public class ChatItemAdapter extends RecyclerView.Adapter<ChatItemViewHolder> {
         void onChatRoomClick(ChatRoom chatRoom, String otherUserId, String otherUserName);
     }
 
+    public interface OnChatRoomLongClickListener {
+        void onChatRoomLongClick(ChatRoom chatRoom, String otherUserName);
+    }
+
+    private OnChatRoomLongClickListener longClickListener;
+
+    public void setOnChatRoomLongClickListener(OnChatRoomLongClickListener listener) {
+        this.longClickListener = listener;
+    }
+
     private List<ChatRoom> chatRooms = new ArrayList<>();
     private Map<String, User> users = new HashMap<>();
     private final String currentUserId;
@@ -94,6 +104,16 @@ public class ChatItemAdapter extends RecyclerView.Adapter<ChatItemViewHolder> {
         } else {
             holder.imgChatAvatar.setImageDrawable(null);
         }
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (longClickListener != null) {
+                    longClickListener.onChatRoomLongClick(chatRoom, displayName);
+                }
+                return true;
+            }
+        });
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

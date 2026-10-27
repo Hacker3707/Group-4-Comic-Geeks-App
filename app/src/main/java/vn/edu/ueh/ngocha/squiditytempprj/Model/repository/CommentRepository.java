@@ -82,6 +82,10 @@ public class CommentRepository {
         commentMap.put("postId", comment.getPostId());
         commentMap.put("content", comment.getContent());
         commentMap.put("timestamp", comment.getTimestamp());
+        if (comment.getParentId() != null) {
+            commentMap.put("parentId", comment.getParentId());
+            commentMap.put("replyToUsername", comment.getReplyToUsername());
+        }
 
         FirebaseFirestore.getInstance().collection("comments")
                 .document(comment.getCommentId())

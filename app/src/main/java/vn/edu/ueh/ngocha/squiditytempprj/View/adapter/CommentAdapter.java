@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,7 +75,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                 targetDisplayName = comment.getReplyToUsername();
             }
 
-            holder.tvReplyInfo.setText("Trả lời @" + targetDisplayName);
+            holder.tvReplyInfo.setText(Str.t(R.string.comment_reply_to, targetDisplayName));
         } else {
             // Nếu là bình luận gốc -> Sát lề trái hoàn toàn
             layoutParams.leftMargin = (int) (0 * density);
