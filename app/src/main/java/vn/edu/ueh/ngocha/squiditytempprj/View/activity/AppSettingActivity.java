@@ -1,6 +1,16 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
+import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.BlockedUsersDialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -64,6 +74,131 @@ public class AppSettingActivity extends AppCompatActivity {
             setPreferencesFromResource(R.xml.preferences, rootKey);
             showAppVersion();
             setupLanguage();
+            setupTheme();
+            setupAccount();
+            setupMisc();
+        }
+
+        // Giao diện sáng / tối / theo hệ thống, áp dụng ngay
+        private void setupTheme() {
+            ListPreference theme = findPreference("theme");
+            if (theme == null) return;
+            theme.setOnPreferenceChangeListener((preference, newValue) -> {
+                androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+                        vn.edu.ueh.ngocha.squiditytempprj.SquidityApp.themeToMode(String.valueOf(newValue)));
+                return true;
+            });
+        }
+
+        private void onClick(String key, Preference.OnPreferenceClickListener l) {
+            Preference p = findPreference(key);
+            if (p != null) p.setOnPreferenceClickListener(l);
+        }
+
+        private void setupAccount() {
+            onClick("reset_password", p -> { sendResetEmail(); return true; });
+            onClick("logout", p -> { confirmLogout(); return true; });
+            onClick("delete_account", p -> { confirmDeleteAccount(); return true; });
+        }
+
+        private void setupMisc() {
+            onClick("clear_cache", p -> { clearCache(); return true; });
+            onClick("blocked_users", p -> {
+                BlockedUsersDialog.show(requireActivity());
+                return true;
+            });
+            onClick("privacy_policy", p -> { info(R.string.pref_privacy_policy, R.string.settings_privacy_text); return true; });
+            onClick("help", p -> { info(R.string.pref_help, R.string.settings_help_text); return true; });
+            onClick("app_info", p -> { info(R.string.pref_app_info, R.string.settings_info_text); return true; });
+            onClick("app_license", p -> { info(R.string.pref_app_license, R.string.settings_license_text); return true; });
+            onClick("app_credits", p -> { info(R.string.pref_app_credits, R.string.settings_credits_text); return true; });
+        }
+
+        private void info(int titleRes, int textRes) {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(Str.t(titleRes))
+                    .setMessage(Str.t(textRes))
+                    .setPositiveButton(Str.t(R.string.common_close), null)
+                    .show();
+        }
+
+        private void toast(String text) {
+            Toast.makeText(requireContext(), text, Toast.LENGTH_LONG).show();
+        }
+
+        private void sendResetEmail() {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user == null || user.getEmail() == null) {
+                toast(Str.t(R.string.common_login_first));
+                return;
+            }
+            final String email = user.getEmail();
+            FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                    .addOnSuccessListener(v -> toast(Str.t(R.string.settings_reset_sent, email)))
+                    .addOnFailureListener(e -> toast(Str.t(R.string.settings_reset_failed, e.getMessage())));
+        }
+
+        private void goHome() {
+            Intent intent = new Intent(requireContext(), MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
+
+        private void confirmLogout() {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+                toast(Str.t(R.string.common_login_first));
+                return;
+            }
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(Str.t(R.string.common_logout))
+                    .setMessage(Str.t(R.string.logout_confirm))
+                    .setNegativeButton(Str.t(R.string.common_cancel), null)
+                    .setPositiveButton(Str.t(R.string.common_logout), (d, w) -> {
+                        FirebaseAuth.getInstance().signOut();
+                        toast(Str.t(R.string.logged_out));
+                        goHome();
+                    })
+                    .show();
+        }
+
+        // Xóa cache ảnh (Glide) và các file tạm
+        private void clearCache() {
+            final Context app = requireContext().getApplicationContext();
+            Glide.get(app).clearMemory();
+            new Thread(() -> {
+                Glide.get(app).clearDiskCache();
+                requireActivity().runOnUiThread(() -> toast(Str.t(R.string.settings_cache_cleared)));
+            }).start();
+        }
+
+        private void confirmDeleteAccount() {
+            final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user == null) {
+                toast(Str.t(R.string.common_login_first));
+                return;
+            }
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(Str.t(R.string.settings_delete_title))
+                    .setMessage(Str.t(R.string.settings_delete_msg))
+                    .setNegativeButton(Str.t(R.string.common_cancel), null)
+                    .setPositiveButton(Str.t(R.string.common_delete), (d, w) -> deleteAccount(user))
+                    .show();
+        }
+
+        private void deleteAccount(final FirebaseUser user) {
+            final String uid = user.getUid();
+            // Xóa tài khoản đăng nhập trước. Nếu Firebase đòi đăng nhập lại thì dừng, chưa xóa gì cả.
+            user.delete().addOnSuccessListener(v -> {
+                FirebaseFirestore.getInstance().collection("users").document(uid).delete();
+                toast(Str.t(R.string.settings_delete_done));
+                goHome();
+            }).addOnFailureListener(e -> {
+                if (e instanceof FirebaseAuthRecentLoginRequiredException) {
+                    toast(Str.t(R.string.settings_delete_failed_relogin));
+                } else {
+                    toast(Str.t(R.string.settings_delete_failed, e.getMessage()));
+                }
+            });
         }
 
         // Đổi ngôn ngữ toàn app: English <-> Tiếng Việt
