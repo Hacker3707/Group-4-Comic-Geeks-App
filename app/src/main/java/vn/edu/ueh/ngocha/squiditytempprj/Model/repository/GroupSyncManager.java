@@ -336,21 +336,12 @@ public class GroupSyncManager {
         firestore.collection(MEMBERS).document(membershipId).delete();
     }
 
-    // Xoá group và toàn bộ thành viên của nó trên Firestore
+    // Xoá group trên Firestore: bình luận của các bài trong group, bài viết, thành viên rồi tới group
     public void deleteGroupRemote(String groupId) {
         if (groupId == null) {
             return;
         }
-        firestore.collection(GROUPS).document(groupId).delete();
-        firestore.collection(MEMBERS).whereEqualTo("groupId", groupId).get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot snapshots) {
-                        for (DocumentSnapshot doc : snapshots.getDocuments()) {
-                            doc.getReference().delete();
-                        }
-                    }
-                });
+        GroupCascadeDelete.deleteGroup(firestore, groupId, null);
     }
 
     // =================================

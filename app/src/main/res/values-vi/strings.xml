@@ -432,6 +432,11 @@
     <string name="follow_list_loading">Đang tải...</string>
     <string name="follow_list_follow">Theo dõi</string>
     <string name="follow_list_unfollow">Bỏ theo dõi</string>
+    <string name="admin_post_detail_title">Chi tiết bài viết</string>
+    <string name="admin_post_not_found">Bài viết này không còn tồn tại</string>
+    <string name="admin_comments_title">Bình luận (%1$d)</string>
+    <string name="admin_no_comments">Chưa có bình luận nào</string>
+    <string name="admin_post_images">%1$d ảnh</string>
     <string name="notif_replied">%1$s đã trả lời bình luận của bạn: %2$s</string>
     <string name="chat_menu_cd">Tùy chọn khác</string>
     <string name="chat_menu_delete_conversation">Xóa cuộc trò chuyện</string>
