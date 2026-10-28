@@ -103,8 +103,11 @@
                         android:contentDescription="@string/profile_change_cover"
                         android:src="@android:drawable/ic_menu_edit"
                         android:visibility="gone"
-                        app:layout_constraintEnd_toEndOf="@id/imgProfileAvatar"
-                        app:layout_constraintTop_toTopOf="@id/imgProfileAvatar"
+                        android:elevation="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:layout_constraintEnd_toEndOf="@id/imgProfileCover"
+                        app:layout_constraintTop_toTopOf="@id/imgProfileCover"
                         app:tint="#493373" />
 
                     <LinearLayout

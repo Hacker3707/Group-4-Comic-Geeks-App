@@ -21,6 +21,8 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Group;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
@@ -91,6 +93,8 @@ public class SearchActivity extends BaseActivity {
         setupAdapters();
         showAdapterForType(currentSearchType);
         observeData();
+        usersRequested = true;
+        userViewModel.loadAllUsers();
 
         String initialQuery = getIntent().getStringExtra("SEARCH_QUERY");
         if (initialQuery != null && !initialQuery.isEmpty()) {
@@ -234,8 +238,37 @@ public class SearchActivity extends BaseActivity {
         userViewModel.getSearchableUsers().observe(this, new Observer<List<User>>() {
             @Override
             public void onChanged(List<User> users) {
-                allUsers = users != null ? users : new ArrayList<User>();
+                allUsers = users != null
+                        ? users
+                        : new ArrayList<User>();
+
+                // Tạo danh sách tài khoản để PostAdapter tìm người đăng bài.
+                Map<String, User> userMap = new HashMap<>();
+
+                for (User user : allUsers) {
+                    if (user == null) {
+                        continue;
+                    }
+
+                    String userId = user.getUserId();
+
+                    if (userId != null && !userId.trim().isEmpty()) {
+                        userMap.put(userId.trim(), user);
+                    }
+
+                    // Hỗ trợ cả trường hợp post đang lưu username thay vì UID.
+                    String username = user.getUsername();
+
+                    if (username != null && !username.trim().isEmpty()) {
+                        userMap.put(username.trim(), user);
+                    }
+                }
+
+                // Quan trọng: truyền dữ liệu tài khoản vào adapter bài viết.
+                postAdapter.setUsers(userMap);
+
                 usersLoaded = true;
+
                 if (currentSearchType == TYPE_USER) {
                     performSearch();
                 }

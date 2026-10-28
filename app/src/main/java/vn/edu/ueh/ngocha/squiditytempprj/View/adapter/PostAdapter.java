@@ -148,11 +148,57 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private String fallbackName() {
         return context.getString(R.string.group_member_unknown_name);
     }
+    private User findAuthorUser(Post post) {
+        if (post == null || post.getUserId() == null) {
+            return null;
+        }
+
+        String postUserId = post.getUserId().trim();
+
+        if (postUserId.isEmpty()) {
+            return null;
+        }
+
+        // Ưu tiên tìm theo UID.
+        User user = users.get(postUserId);
+
+        if (user != null) {
+            return user;
+        }
+
+        // Dự phòng nếu post đang lưu username.
+        for (User candidate : users.values()) {
+            if (candidate == null) {
+                continue;
+            }
+
+            String uid = candidate.getUserId();
+            String username = candidate.getUsername();
+
+            if (uid != null && uid.trim().equals(postUserId)) {
+                return candidate;
+            }
+
+            if (username != null
+                    && username.trim().equalsIgnoreCase(postUserId)) {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
 
     private String authorName(Post post) {
-        User user = users.get(post.getUserId());
-        return UserDisplayUtils.displayName(user,
-                post.getUserId() != null ? post.getUserId() : fallbackName());
+        User user = findAuthorUser(post);
+
+        if (user != null) {
+            return UserDisplayUtils.displayName(
+                    user,
+                    user.getUsername()
+            );
+        }
+
+        return fallbackName();
     }
 
     private static boolean isGroupPost(Post post) {
@@ -225,10 +271,19 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private void openProfile(String userId) {
-        if (userId == null || userId.isEmpty()) return;
+        if (userId == null || userId.trim().isEmpty()) {
+            Toast.makeText(
+                    context,
+                    "Không tìm thấy thông tin tài khoản người đăng.",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        String uid = userId.trim();
+
         Intent intent = new Intent(context, ProfileActivity.class);
-        intent.putExtra("profile_user_id", userId);
-        intent.putExtra(ProfileActivity.EXTRA_USER_ID, userId);
+        intent.putExtra(ProfileActivity.EXTRA_USER_ID, uid);
         context.startActivity(intent);
     }
 
@@ -251,10 +306,20 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private void bindHeader(PostViewHolder holder, Post post) {
         Group group = (!groupPageMode && isGroupPost(post)) ? groups.get(post.getGroupId()) : null;
+        User user = findAuthorUser(post);
         String name = authorName(post);
-        User user = users.get(post.getUserId());
-        String posterAvatarUrl = user != null ? user.getAvatarUrl() : null;
-        final String ownerId = post.getUserId();
+
+        String posterAvatarUrl = user != null
+                ? user.getAvatarUrl()
+                : null;
+
+// Chỉ mở Profile khi xác định được UID thật của tài khoản.
+        final String ownerId =
+                user != null
+                        && user.getUserId() != null
+                        && !user.getUserId().trim().isEmpty()
+                        ? user.getUserId().trim()
+                        : null;
 
         if (group != null) {
             holder.headerLayout.setVisibility(View.GONE);

@@ -103,6 +103,9 @@
                         android:contentDescription="@string/profile_change_cover"
                         android:src="@android:drawable/ic_menu_edit"
                         android:visibility="gone"
+                        android:elevation="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
                         app:layout_constraintEnd_toEndOf="@id/imgProfileCover"
                         app:layout_constraintTop_toTopOf="@id/imgProfileCover"
                         app:tint="#493373" />
@@ -337,15 +340,15 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="22dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#E0DCF0"
-                app:strokeWidth="1dp">
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="22dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="#E0DCF0"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -437,7 +440,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/profile_tab_posts" />
-                    
+
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -551,8 +554,20 @@
                     android:paddingTop="8dp"
                     android:clipToPadding="false"
                     android:layout_marginBottom="80dp"
-                    android:visibility="gone"
                     tools:listitem="@layout/activity_post" />
+
+                <!-- REVIEW LIST -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rcvProfileReviews"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#FFFFFF"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingTop="8dp"
+                    android:clipToPadding="false"
+                    android:layout_marginBottom="80dp"
+                    android:visibility="gone"
+                    tools:listitem="@layout/comic_review_item"/>
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
