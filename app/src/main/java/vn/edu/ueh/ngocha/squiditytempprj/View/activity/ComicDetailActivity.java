@@ -109,6 +109,24 @@ public class ComicDetailActivity extends BaseActivity {
         }
     };
 
+    private Observer<MangaData> mangaDataObserver = new Observer<MangaData>() {
+        @Override
+        public void onChanged(MangaData mangaData) {
+            if (mangaData != null) {
+                displayMangaData(mangaData);
+            }
+        }
+    };
+
+    private Observer<Comic> getSavedComicObserver = new Observer<Comic>() {
+        @Override
+        public void onChanged(Comic comic) {
+            if (comic != null) {
+                displayMangaData(comic);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -144,26 +162,28 @@ public class ComicDetailActivity extends BaseActivity {
 
         if ("ProfileActivity".equals(fromActivity)) {
             txtfromActivity_comdetail.setText(R.string.back_to_profile);
-        } else {
+        } else if ("ComicListActivity".equals(fromActivity)){
             txtfromActivity_comdetail.setText(R.string.comic_back_zone);
+        } else {
+            txtfromActivity_comdetail.setText(R.string.back_to_home);
         }
 
         reviewViewModel.getAverageRating(comicId).observe(ComicDetailActivity.this, reviewsratingObserver);
 
 
         if ("MangaDex".equals(searchOption) && comicId != null) {
-            viewModel.getMangaById(comicId).observe(this,
-                    new Observer<MangaData>() {
-                        @Override
-                        public void onChanged(MangaData mangaData) {
-                            if (mangaData != null) {
-                                displayMangaData(mangaData);
-                            }
-                        }
-                    });
+            viewModel.getMangaById(comicId).observe(this, mangaDataObserver);
+        }
+
+        if (comicId != null && !comicId.trim().isEmpty()) {
+            comicViewModel = new ViewModelProvider(this)
+                    .get(ComicViewModel.class);
+
+            comicViewModel.getSavedComicById(comicId).observe(this, getSavedComicObserver);
         }
 
     }
+
 
     @Override
     protected int getContentLayoutId() {
@@ -207,7 +227,6 @@ public class ComicDetailActivity extends BaseActivity {
         }
 
         MangaAttributes attributes = mangaData.getAttributes();
-
 
         List<Tag> genres = new ArrayList<>();
 
@@ -320,40 +339,71 @@ public class ComicDetailActivity extends BaseActivity {
 
     }
 
-    public void displayMangaData(Comic comic)
-    {
-        // Giả sử comic là object Comic đã lấy được
-        txtName.setText(comic.getComicName());
-        txtAuthor.setText(comic.getComicAuthor());
-        txtDescription.setText(comic.getComicDescription());
+    public void displayMangaData(Comic comic) {
+        if (comic == null) return;
 
-        txtStatus.setText(
-                comic.getComicStatus() != null
-                        ? comic.getComicStatus()
-                        : Str.t(R.string.common_unknown)
-        );
+        comic_name = comic.getComicName();
+        comic_cover = comic.getCoverImageUrl();
+
+        txtName.setText(valueOrDefault(comic.getComicName()));
+        txtAuthor.setText(valueOrDefault(comic.getComicAuthor()));
+        txtDescription.setText(valueOrDefault(comic.getComicDescription()));
+
+        txtStatus.setText(valueOrDefault(comic.getComicStatus()));
 
         txtContentRating.setText(
-                Str.t(R.string.comic_content_rating, valueOrDefault(comic.getContentRating()))
+                Str.t(R.string.comic_content_rating,
+                        valueOrDefault(comic.getContentRating()))
         );
 
         txtLanguage.setText(
-                Str.t(R.string.comic_original_language, valueOrDefault(comic.getOriginalLanguage()))
+                Str.t(R.string.comic_original_language,
+                        valueOrDefault(comic.getOriginalLanguage()))
         );
 
         txtYear.setText(
-                Str.t(R.string.comic_release_year, (comic.getReleaseYear() != null
+                Str.t(R.string.comic_release_year,
+                        comic.getReleaseYear() != null
                                 ? comic.getReleaseYear().toString()
-                                : Str.t(R.string.common_unknown)))
+                                : Str.t(R.string.common_unknown))
         );
 
         txtLastVolume.setText(
-                Str.t(R.string.comic_last_volume, valueOrDefault(comic.getLastVolume()))
+                Str.t(R.string.comic_last_volume,
+                        valueOrDefault(comic.getLastVolume()))
         );
 
         txtLastChapter.setText(
-                Str.t(R.string.comic_last_chapter, valueOrDefault(comic.getLastChapter()))
+                Str.t(R.string.comic_last_chapter,
+                        valueOrDefault(comic.getLastChapter()))
         );
+
+        Glide.with(imgCover.getContext())
+                .load(comic.getCoverImageUrl())
+                .placeholder(R.drawable.comic_background)
+                .error(R.drawable.comic_background)
+                .centerCrop()
+                .into(imgCover);
+
+        // Room hiện lưu tên thể loại dưới dạng chuỗi,
+        // chưa lưu danh sách ID Genre riêng.
+        layoutComicGenres.removeAllViews();
+
+        String savedGenres = comic.getComicGenres();
+
+        if (savedGenres != null && !savedGenres.trim().isEmpty()) {
+            for (String genreName : savedGenres.split(",")) {
+                TextView genreView = (TextView) LayoutInflater.from(this)
+                        .inflate(R.layout.comic_genre_item,
+                                layoutComicGenres, false);
+
+                genreView.setText(genreName.trim());
+
+                // Không gắn onGenreClickListener ở đây vì
+                // dữ liệu Room chỉ có tên, không có Genre ID.
+                layoutComicGenres.addView(genreView);
+            }
+        }
     }
 
     private void displayGenres(List<Tag> genres) {

@@ -4,7 +4,6 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -97,6 +96,9 @@ public class MainActivity extends BaseActivity {
     protected boolean shouldShowBackHomeButton() {
         return false;
     }
+
+    @Override
+    protected String getActivityName() { return "MainActivity"; }
 
     @Override
     protected boolean isHome() {
@@ -555,16 +557,6 @@ public class MainActivity extends BaseActivity {
             }
         }
         pendingPostId = null;
-    }
-
-    private void openAuthActivity() {
-        try {
-            Intent intent = new Intent(MainActivity.this, AuthActivity.class);
-            startActivity(intent);
-        } catch (Exception e) {
-            Log.e("MainActivity", "Không mở được AuthActivity", e);
-            Toast.makeText(this, Str.t(R.string.auth_open_failed), Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override

@@ -5,9 +5,9 @@
     <string name="group_tag_help">Type # to add a topic. Posts without a valid # go to Others.</string>
 
     <!-- Gợi ý khi gõ # (cũng là nội dung được chèn vào bài viết) -->
-    <string name="group_tag_anime">#Anime</string>
-    <string name="group_tag_manga">#Manga</string>
-    <string name="group_tag_light_novel">#LightNovel</string>
-    <string name="group_tag_discussion">#Discussion</string>
-    <string name="group_tag_otaku">#Otaku</string>
+    <string name="group_tag_anime" translatable="false">#Anime</string>
+    <string name="group_tag_manga" translatable="false">#Manga</string>
+    <string name="group_tag_light_novel" translatable="false">#LightNovel</string>
+    <string name="group_tag_discussion" translatable="false">#Discussion</string>
+    <string name="group_tag_otaku" translatable="false">#Otaku</string>
 </resources>

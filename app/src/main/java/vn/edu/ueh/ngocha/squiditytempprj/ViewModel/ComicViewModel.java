@@ -45,11 +45,6 @@ public class ComicViewModel extends AndroidViewModel {
     private MutableLiveData<List<MangaData>> mangaList =
             new MutableLiveData<List<MangaData>>();
 
-    private int currentOffset = 0;
-    private final int PAGE_SIZE = 20;
-    private boolean isLoading = false;
-    private boolean isLastPage = false;
-    private String currentQuery = "";
     private final LiveData<List<MangaData>> mangaByGenreLive;
     public void setMangaList(List<MangaData> mangaList) {
         this.mangaList.setValue(mangaList);
@@ -153,5 +148,10 @@ public class ComicViewModel extends AndroidViewModel {
     public LiveData<List<MangaData>> getComicbyIdList(List<String> comicIds) {
         return mangaRepository.getMangaByIdList(comicIds);
     }
+
+    public LiveData<Comic> getSavedComicById(String comicId) {
+        return comicRepository.getComicById(comicId);
+    }
+
 
 }

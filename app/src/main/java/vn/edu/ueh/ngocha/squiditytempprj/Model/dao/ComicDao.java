@@ -25,8 +25,8 @@ public interface ComicDao {
     @Query("DELETE FROM comics")
     void deleteAll();
 
-    @Query("SELECT * FROM comics WHERE comic_id = :comicId")
-    Comic getComicById(String comicId);
+    @Query("SELECT * FROM comics WHERE comic_id = :comicId LIMIT 1")
+    LiveData<Comic> getComicById(String comicId);
 
     @Query("SELECT * FROM comics WHERE comic_name = :name LIMIT 1")
     LiveData<Comic> getComicbyName(String name);

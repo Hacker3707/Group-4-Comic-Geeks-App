@@ -14,6 +14,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -67,6 +70,25 @@ public class AdminPostDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_post_detail);
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                findViewById(R.id.adminPostDetailRoot),
+                (v, insets) -> {
+
+                    Insets systemBars = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                    );
+
+                    v.setPadding(
+                            v.getPaddingLeft(),
+                            systemBars.top,
+                            v.getPaddingRight(),
+                            v.getPaddingBottom()
+                    );
+
+                    return insets;
+                }
+        );
 
         db = FirebaseFirestore.getInstance();
         postId = getIntent().getStringExtra(EXTRA_POST_ID);

@@ -60,8 +60,8 @@
                     android:id="@+id/btnFollow"
                     android:layout_width="82dp"
                     android:layout_height="35dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="27dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginEnd="16dp"
                     android:backgroundTint="#33FFFFFF"
                     android:ellipsize="none"
                     android:fontFamily="@font/jersey25_regular"
@@ -74,20 +74,18 @@
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
                     app:cornerRadius="16dp"
-                    app:layout_constraintStart_toEndOf="@id/btnOptions"
+                    app:layout_constraintEnd_toStartOf="@+id/userInfoLayout"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <LinearLayout
                     android:id="@+id/userInfoLayout"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
                     android:layout_marginTop="24dp"
                     android:layout_marginEnd="10dp"
                     android:gravity="end"
                     android:orientation="vertical"
                     app:layout_constraintEnd_toStartOf="@id/imgAvatar"
-                    app:layout_constraintStart_toEndOf="@id/btnFollow"
                     app:layout_constraintTop_toTopOf="parent">
 
                     <TextView

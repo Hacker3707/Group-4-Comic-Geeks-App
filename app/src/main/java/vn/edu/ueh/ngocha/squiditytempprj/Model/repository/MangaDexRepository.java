@@ -191,6 +191,7 @@ public class MangaDexRepository {
 
         List<String> includes = new ArrayList<>();
         includes.add("cover_art");
+        includes.add("author");
 
         api.getMangaByGenre(
                 tagId,

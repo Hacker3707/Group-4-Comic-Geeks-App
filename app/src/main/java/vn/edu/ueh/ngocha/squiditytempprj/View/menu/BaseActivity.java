@@ -45,6 +45,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NotificationPopup;
 import vn.edu.ueh.ngocha.squiditytempprj.View.notification.NtfChannel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.AuthViewModel;
 import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
+
 public abstract class BaseActivity extends AppCompatActivity {
 
     protected DrawerLayout drawerLayout;
@@ -78,6 +79,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected boolean hideAppBarinLandscape() { return false; }
+    protected String getActivityName() { return getClass().getSimpleName(); }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -343,6 +346,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                                     BaseActivity.this,
                                     ComicListActivity.class
                             );
+                            intent.putExtra("from_activity", getActivityName());
                             startActivity(intent);
                         }
                         else if (id == R.id.action_admin) {
