@@ -444,11 +444,6 @@
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/profile_tab_liked" />
-
-                    <com.google.android.material.tabs.TabItem
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:text="@string/profile_tab_reviews" />
 
                 </com.google.android.material.tabs.TabLayout>

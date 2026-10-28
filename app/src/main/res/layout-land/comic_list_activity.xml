@@ -2,78 +2,57 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/searchHeader"
         android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:orientation="horizontal"
+        android:layout_height="70dp"
+        android:background="@color/chat_bubble_received"
         android:gravity="center_vertical"
-        android:background="@color/squidity_lightpurple"
-        app:layout_constraintTop_toTopOf="parent"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/txtview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="25dp"
-            android:fontFamily="@font/jersey25_regular"
-            android:text="@string/comic_zone_title"
-            android:textSize="30sp" />
-
-        <View
+        <include
+            android:id="@+id/searchBar"
+            layout="@layout/layout_search_bar"
             android:layout_width="0dp"
-            android:layout_height="1dp"
+            android:layout_height="match_parent"
             android:layout_weight="1" />
 
         <Spinner
             android:id="@+id/spn_searchopt"
             style="@style/Widget.AppCompat.Spinner.DropDown"
-            android:layout_width="180dp"
-            android:layout_height="25dp"
-            android:layout_marginRight="20dp"
+            android:layout_width="150dp"
+            android:layout_height="35dp"
+            android:layout_marginHorizontal="20dp"
             android:background="@color/white"
             android:entries="@array/search_comic_options" />
 
     </LinearLayout>
 
-
-    <!-- Search Bar -->
-    <include
-        android:id="@+id/searchBar"
-        layout="@layout/layout_search_bar"
-        android:layout_width="0dp"
-        android:layout_height="70dp"
-        app:layout_constraintTop_toBottomOf="@id/linearLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Hướng dẫn tìm theo tên -->
     <TextView
         android:id="@+id/tvSearchResult"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
         android:text="@string/comic_search_hint"
         android:textColor="#8E8E8E"
-        android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/searchBar"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/searchHeader"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Danh sách genre: chỉ hiện khi chọn Genre -->
     <HorizontalScrollView
         android:id="@+id/genreScrollView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:fillViewport="false"
         android:scrollbars="none"
         android:visibility="gone"
@@ -94,7 +73,6 @@
 
     </HorizontalScrollView>
 
-    <!-- Danh sách manga -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcvcomic"
         android:layout_width="0dp"
