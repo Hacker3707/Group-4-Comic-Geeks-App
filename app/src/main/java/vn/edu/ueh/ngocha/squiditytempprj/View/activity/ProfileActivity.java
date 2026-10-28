@@ -17,8 +17,6 @@ import com.google.firebase.auth.FirebaseUser;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -35,14 +33,16 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.ChatRoom;
-import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comment;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Post;
@@ -50,6 +50,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Review;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Stamp;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.StampType;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.StampRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicReviewAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.CommentAdapter;
@@ -67,7 +68,6 @@ import vn.edu.ueh.ngocha.squiditytempprj.ViewModel.UserProfileViewModel;
 
 public class ProfileActivity extends BaseActivity {
 
-    // Truyền id người muốn xem profile. Không truyền thì xem profile của chính mình.
     public static final String EXTRA_USER_ID = "user_id";
 
     private static final String STATE_FOLLOW_SHEET = "follow_sheet_mode";
@@ -86,8 +86,8 @@ public class ProfileActivity extends BaseActivity {
     private TextView tvFollowingCount;
     private MaterialButton btnFollow;
 
-    // ViewModel & UI Profile (Phần của Nghĩa)
     private UserProfileViewModel profileViewModel;
+    private UserViewModel userViewModel;
     private ShapeableImageView imgProfileAvatar;
     private ImageView imgProfileCover;
     private TextView tvProfileName;
@@ -122,6 +122,12 @@ public class ProfileActivity extends BaseActivity {
     private List<Genre> allGenres = new ArrayList<>();
     private List<String> selectedGenreIds = new ArrayList<>();
     private User currentProfile;
+
+    private final Map<String, User> userMap = new HashMap<>();
+    private androidx.lifecycle.LiveData<Map<String, User>> userLive = null;
+    private Observer<Map<String, User>> userObserver;
+    private String watchedUserKey = "";
+
     private final ActivityResultLauncher<String> avatarPicker =
             registerForActivityResult(
                     new ActivityResultContracts.GetContent(),
@@ -142,8 +148,6 @@ public class ProfileActivity extends BaseActivity {
                     }
             );
 
-
-    // Id của tài khoản đang đăng nhập, chưa đăng nhập thì dùng "guest"
     private String currentUid() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             return "guest";
@@ -154,36 +158,28 @@ public class ProfileActivity extends BaseActivity {
     private Observer<List<Genre>> genreObserver = new Observer<List<Genre>>() {
         @Override
         public void onChanged(List<Genre> genres) {
-            allGenres = genres == null
-                    ? new ArrayList<>()
-                    : new ArrayList<>(genres);
-
+            allGenres = genres == null ? new ArrayList<>() : new ArrayList<>(genres);
             renderSelectedGenres();
         }
     };
 
-    private Observer<List<Review>> reviewObserver =
-            new Observer<List<Review>>() {
-                @Override
-                public void onChanged(List<Review> reviews) {
-                    reviewAdapter.setReviews(reviews);
-                    reviewAdapter.setUser(currentProfile);
+    private Observer<List<Review>> reviewObserver = new Observer<List<Review>>() {
+        @Override
+        public void onChanged(List<Review> reviews) {
+            reviewAdapter.setReviews(reviews);
+            reviewAdapter.setUser(currentProfile);
 
-                    List<String> mangaIds = new ArrayList<>();
-
-                    if (reviews != null) {
-                        for (Review review : reviews) {
-                            if (review != null
-                                    && review.getComicId() != null
-                                    && !mangaIds.contains(review.getComicId())) {
-                                mangaIds.add(review.getComicId());
-                            }
-                        }
+            List<String> mangaIds = new ArrayList<>();
+            if (reviews != null) {
+                for (Review review : reviews) {
+                    if (review != null && review.getComicId() != null && !mangaIds.contains(review.getComicId())) {
+                        mangaIds.add(review.getComicId());
                     }
-
-                    comicViewModel.getComicbyIdList(mangaIds).observe(ProfileActivity.this, comicObserver);
                 }
-            };
+            }
+            comicViewModel.getComicbyIdList(mangaIds).observe(ProfileActivity.this, comicObserver);
+        }
+    };
 
     private View.OnClickListener onclickGenreChip = new View.OnClickListener() {
         @Override
@@ -208,13 +204,17 @@ public class ProfileActivity extends BaseActivity {
         @Override
         public void onChanged(User user) {
             currentProfile = user;
+            if (user != null && user.getUserId() != null) {
+                userMap.put(user.getUserId(), user);
+                if (postAdapter != null) {
+                    postAdapter.setUsers(userMap);
+                }
+            }
         }
     };
 
     private void renderSelectedGenres() {
-        if (chipGenreProfile == null) {
-            return;
-        }
+        if (chipGenreProfile == null) return;
 
         chipGenreProfile.setSingleSelection(false);
         chipGenreProfile.setSelectionRequired(false);
@@ -223,24 +223,15 @@ public class ProfileActivity extends BaseActivity {
         Set<String> selectedIds = new HashSet<>(selectedGenreIds);
 
         for (Genre genre : allGenres) {
-            if (genre == null || genre.getGenreId() == null) {
-                continue;
-            }
-
-            // Chỉ hiển thị genre đã được người dùng chọn.
-            if (!selectedIds.contains(genre.getGenreId())) {
-                continue;
-            }
+            if (genre == null || genre.getGenreId() == null) continue;
+            if (!selectedIds.contains(genre.getGenreId())) continue;
 
             Chip chip = new Chip(this);
             chip.setText(genre.getGenreName());
             chip.setTag(genre.getGenreId());
-
-            // Chip trên Profile chỉ dùng để hiển thị.
             chip.setCheckable(false);
             chip.setClickable(false);
             chip.setFocusable(false);
-
             chip.setOnClickListener(onclickGenreChip);
 
             chipGenreProfile.addView(chip);
@@ -256,32 +247,19 @@ public class ProfileActivity extends BaseActivity {
     public ComicReviewAdapter.OnReviewClickListener reviewInteractionListener = new ComicReviewAdapter.OnReviewClickListener() {
         @Override
         public void onUserClick(String userId) {
-            if (userId == null || userId.trim().isEmpty()) {
-                return;
-            }
-
-            Intent intent = new Intent(
-                    ProfileActivity.this,
-                    ProfileActivity.class
-            );
-
+            if (userId == null || userId.trim().isEmpty()) return;
+            Intent intent = new Intent(ProfileActivity.this, ProfileActivity.class);
             intent.putExtra(ProfileActivity.EXTRA_USER_ID, userId);
             startActivity(intent);
         }
 
         @Override
         public void onComicChipClick(String comicId) {
-            Intent intent = new Intent(
-                    ProfileActivity.this,
-                    ComicDetailActivity.class
-            );
-
+            Intent intent = new Intent(ProfileActivity.this, ComicDetailActivity.class);
             intent.putExtra("comic_id", comicId);
             intent.putExtra("search_option", "MangaDex");
-
             startActivity(intent);
         }
-
     };
 
     @Override
@@ -292,13 +270,11 @@ public class ProfileActivity extends BaseActivity {
         }
 
         ImageButton btnBackHome = findViewById(R.id.btnBackHome);
-
         if (btnBackHome != null) {
             btnBackHome.setVisibility(View.VISIBLE);
             btnBackHome.setOnClickListener(v -> finish());
         }
 
-        // Ánh xạ các view Profile
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileEmail = findViewById(R.id.tvProfileEmail);
         imgProfileAvatar = findViewById(R.id.imgProfileAvatar);
@@ -309,9 +285,7 @@ public class ProfileActivity extends BaseActivity {
         tvProfileBio = findViewById(R.id.tvProfileBio);
         chipGenreProfile = findViewById(R.id.chipGroupProfile);
 
-        layoutIntroductionDetails =
-                findViewById(R.id.layoutIntroductionDetails);
-
+        layoutIntroductionDetails = findViewById(R.id.layoutIntroductionDetails);
         tvIntroUsername = findViewById(R.id.tvIntroUsername);
         tvIntroEmail = findViewById(R.id.tvIntroEmail);
         tvIntroGender = findViewById(R.id.tvIntroGender);
@@ -320,29 +294,38 @@ public class ProfileActivity extends BaseActivity {
         btnFollow = findViewById(R.id.btnFollow);
         btnMessage = findViewById(R.id.btnMessage);
 
-
         tabLayout = findViewById(R.id.tabLayout);
-
         if (tabLayout != null && tabLayout.getTabAt(1) != null) {
             tabLayout.selectTab(tabLayout.getTabAt(1));
         }
 
         profileActionButtons = findViewById(R.id.profileActionButtons);
 
-        btnEditProfile = findViewById(R.id.btnEditProfile);
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
             startActivity(new Intent(this, AuthActivity.class));
             finish();
             return;
         }
 
-        genreViewModel = new ViewModelProvider(this)
-                .get(GenreViewModel.class);
-
+        genreViewModel = new ViewModelProvider(this).get(GenreViewModel.class);
         genreViewModel.getAllGenres().observe(this, genreObserver);
 
         profileViewModel = new ViewModelProvider(this).get(UserProfileViewModel.class);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+
+        userObserver = new Observer<Map<String, User>>() {
+            @Override
+            public void onChanged(Map<String, User> users) {
+                if (users != null) {
+                    userMap.putAll(users);
+                    if (postAdapter != null) {
+                        postAdapter.setUsers(userMap);
+                    }
+                }
+            }
+        };
+
         profileViewModel.getLiveBio().observe(this, bio -> {
             if (tvProfileBio != null) {
                 tvProfileBio.setText(
@@ -363,19 +346,12 @@ public class ProfileActivity extends BaseActivity {
             }
         });
 
-        profileViewModel.getLiveIntroduction().observe(this, introduction -> {
-            // Cập nhật TextView giới thiệu bản thân riêng tại đây
-            // khi bạn đã xác định đúng ID của TextView trong layout.
-        });
         followViewModel = new ViewModelProvider(this).get(FollowViewModel.class);
         chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
-        FirebaseUser me = FirebaseAuth.getInstance()
-                .getCurrentUser();
-
-        String fromIntent = getIntent()
-                .getStringExtra(EXTRA_USER_ID);
+        FirebaseUser me = currentUser;
+        String fromIntent = getIntent().getStringExtra(EXTRA_USER_ID);
 
         targetUserId = (fromIntent == null || fromIntent.trim().isEmpty())
                 ? me.getUid()
@@ -384,41 +360,25 @@ public class ProfileActivity extends BaseActivity {
         isOwnProfile = targetUserId.equals(me.getUid());
         currentProfileUserId = targetUserId;
 
-        // 1. Khởi tạo RecyclerView
         recyclerViewProfileComments = findViewById(R.id.rcvProfileReviews);
-
         reviewAdapter = new ComicReviewAdapter(reviewInteractionListener);
         reviewAdapter.setupInProfile();
 
-
         if (recyclerViewProfileComments != null) {
-            recyclerViewProfileComments.setLayoutManager(
-                    new LinearLayoutManager(this)
-            );
+            recyclerViewProfileComments.setLayoutManager(new LinearLayoutManager(this));
             recyclerViewProfileComments.setAdapter(reviewAdapter);
         }
 
-        // 2. Sau đó mới đăng ký Observer
-        reviewViewModel = new ViewModelProvider(this)
-                .get(ReviewViewModel.class);
+        reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
         comicViewModel = new ViewModelProvider(this).get(ComicViewModel.class);
 
         profileViewModel.getUserById(targetUserId).observe(this, profileObserver);
-
-        reviewViewModel.getAllReviewsforUserId(targetUserId)
-                .observe(this, reviewObserver);
+        reviewViewModel.getAllReviewsforUserId(targetUserId).observe(this, reviewObserver);
 
         tvProfilePostCount = findViewById(R.id.tvProfilePostCount);
-
-        FirebaseUser currentUser =
-                FirebaseAuth.getInstance().getCurrentUser();
-
         if (currentUser != null) {
             currentProfileUserId = currentUser.getUid();
-
-            currentProfileUsername = currentUser.getDisplayName() == null
-                    ? ""
-                    : currentUser.getDisplayName();
+            currentProfileUsername = currentUser.getDisplayName() == null ? "" : currentUser.getDisplayName();
         }
 
         if (tvProfilePostCount != null) {
@@ -426,208 +386,96 @@ public class ProfileActivity extends BaseActivity {
         }
 
         if (tabLayout != null) {
-            tabLayout.addOnTabSelectedListener(
-                    new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
-                        @Override
-                        public void onTabSelected(
-                                com.google.android.material.tabs.TabLayout.Tab tab) {
-
-                            if (tab == null) return;
-
-                            int position = tab.getPosition();
-
-                            if (layoutIntroductionDetails != null) {
-                                layoutIntroductionDetails.setVisibility(
-                                        position == 0 ? View.VISIBLE : View.GONE
-                                );
-                            }
-
-                            if (recyclerViewProfilePosts != null) {
-                                recyclerViewProfilePosts.setVisibility(
-                                        position == 1 ? View.VISIBLE : View.GONE
-                                );
-                            }
-
-                            if (recyclerViewProfileComments != null) {
-                                recyclerViewProfileComments.setVisibility(
-                                        position == 3 ? View.VISIBLE : View.GONE
-                                );
-                            }
-
-                            // Tab COLLECTION (position 2) cần có view riêng
-                            // và được hiển thị tại đây khi bạn đã xác định view đó.
-                        }
-
-                        @Override
-                        public void onTabUnselected(
-                                com.google.android.material.tabs.TabLayout.Tab tab) {
-                        }
-
-                        @Override
-                        public void onTabReselected(
-                                com.google.android.material.tabs.TabLayout.Tab tab) {
-                        }
+            tabLayout.addOnTabSelectedListener(new com.google.android.material.tabs.TabLayout.OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(com.google.android.material.tabs.TabLayout.Tab tab) {
+                    if (tab == null) return;
+                    int position = tab.getPosition();
+                    if (layoutIntroductionDetails != null) {
+                        layoutIntroductionDetails.setVisibility(position == 0 ? View.VISIBLE : View.GONE);
                     }
-            );
-
-            // Mặc định mở tab POSTS.
+                    if (recyclerViewProfilePosts != null) {
+                        recyclerViewProfilePosts.setVisibility(position == 1 ? View.VISIBLE : View.GONE);
+                    }
+                    if (recyclerViewProfileComments != null) {
+                        recyclerViewProfileComments.setVisibility(position == 3 ? View.VISIBLE : View.GONE);
+                    }
+                }
+                @Override public void onTabUnselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
+                @Override public void onTabReselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
+            });
             tabLayout.selectTab(tabLayout.getTabAt(1));
         }
-        // Mở màn hình chỉnh sửa thông tin cá nhân
+
         if (btnEditProfile != null) {
-            btnEditProfile.setOnClickListener(v ->
-                    startActivity(new Intent(
-                            ProfileActivity.this,
-                            EditProfileActivity.class
-                    ))
-            );
+            btnEditProfile.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class)));
         }
 
-// Bấm avatar để xem ảnh lớn
         if (imgProfileAvatar != null) {
-            imgProfileAvatar.setOnClickListener(v ->
-                    showLargeImage(currentAvatarUrl, true)
-            );
+            imgProfileAvatar.setOnClickListener(v -> showLargeImage(currentAvatarUrl, true));
         }
 
-// Bấm ảnh bìa để xem ảnh lớn
         if (imgProfileCover != null) {
-            imgProfileCover.setOnClickListener(v ->
-                    showLargeImage(currentCoverUrl, false)
-            );
+            imgProfileCover.setOnClickListener(v -> showLargeImage(currentCoverUrl, false));
         }
 
-// Nút riêng để đổi avatar
         if (btnEditAvatarImage != null) {
-            btnEditAvatarImage.setOnClickListener(v ->
-                    avatarPicker.launch("image/*")
-            );
+            btnEditAvatarImage.setOnClickListener(v -> avatarPicker.launch("image/*"));
         }
 
-// Nút riêng để đổi ảnh bìa
         if (btnEditCoverImage != null) {
-            btnEditCoverImage.setOnClickListener(v ->
-                    coverPicker.launch("image/*")
-            );
+            btnEditCoverImage.setOnClickListener(v -> coverPicker.launch("image/*"));
         }
 
         profileViewModel.getProfile().observe(this, state -> {
             if (state == null) return;
-
-            selectedGenreIds = state.favGenres == null
-                    ? new ArrayList<>()
-                    : new ArrayList<>(state.favGenres);
-
+            selectedGenreIds = state.favGenres == null ? new ArrayList<>() : new ArrayList<>(state.favGenres);
             renderSelectedGenres();
 
             String username = state.username == null ? "" : state.username.trim();
             if (username.isEmpty()) username = Str.t(R.string.common_user);
-
             String email = state.email == null ? "" : state.email.trim();
 
-
             tvProfileName.setText(username);
-
-            if (tvIntroUsername != null) {
-                tvIntroUsername.setText(username);
-            }
-
-            if (tvIntroEmail != null) {
-                tvIntroEmail.setText(
-                        email.isEmpty() ? Str.t(R.string.common_not_updated) : email
-                );
-            }
-
-            if (tvIntroGender != null) {
-                tvIntroGender.setText(
-                        state.gender == null || state.gender.trim().isEmpty()
-                                ? Str.t(R.string.common_not_updated)
-                                : Str.gender(state.gender)
-                );
-            }
-
-            if (tvIntroBirthDate != null) {
-                tvIntroBirthDate.setText(
-                        state.birthDate == null || state.birthDate.trim().isEmpty()
-                                ? Str.t(R.string.common_not_updated)
-                                : state.birthDate
-                );
-            }
+            if (tvIntroUsername != null) tvIntroUsername.setText(username);
+            if (tvIntroEmail != null) tvIntroEmail.setText(email.isEmpty() ? Str.t(R.string.common_not_updated) : email);
+            if (tvIntroGender != null) tvIntroGender.setText(state.gender == null || state.gender.trim().isEmpty() ? Str.t(R.string.common_not_updated) : Str.gender(state.gender));
+            if (tvIntroBirthDate != null) tvIntroBirthDate.setText(state.birthDate == null || state.birthDate.trim().isEmpty() ? Str.t(R.string.common_not_updated) : state.birthDate);
 
             tvProfileEmail.setText(email);
             tvProfileEmail.setVisibility(email.isEmpty() ? View.GONE : View.VISIBLE);
 
             if (state.avatarUrl != null && !state.avatarUrl.isEmpty()) {
-                Glide.with(this).load(state.avatarUrl)
-                        .placeholder(R.drawable.ic_launcher_background)
-                        .error(R.drawable.ic_launcher_background)
-                        .circleCrop().into(imgProfileAvatar);
+                Glide.with(this).load(state.avatarUrl).placeholder(R.drawable.ic_launcher_background).error(R.drawable.ic_launcher_background).circleCrop().into(imgProfileAvatar);
             } else {
                 imgProfileAvatar.setImageResource(R.drawable.ic_launcher_background);
             }
 
             if (state.coverUrl != null && !state.coverUrl.isEmpty()) {
-                Glide.with(this).load(state.coverUrl)
-                        .placeholder(R.drawable.ic_launcher_background)
-                        .error(R.drawable.ic_launcher_background)
-                        .centerCrop().into(imgProfileCover);
+                Glide.with(this).load(state.coverUrl).placeholder(R.drawable.ic_launcher_background).error(R.drawable.ic_launcher_background).centerCrop().into(imgProfileCover);
             } else {
                 imgProfileCover.setImageResource(R.drawable.ic_launcher_background);
             }
 
-            // Chỉ là chủ profile khi đang xem profile của chính mình
-            boolean isOwner =
-                    isOwnProfile
-                            && FirebaseAuth.getInstance().getCurrentUser() != null
-                            && state.loggedIn;
-
-            if (btnEditProfile != null) {
-                btnEditProfile.setVisibility(
-                        isOwner ? View.VISIBLE : View.GONE
-                );
-            }
-
-            if (btnEditAvatarImage != null) {
-                btnEditAvatarImage.setVisibility(
-                        isOwner ? View.VISIBLE : View.GONE
-                );
-            }
-
-            if (btnEditCoverImage != null) {
-                btnEditCoverImage.setVisibility(
-                        isOwner ? View.VISIBLE : View.GONE
-                );
-            }
+            boolean isOwner = isOwnProfile && FirebaseAuth.getInstance().getCurrentUser() != null && state.loggedIn;
+            if (btnEditProfile != null) btnEditProfile.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+            if (btnEditAvatarImage != null) btnEditAvatarImage.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+            if (btnEditCoverImage != null) btnEditCoverImage.setVisibility(isOwner ? View.VISIBLE : View.GONE);
             if (isOwner) {
                 profileActionButtons.setVisibility(View.GONE);
-            }
-            else {
+            } else {
                 profileActionButtons.setVisibility(View.VISIBLE);
             }
 
-            currentAvatarUrl = state.avatarUrl == null
-                    ? "" : state.avatarUrl;
-
-            currentCoverUrl = state.coverUrl == null
-                    ? "" : state.coverUrl;
-
+            currentAvatarUrl = state.avatarUrl == null ? "" : state.avatarUrl;
+            currentCoverUrl = state.coverUrl == null ? "" : state.coverUrl;
         });
-
 
         profileViewModel.getSaving().observe(this, saving -> {
             boolean isSaving = Boolean.TRUE.equals(saving);
-
-            if (btnEditProfile != null) {
-                btnEditProfile.setEnabled(!isSaving);
-            }
-
-            if (btnEditAvatarImage != null) {
-                btnEditAvatarImage.setEnabled(!isSaving);
-            }
-
-            if (btnEditCoverImage != null) {
-                btnEditCoverImage.setEnabled(!isSaving);
-            }
+            if (btnEditProfile != null) btnEditProfile.setEnabled(!isSaving);
+            if (btnEditAvatarImage != null) btnEditAvatarImage.setEnabled(!isSaving);
+            if (btnEditCoverImage != null) btnEditCoverImage.setEnabled(!isSaving);
         });
 
         profileViewModel.getMessage().observe(this, message -> {
@@ -637,21 +485,16 @@ public class ProfileActivity extends BaseActivity {
         });
 
         recyclerViewProfilePosts = findViewById(R.id.recyclerViewProfilePosts);
-
         if (recyclerViewProfilePosts != null) {
-            recyclerViewProfilePosts.setLayoutManager(
-                    new LinearLayoutManager(this)
-            );
+            recyclerViewProfilePosts.setLayoutManager(new LinearLayoutManager(this));
         }
 
         FloatingActionButton fabCreatePost = findViewById(R.id.fabCreatePost);
         if (fabCreatePost != null) {
-            fabCreatePost.setOnClickListener(v -> {
-                Intent intent = new Intent(ProfileActivity.this, CreatePostActivity.class);
-                startActivity(intent);
-            });
+            fabCreatePost.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, CreatePostActivity.class)));
         }
 
+        // Khởi tạo PostAdapter
         postAdapter = new PostAdapter(this, new ArrayList<>(), new PostAdapter.OnPostInteractionListener() {
             @Override
             public void onStampClick(Post post) {
@@ -688,7 +531,6 @@ public class ProfileActivity extends BaseActivity {
                 if (rvComments != null) {
                     rvComments.setAdapter(commentAdapter);
                 }
-                // Hiện đúng tên + ảnh tài khoản của người bình luận
                 CommentUsersWatcher usersWatcher = new CommentUsersWatcher(
                         ProfileActivity.this,
                         new ViewModelProvider(ProfileActivity.this).get(UserViewModel.class),
@@ -706,7 +548,6 @@ public class ProfileActivity extends BaseActivity {
                         }
                     });
                 }
-
                 bottomSheetDialog.show();
             }
 
@@ -736,40 +577,69 @@ public class ProfileActivity extends BaseActivity {
             recyclerViewProfilePosts.setAdapter(postAdapter);
         }
 
+        StampRepository stampRepository = new StampRepository(getApplication());
         postViewModel.getAllPosts().observe(this, realPosts -> {
             if (realPosts == null) {
-                if (tvProfilePostCount != null) {
-                    tvProfilePostCount.setText("0");
-                }
+                if (tvProfilePostCount != null) tvProfilePostCount.setText("0");
                 return;
             }
 
-            // Chỉ hiện bài của chủ profile đang xem và đếm số bài
             List<Post> profilePosts = new ArrayList<>();
             int postCount = 0;
+            TreeSet<String> userIdsToWatch = new TreeSet<>();
 
             for (Post post : realPosts) {
-                if (post == null || post.getUserId() == null) {
-                    continue;
-                }
+                if (post == null || post.getUserId() == null) continue;
 
                 String authorId = post.getUserId().trim();
 
-                boolean isCurrentUserPost =
-                        authorId.equals(currentProfileUserId)
-                                || (!currentProfileUsername.isEmpty()
-                                && authorId.equalsIgnoreCase(currentProfileUsername));
+                // 👉 Đã sửa chuẩn xác: Chỉ lấy bài viết thuộc về chủ nhân trang profile hiện tại (targetUserId)
+                boolean isTargetUserPost = authorId.equals(targetUserId);
 
-                if (isCurrentUserPost) {
+                if (isTargetUserPost) {
                     postCount++;
                     profilePosts.add(post);
                 }
+                userIdsToWatch.add(authorId);
             }
 
-            postAdapter.setPosts(profilePosts);
+            if (postAdapter != null) {
+                postAdapter.setPosts(profilePosts);
+            }
 
             if (tvProfilePostCount != null) {
                 tvProfilePostCount.setText(String.valueOf(postCount));
+            }
+
+            if (!userIdsToWatch.isEmpty()) {
+                String key = String.join(",", userIdsToWatch);
+                if (!key.equals(watchedUserKey)) {
+                    if (userLive != null) {
+                        userLive.removeObserver(userObserver);
+                    }
+                    watchedUserKey = key;
+                    userLive = userViewModel.watchUsersByIds(new ArrayList<>(userIdsToWatch));
+                    userLive.observe(ProfileActivity.this, userObserver);
+                }
+            }
+
+            Set<String> myStampedPostIds = new HashSet<>();
+            for (Post post : profilePosts) {
+                if (post.getPostId() != null) {
+                    stampRepository.getStampsByPost(post.getPostId()).observe(ProfileActivity.this, stamps -> {
+                        if (stamps != null) {
+                            for (Stamp s : stamps) {
+                                if (s.getUserId() != null && s.getUserId().equals(currentUid())) {
+                                    myStampedPostIds.add(post.getPostId());
+                                    break;
+                                }
+                            }
+                            if (postAdapter != null) {
+                                postAdapter.setStampedPostIds(myStampedPostIds);
+                            }
+                        }
+                    });
+                }
             }
         });
 
@@ -786,25 +656,17 @@ public class ProfileActivity extends BaseActivity {
         }
     }
 
-    // =================================
-    // FOLLOW
-    // =================================
     private void setupFollow() {
-        String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
         tvFollowersCount = findViewById(R.id.tvFollowersCount);
         tvFollowingCount = findViewById(R.id.tvFollowingCount);
         btnFollow = findViewById(R.id.btnFollow);
 
         if (isOwnProfile) {
-            // Không tự follow chính mình
             btnFollow.setVisibility(View.GONE);
         } else {
-            // Xem profile người khác: ẩn nút đăng bài
             View fab = findViewById(R.id.fabCreatePost);
             if (fab != null) fab.setVisibility(View.GONE);
 
-            // Nút Message: mở thẳng khung chat với người này
             if (btnMessage != null) {
                 btnMessage.setOnClickListener(v -> openChatWithTarget());
             }
@@ -819,7 +681,6 @@ public class ProfileActivity extends BaseActivity {
             });
         }
 
-        // Số Followers = số người đang follow profile này, Following = số người profile này đang follow
         followViewModel.getFollowerCount().observe(this, count ->
                 tvFollowersCount.setText(String.valueOf(count == null ? 0 : count)));
         followViewModel.getFollowingCount().observe(this, count ->
@@ -881,11 +742,9 @@ public class ProfileActivity extends BaseActivity {
         super.onDestroy();
     }
 
-    // Mở khung chat với chủ profile đang xem (phòng chat cố định theo cặp người dùng)
     private void openChatWithTarget() {
         FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
-        if (me == null || targetUserId == null || targetUserId.isEmpty()
-                || targetUserId.equals(me.getUid())) {
+        if (me == null || targetUserId == null || targetUserId.isEmpty() || targetUserId.equals(me.getUid())) {
             return;
         }
 
@@ -894,12 +753,9 @@ public class ProfileActivity extends BaseActivity {
                 ? myId + "_" + targetUserId
                 : targetUserId + "_" + myId;
 
-        // Chưa có phòng thì tạo, đã có thì Room bỏ qua
         chatViewModel.createChatRoom(new ChatRoom(chatRoomId, myId, targetUserId));
 
-        String title = tvProfileName != null
-                ? tvProfileName.getText().toString()
-                : "";
+        String title = tvProfileName != null ? tvProfileName.getText().toString() : "";
 
         Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra(ChatActivity.EXTRA_CHAT_ROOM_ID, chatRoomId);
@@ -921,11 +777,7 @@ public class ProfileActivity extends BaseActivity {
         imageView.setBackgroundColor(android.graphics.Color.BLACK);
 
         if (imageUrl != null && !imageUrl.trim().isEmpty()) {
-            Glide.with(this)
-                    .load(imageUrl)
-                    .placeholder(R.drawable.ic_launcher_background)
-                    .error(R.drawable.ic_launcher_background)
-                    .into(imageView);
+            Glide.with(this).load(imageUrl).placeholder(R.drawable.ic_launcher_background).error(R.drawable.ic_launcher_background).into(imageView);
         } else {
             imageView.setImageResource(R.drawable.ic_launcher_background);
         }
@@ -937,9 +789,7 @@ public class ProfileActivity extends BaseActivity {
         dialog.setContentView(container);
 
         if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(
-                    android.R.color.black
-            );
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.black);
         }
 
         imageView.setOnClickListener(v -> dialog.dismiss());
@@ -962,7 +812,22 @@ public class ProfileActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         if (profileViewModel != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
+            loadUserLive();
             loadTargetProfile();
+        }
+    }
+
+    private void loadUserLive() {
+        if (!watchedUserKey.isEmpty()) {
+            List<String> ids = new ArrayList<>();
+            for (String id : watchedUserKey.split(",")) {
+                if (!id.trim().isEmpty()) ids.add(id.trim());
+            }
+            if (!ids.isEmpty()) {
+                if (userLive != null) userLive.removeObserver(userObserver);
+                userLive = userViewModel.watchUsersByIds(ids);
+                userLive.observe(this, userObserver);
+            }
         }
     }
 }

@@ -69,6 +69,9 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private String commentingPostId = null;
     private String commentDraft = "";
 
+    // 👉 Tập hợp lưu các postId mà user hiện tại đã thả Stamp
+    private final Set<String> stampedPostIds = new HashSet<>();
+
     private static final String PAYLOAD_FOLLOW = "follow_state";
     private final Set<String> myFollowingIds = new HashSet<>();
     private FollowRemoteRepository followRepository;
@@ -130,6 +133,15 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void setPosts(List<Post> posts) {
         this.postList = posts != null ? new ArrayList<>(posts) : new ArrayList<Post>();
+        notifyDataSetChanged();
+    }
+
+    // 👉 Phương thức cập nhật danh sách bài viết đã thả stamp từ bên ngoài (Profile/Group/Home)
+    public void setStampedPostIds(Set<String> ids) {
+        stampedPostIds.clear();
+        if (ids != null) {
+            stampedPostIds.addAll(ids);
+        }
         notifyDataSetChanged();
     }
 
@@ -212,7 +224,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         });
     }
 
-    // 👉 Hàm mở trang Profile cá nhân của người dùng
     private void openProfile(String userId) {
         if (userId == null || userId.isEmpty()) return;
         Intent intent = new Intent(context, ProfileActivity.class);
@@ -237,10 +248,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         bindPost((PostViewHolder) holder, postList.get(position), position);
     }
-
-    // =================================
-    // Tách nhỏ các hàm bind để dọn gọn code
-    // =================================
 
     private void bindHeader(PostViewHolder holder, Post post) {
         Group group = (!groupPageMode && isGroupPost(post)) ? groups.get(post.getGroupId()) : null;
@@ -269,7 +276,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             holder.imgGroupAvatar.setOnClickListener(openGroup);
             holder.tvGroupName.setOnClickListener(openGroup);
 
-            // Bấm vào avatar/tên người đăng nhỏ trong group -> Sang Profile người đó
             View.OnClickListener openOwner = v -> openProfile(ownerId);
             holder.imgGroupPosterAvatar.setOnClickListener(openOwner);
             holder.tvGroupPoster.setOnClickListener(openOwner);
@@ -283,7 +289,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             loadAvatar(holder.imgAvatar, posterAvatarUrl);
             bindFollowButton(holder, post);
 
-            // 👉 Bấm vào tên hoặc avatar chính của bài đăng -> Sang Profile người đó
             View.OnClickListener openOwnerProfile = v -> openProfile(ownerId);
             holder.tvUserName.setOnClickListener(openOwnerProfile);
             if (holder.imgAvatar != null) {
@@ -398,7 +403,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             String content = post.getContent();
             String foundHashtag = "";
 
-            // 1. Ưu tiên quét xem trong nội dung (content) có chứa từ bắt đầu bằng dấu # hay không
             if (content != null && content.contains("#")) {
                 int hashIndex = content.indexOf("#");
                 String sub = content.substring(hashIndex).trim();
@@ -410,7 +414,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
             }
 
-            // 2. Nếu trong content không có dấu #, kiểm tra tiếp trường post.getHashtag() xem có dữ liệu không
             if (foundHashtag.isEmpty() && post.getHashtag() != null && !post.getHashtag().trim().isEmpty()) {
                 foundHashtag = post.getHashtag().trim();
                 if (!foundHashtag.startsWith("#")) {
@@ -418,7 +421,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
             }
 
-            // 3. Nếu vẫn không có nữa thì mới dùng bộ lọc topicLabel hoặc mặc định là #Discussion
             if (foundHashtag.isEmpty()) {
                 String topic = GroupHashtagUtils.topicLabel(content);
                 foundHashtag = (topic != null && !topic.isEmpty() && !topic.equals(Str.t(R.string.group_chip_other))) ? "#" + topic : "#Discussion";
@@ -427,7 +429,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             holder.tvHashtag.setText(foundHashtag);
             hashtagToDisplay = foundHashtag;
         } else {
-            // Dành cho bài đăng ngoài trang chủ (Home)
             String hashtag = post.getHashtag();
             if (hashtag != null && !hashtag.trim().isEmpty()) {
                 hashtagToDisplay = hashtag.startsWith("#") ? hashtag : "#" + hashtag;
@@ -437,7 +438,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             holder.tvHashtag.setText(hashtagToDisplay);
         }
 
-        // Sự kiện khi bấm vào hashtag để tìm kiếm
         holder.tvHashtag.setOnClickListener(v -> {
             Intent intent = new Intent(context, SearchActivity.class);
             intent.putExtra("SEARCH_QUERY", hashtagToDisplay.replace("#", "").trim());
@@ -446,16 +446,35 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private void setupInteractions(PostViewHolder holder, Post post, int position) {
+        // 👉 Kiểm tra trạng thái Stamp từ tập hợp stampedPostIds để vẽ đúng icon/màu sắc
+        boolean isAlreadyStamped = post.getPostId() != null && stampedPostIds.contains(post.getPostId());
+
+        if (isAlreadyStamped) {
+            holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#493373"));
+            holder.btnStamp.setImageResource(R.drawable.post_ink_splat);
+            holder.btnStamp.setTag(true);
+        } else {
+            holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#A890D3"));
+            holder.btnStamp.setImageResource(R.drawable.ic_splash_unfill);
+            holder.btnStamp.setTag(false);
+        }
+
         holder.btnStamp.setOnClickListener(v -> {
             boolean isStamped = holder.btnStamp.getTag() != null && (boolean) holder.btnStamp.getTag();
             if (isStamped) {
                 holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#A890D3"));
                 holder.btnStamp.setImageResource(R.drawable.ic_splash_unfill);
                 holder.btnStamp.setTag(false);
+                if (post.getPostId() != null) {
+                    stampedPostIds.remove(post.getPostId());
+                }
             } else {
                 holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#493373"));
                 holder.btnStamp.setImageResource(R.drawable.post_ink_splat);
                 holder.btnStamp.setTag(true);
+                if (post.getPostId() != null) {
+                    stampedPostIds.add(post.getPostId());
+                }
 
                 if (listener != null) {
                     listener.onStampClick(post);
@@ -478,7 +497,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         });
 
-        // 👉 KIỂM TRA QUYỀN SỞ HỮU BÀI VIẾT (So sánh Firebase UID của bài post với user đang đăng nhập)
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         View.OnClickListener openOptions = v -> showOptionsMenu(v, post);
 
@@ -495,7 +513,6 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 holder.btnGroupOptions.setOnClickListener(openOptions);
             }
         } else {
-            // Không phải bài của mình -> Ẩn nút chỉnh sửa/xóa đi
             if (holder.btnOptions != null) {
                 holder.btnOptions.setVisibility(View.GONE);
                 holder.btnOptions.setOnClickListener(null);
