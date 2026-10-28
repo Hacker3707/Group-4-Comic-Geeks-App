@@ -2,6 +2,7 @@ package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,17 +13,10 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.GravityCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -40,6 +34,8 @@ import java.util.List;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Tag;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
+import vn.edu.ueh.ngocha.squiditytempprj.Utils.NetworkUtils;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.adapter.ComicAdapter;
 import vn.edu.ueh.ngocha.squiditytempprj.View.menu.BaseActivity;
@@ -97,6 +93,8 @@ public class ComicListActivity extends BaseActivity {
     private ComicViewModel comicViewModel;
     private SearchViewModel searchViewModel;
     private boolean isGenreMode = false;
+    private boolean isOffline = false;
+    private List<Comic> cachedComics = new ArrayList<>();
 
 
 
@@ -135,7 +133,7 @@ public class ComicListActivity extends BaseActivity {
                     layoutManager.findLastVisibleItemPosition();
 
             if (lastVisible >= totalItems - 5) {
-                comicViewModel.loadNextPage();
+                comicViewModel.loadNextPage(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE);
             }
         }
     };
@@ -150,7 +148,11 @@ public class ComicListActivity extends BaseActivity {
 
                 rcvcomic.scrollToPosition(0);
                 searchViewModel.savecomicSearch(query);
-                loadComicwithMangaDex(query);
+                if (isOffline) {
+                    showRoomResults(query);
+                } else {
+                    loadComicwithMangaDex(query);
+                }
             }
         }
     };
@@ -201,16 +203,18 @@ public class ComicListActivity extends BaseActivity {
                 tvSearchResult.setVisibility(View.VISIBLE);
                 genreScrollView.setVisibility(View.GONE);
                 searchbar.setVisibility(View.VISIBLE);
-                comicAdapter.setMangaList(new ArrayList<MangaData>());
                 isGenreMode = false;
+                if (isOffline) showRoomResults(SEARCH_QUERY);
+                else comicAdapter.setMangaList(new ArrayList<MangaData>());
 
             } else {
                 // Genre
                 tvSearchResult.setVisibility(View.GONE);
                 genreScrollView.setVisibility(View.VISIBLE);
                 searchbar.setVisibility(View.GONE);
-                comicAdapter.setMangaList(new ArrayList<MangaData>());
                 isGenreMode = true;
+                if (isOffline) showRoomResults("");
+                else comicAdapter.setMangaList(new ArrayList<MangaData>());
             }
         }
 
@@ -270,11 +274,53 @@ public class ComicListActivity extends BaseActivity {
 
     };
 
+    private final Observer<List<Comic>> roomComicObserver = new Observer<List<Comic>>() {
+        @Override
+        public void onChanged(List<Comic> comics) {
+            cachedComics = comics == null ? new ArrayList<>() : new ArrayList<>(comics);
+            if (isOffline) {
+                showRoomResults(SEARCH_QUERY);
+            }
+        }
+    };
+
+    private void showRoomResults(String query) {
+        List<Comic> filtered = new ArrayList<>();
+        String normalized = query == null ? "" : query.trim().toLowerCase(java.util.Locale.ROOT);
+        for (Comic comic : cachedComics) {
+            if (comic == null) continue;
+            String title = comic.getComicName() == null ? "" : comic.getComicName();
+            if (normalized.isEmpty() || title.toLowerCase(java.util.Locale.ROOT).contains(normalized)) {
+                filtered.add(comic);
+            }
+        }
+        comicAdapter.setComicList(filtered);
+        if (tvSearchResult != null) {
+            tvSearchResult.setText(filtered.isEmpty()
+                    ? (normalized.isEmpty()
+                       ? "Chưa có truyện được lưu để xem offline."
+                       : "Không tìm thấy truyện đã lưu khớp với: " + query)
+                    : "Đang hiển thị " + filtered.size() + " truyện đã lưu trên thiết bị.");
+        }
+    }
+
+    /** Called by BaseActivity's shared NetworkMonitor. */
+    @Override
+    protected void onNetworkStatusChanged(boolean connected) {
+        isOffline = !connected;
+        if (isOffline && comicAdapter != null) {
+            showRoomResults(SEARCH_QUERY);
+        } else if (connected && !isGenreMode && SEARCH_QUERY != null
+                && !SEARCH_QUERY.trim().isEmpty() && comicViewModel != null) {
+            loadComicwithMangaDex(SEARCH_QUERY);
+        }
+    }
+
     private final Observer<List<MangaData>> mangaObserver =
             new Observer<List<MangaData>>() {
                 @Override
                 public void onChanged(List<MangaData> mangaDataList) {
-                    if (mangaDataList != null && !isGenreMode) {
+                    if (mangaDataList != null && !isGenreMode && !isOffline) {
                         comicAdapter.setMangaList(mangaDataList);
 
                         if (!SEARCH_QUERY.isEmpty() && mangaDataList.isEmpty()) {
@@ -299,7 +345,7 @@ public class ComicListActivity extends BaseActivity {
     private final Observer<List<MangaData>> genreMangaObserver = new Observer<List<MangaData>>() {
         @Override
         public void onChanged(List<MangaData> mangaList) {
-            if (mangaList != null) {
+            if (mangaList != null && !isOffline) {
                 comicAdapter.setMangaList(mangaList);
                 rcvcomic.scrollToPosition(0);
             }
@@ -307,7 +353,7 @@ public class ComicListActivity extends BaseActivity {
     };
 
     @Override
-    public boolean hideAppBar() {
+    public boolean hideAppBarinLandscape() {
         return true;
     }
 
@@ -326,7 +372,8 @@ public class ComicListActivity extends BaseActivity {
         genreScrollView = findViewById(R.id.genreScrollView);
         chipGroupGenres = findViewById(R.id.chipGroupGenres);
         searchbar = findViewById(R.id.searchBar);
-        spnSearchOpt.setOnItemSelectedListener(onSearchOptionSelectedListener);
+
+        etSearch.setOnItemSelectedListener(onSearchHistorySelectedListener);
         btnSearch.setOnClickListener(onSearchClickListener);
         rcvcomic.addOnScrollListener(scrollListener);
 
@@ -337,6 +384,7 @@ public class ComicListActivity extends BaseActivity {
             SEARCH_QUERY = savedInstanceState.getString(
                     CURRENT_SEARCH_QUERY, ""
             );
+
         } else {
             SEARCH_QUERY = "";
         }
@@ -358,17 +406,14 @@ public class ComicListActivity extends BaseActivity {
             comicViewModel.selectGenre(pendingGenreId);
         }
 
-        comicViewModel.getMangaList().observe(this, mangaObserver);
-        comicViewModel.getGenresLive().observe(this, genreObserver);
-        comicViewModel.getMangaByGenreResults().observe(this, genreMangaObserver);
-        comicViewModel.getLoading().observe(this, loadingObserver);
-
-        searchViewModel.getcomicHistory().observe(this, historyObserver);
-
         comicAdapter = new ComicAdapter(
                 new ComicAdapter.OnComicClickListener() {
                     @Override
-                    public void onComicClick(String comicId) {
+                    public void onComicClick(String comicId, MangaData mangaData) {
+                        // Chỉ lưu truyện từ API khi người dùng thật sự mở chi tiết.
+                        if (mangaData != null) {
+                            comicViewModel.saveMangaToRoom(mangaData);
+                        }
                         Intent intent = new Intent(
                                 ComicListActivity.this,
                                 ComicDetailActivity.class
@@ -376,6 +421,7 @@ public class ComicListActivity extends BaseActivity {
 
                         intent.putExtra("comic_id", comicId);
                         intent.putExtra("search_option", "MangaDex");
+                        intent.putExtra("from_activity", "ComicListActivity");
 
                         detailLauncher.launch(intent);
                     }
@@ -388,6 +434,19 @@ public class ComicListActivity extends BaseActivity {
                 new GridLayoutManager(this, 2)
         );
 
+        // Đăng ký observer sau khi adapter đã được khởi tạo.
+        comicViewModel.getAllComics().observe(this, roomComicObserver);
+        comicViewModel.getMangaList().observe(this, mangaObserver);
+        comicViewModel.getGenresLive().observe(this, genreObserver);
+        comicViewModel.getMangaByGenreResults().observe(this, genreMangaObserver);
+        comicViewModel.getLoading().observe(this, loadingObserver);
+        searchViewModel.getcomicHistory().observe(this, historyObserver);
+
+        isOffline = !NetworkUtils.isInternetAvailable(this);
+        if (isOffline) {
+            showRoomResults(SEARCH_QUERY);
+        }
+
     }
 
     @Override
@@ -398,7 +457,12 @@ public class ComicListActivity extends BaseActivity {
     }
 
     public void loadComicwithMangaDex(String searchQuery) {
-        comicViewModel.searchComicswithMangaDex(searchQuery);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            comicViewModel.searchComicswithMangaDex(searchQuery, true);
+        }
+        else {
+            comicViewModel.searchComicswithMangaDex(searchQuery, false);
+        }
     }
 
     private void selectGenreChip(String genreId) {

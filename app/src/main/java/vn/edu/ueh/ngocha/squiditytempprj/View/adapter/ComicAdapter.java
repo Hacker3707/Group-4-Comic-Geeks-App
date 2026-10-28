@@ -1,6 +1,5 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
-import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,27 +11,39 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.Relationship;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.holder.ComicViewHolder;
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 
 public class ComicAdapter extends RecyclerView.Adapter<ComicViewHolder> {
     private List<MangaData> mangaList = new ArrayList<>();
+    private List<Comic> comicList = new ArrayList<>();
+    private boolean showingRoomData = false;
 
     public interface OnComicClickListener {
-        void onComicClick(String comicId);
+        void onComicClick(String comicId, MangaData mangaData);
     }
 
-    private OnComicClickListener listener;
+    private final OnComicClickListener listener;
 
     public ComicAdapter(OnComicClickListener listener) {
         this.listener = listener;
     }
 
-    public void setMangaList(List<MangaData> mangaList) {
-        this.mangaList = mangaList;
+    public void setMangaList(List<MangaData> list) {
+        showingRoomData = false;
+        mangaList = list == null ? new ArrayList<>() : list;
+        notifyDataSetChanged();
+    }
+
+    public void setComicList(List<Comic> list) {
+        showingRoomData = true;
+        comicList = list == null ? new ArrayList<>() : list;
         notifyDataSetChanged();
     }
 
@@ -41,42 +52,51 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicViewHolder> {
     public ComicViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.comic_item_view, parent, false);
-        return new ComicViewHolder(view);
+        int orientation = parent.getContext().getResources().getConfiguration().orientation;
+        return new ComicViewHolder(view, orientation);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ComicViewHolder holder, int position) {
-        MangaData manga = mangaList.get(position);
-
-        String title = Str.t(R.string.comic_untitled);
-        if (manga.getAttributes() != null && manga.getAttributes().getTitle() != null) {
-            if (manga.getAttributes().getTitle().get("en") != null) {
-                title = manga.getAttributes().getTitle().get("en");
-            } else if (manga.getAttributes().getTitle().get("ja-ro") != null) {
-                title = manga.getAttributes().getTitle().get("ja-ro");
-            } else if (!manga.getAttributes().getTitle().isEmpty()) {
-                title = manga.getAttributes().getTitle().values().iterator().next();
+        if (showingRoomData) {
+            Comic comic = comicList.get(position);
+            holder.txtcomicname.setText(valueOrUnknown(comic.getComicName()));
+            if (holder.txtcomicauthor != null) {
+                holder.txtcomicauthor.setText(valueOrUnknown(comic.getComicAuthor()));
             }
+            Glide.with(holder.itemView.getContext())
+                    .load(comic.getCoverImageUrl())
+                    .placeholder(R.drawable.comic_background)
+                    .error(R.drawable.comic_background)
+                    .centerCrop()
+                    .into(holder.imgcomiccover);
+            holder.itemView.setOnClickListener(v -> {
+                if (listener != null) listener.onComicClick(comic.getComicId(), null);
+            });
+            return;
         }
 
+        MangaData manga = mangaList.get(position);
+        String title = Str.t(R.string.comic_untitled);
+        if (manga.getAttributes() != null && manga.getAttributes().getTitle() != null) {
+            title = localized(manga.getAttributes().getTitle(), title);
+        }
         holder.txtcomicname.setText(title);
 
         String coverUrl = null;
+        String authorName = Str.t(R.string.common_unknown);
         if (manga.getRelationships() != null) {
-            for (Relationship relationship : manga.getRelationships()) {
-                if ("cover_art".equals(relationship.getType())
-                        && relationship.getAttributes() != null
-                        && relationship.getAttributes().getFileName() != null) {
-
-                    coverUrl = "https://uploads.mangadex.org/covers/"
-                            + manga.getId()
-                            + "/"
-                            + relationship.getAttributes().getFileName();
-                    break;
+            for (Relationship r : manga.getRelationships()) {
+                if (r == null || r.getAttributes() == null) continue;
+                if ("cover_art".equals(r.getType()) && r.getAttributes().getFileName() != null) {
+                    coverUrl = "https://uploads.mangadex.org/covers/" + manga.getId()
+                            + "/" + r.getAttributes().getFileName();
+                } else if ("author".equals(r.getType()) && r.getAttributes().getName() != null) {
+                    authorName = r.getAttributes().getName();
                 }
             }
         }
-
+        if (holder.txtcomicauthor != null) holder.txtcomicauthor.setText(authorName);
         Glide.with(holder.itemView.getContext())
                 .load(coverUrl)
                 .placeholder(R.drawable.comic_background)
@@ -84,22 +104,31 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicViewHolder> {
                 .centerCrop()
                 .into(holder.imgcomiccover);
 
-        // BẮT SỰ KIỆN CLICK TRỰC TIẾP TRÊN TỪNG ITEM
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (listener != null && manga.getId() != null) {
-                    listener.onComicClick(manga.getId());
-                }
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null && manga.getId() != null) {
+                listener.onComicClick(manga.getId(), manga);
             }
         });
     }
 
+    private String localized(Map<String, String> map, String fallback) {
+        String en = map.get("en");
+        if (en != null && !en.trim().isEmpty()) return en;
+        String romanized = map.get("ja-ro");
+        if (romanized != null && !romanized.trim().isEmpty()) return romanized;
+        for (String value : map.values()) {
+            if (value != null && !value.trim().isEmpty()) return value;
+        }
+        return fallback;
+    }
+
+    private String valueOrUnknown(String value) {
+        return value == null || value.trim().isEmpty()
+                ? Str.t(R.string.common_unknown) : value;
+    }
+
     @Override
     public int getItemCount() {
-        if (mangaList == null) {
-            return 0;
-        }
-        return mangaList.size();
+        return showingRoomData ? comicList.size() : mangaList.size();
     }
 }

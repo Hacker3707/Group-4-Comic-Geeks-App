@@ -18,13 +18,13 @@ public interface MangaDexApi {
             @Query("title") String title,
             @Query("limit") int limit,
             @Query("offset") int offset,
-            @Query("includes[]") String include
+            @Query("includes[]") List<String> includes
     );
 
     @GET("manga/{id}")
     Call<MangaSingleResponse> getMangaById(
             @Path("id") String mangaId,
-            @Query("includes[]") List<String> include
+            @Query("includes[]") List<String> includes
     );
 
     @GET("manga/tag")

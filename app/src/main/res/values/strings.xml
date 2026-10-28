@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Squidity</string>
-    <string name="base_url">https://api.mangadex.org</string>
+    <string name="app_name" translatable="false">Squidity</string>
+    <string name="base_url" translatable="false">https://api.mangadex.org</string>
     <string name="settings">Settings</string>
     <array name="nav_actions">
         <item>My Profile</item>
@@ -45,6 +45,7 @@
         <item>light</item>
         <item>dark</item>
     </string-array>
+    <string name="back_to_profile">Back to Profile</string>
 
 
 </resources>

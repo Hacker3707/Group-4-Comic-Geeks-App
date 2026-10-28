@@ -10,12 +10,7 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -25,6 +20,7 @@ import com.google.android.flexbox.FlexboxLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaAttributes;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.dto.MangaData;
@@ -50,6 +46,7 @@ public class ComicDetailActivity extends BaseActivity {
     TextView txtLastChapter;
     TextView txticRatings;
     TextView txtplacehdRatings;
+    TextView txtfromActivity_comdetail;
     TextView txtRatings;
     ImageView imgCover;
     ImageButton btnBack;
@@ -100,12 +97,25 @@ public class ComicDetailActivity extends BaseActivity {
         }
     };
 
+    final Observer<Float> reviewsratingObserver = new Observer<Float>() {
+        @Override
+        public void onChanged(Float aFloat) {
+            ratingBar.setVisibility(View.VISIBLE);
+            ratingBar.setRating(aFloat);
+            txtRatings.setVisibility(View.VISIBLE);
+            txtRatings.setText(String.valueOf(aFloat) + " / 5");
+            txticRatings.setVisibility(View.GONE);
+            txtplacehdRatings.setVisibility(View.GONE);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         comicId = getIntent().getStringExtra("comic_id");
         String searchOption = getIntent().getStringExtra("search_option");
+        String fromActivity = getIntent().getStringExtra("from_activity");
         viewModel = new ViewModelProvider(this).get(ComicDetailViewModel.class);
         reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
 
@@ -127,21 +137,17 @@ public class ComicDetailActivity extends BaseActivity {
         txticRatings = findViewById(R.id.txticRatings);
         txtplacehdRatings = findViewById(R.id.txtComicRating);
         txtRatings = findViewById(R.id.txtRatings);
+        txtfromActivity_comdetail = findViewById(R.id.txtfromActivity_comdetail);
 
         btnBack.setOnClickListener(onBackClickListener);
         cardRatings.setOnClickListener(onReviewClickListener);
 
-        final Observer<Float> reviewsratingObserver = new Observer<Float>() {
-            @Override
-            public void onChanged(Float aFloat) {
-                ratingBar.setVisibility(View.VISIBLE);
-                ratingBar.setRating(aFloat);
-                txtRatings.setVisibility(View.VISIBLE);
-                txtRatings.setText(String.valueOf(aFloat) + " / 5");
-                txticRatings.setVisibility(View.GONE);
-                txtplacehdRatings.setVisibility(View.GONE);
-            }
-        };
+        if ("ProfileActivity".equals(fromActivity)) {
+            txtfromActivity_comdetail.setText(R.string.back_to_profile);
+        } else {
+            txtfromActivity_comdetail.setText(R.string.comic_back_zone);
+        }
+
         reviewViewModel.getAverageRating(comicId).observe(ComicDetailActivity.this, reviewsratingObserver);
 
 
@@ -267,8 +273,8 @@ public class ComicDetailActivity extends BaseActivity {
 
         if (mangaData.getRelationships() != null) {
 
-            Boolean hasCover = false;
-            Boolean hasAuthor = false;
+            boolean hasCover = false;
+            boolean hasAuthor = false;
 
             for (Relationship relationship : mangaData.getRelationships()) {
 
