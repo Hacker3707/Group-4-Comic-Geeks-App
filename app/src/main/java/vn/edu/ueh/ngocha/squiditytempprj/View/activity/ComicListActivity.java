@@ -66,6 +66,10 @@ public class ComicListActivity extends BaseActivity {
                                         .getStringExtra("genre_id");
 
                                 if (genreId != null) {
+                                    selectedGenreId = genreId;
+                                    pendingGenreId = genreId;
+                                    isGenreMode = true;
+
                                     spnSearchOpt.setSelection(1);
                                     selectGenreChip(genreId);
                                     comicViewModel.selectGenre(genreId);
@@ -87,12 +91,17 @@ public class ComicListActivity extends BaseActivity {
     View searchbar;
 
     private static final String CURRENT_SEARCH_QUERY = "current_search_query";
-    private String SEARCH_QUERY = "search_query";
+    private static final String CURRENT_SEARCH_OPTION = "current_search_option";
+    private static final String CURRENT_GENRE_ID = "current_genre_id";
+
+    private String SEARCH_QUERY = "";
+    private String selectedGenreId = null;
+    private boolean isGenreMode = false;
+    private boolean restoringState = false;
 
 
     private ComicViewModel comicViewModel;
     private SearchViewModel searchViewModel;
-    private boolean isGenreMode = false;
     private boolean isOffline = false;
     private List<Comic> cachedComics = new ArrayList<>();
 
@@ -188,40 +197,56 @@ public class ComicListActivity extends BaseActivity {
         }
     };
 
-    private AdapterView.OnItemSelectedListener onSearchOptionSelectedListener = new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(
-                AdapterView<?> parent,
-                View view,
-                int position,
-                long id) {
+    private final AdapterView.OnItemSelectedListener onSearchOptionSelectedListener =
+            new AdapterView.OnItemSelectedListener() {
 
-            Log.d("ComicListActivity", "Selected position: " + position);
+                @Override
+                public void onItemSelected(
+                        AdapterView<?> parent,
+                        View view,
+                        int position,
+                        long id) {
 
-            if (position == 0) {
-                // Comic name
-                tvSearchResult.setVisibility(View.VISIBLE);
-                genreScrollView.setVisibility(View.GONE);
-                searchbar.setVisibility(View.VISIBLE);
-                isGenreMode = false;
-                if (isOffline) showRoomResults(SEARCH_QUERY);
-                else comicAdapter.setMangaList(new ArrayList<MangaData>());
+                    boolean newGenreMode = position == 1;
 
-            } else {
-                // Genre
-                tvSearchResult.setVisibility(View.GONE);
-                genreScrollView.setVisibility(View.VISIBLE);
-                searchbar.setVisibility(View.GONE);
-                isGenreMode = true;
-                if (isOffline) showRoomResults("");
-                else comicAdapter.setMangaList(new ArrayList<MangaData>());
-            }
-        }
+                    tvSearchResult.setVisibility(newGenreMode ? View.GONE : View.VISIBLE);
+                    genreScrollView.setVisibility(newGenreMode ? View.VISIBLE : View.GONE);
+                    searchbar.setVisibility(newGenreMode ? View.GONE : View.VISIBLE);
 
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-        }
-    };
+                    if (restoringState) {
+                        return;
+                    }
+
+                    if (isGenreMode == newGenreMode) {
+                        return;
+                    }
+
+                    isGenreMode = newGenreMode;
+
+                    if (isOffline) {
+                        showRoomResults(isGenreMode ? "" : SEARCH_QUERY);
+                        return;
+                    }
+
+                    if (isGenreMode) {
+                        if (selectedGenreId != null) {
+                            comicViewModel.selectGenre(selectedGenreId);
+                        } else {
+                            comicAdapter.setMangaList(new ArrayList<>());
+                        }
+                    } else {
+                        if (!SEARCH_QUERY.trim().isEmpty()) {
+                            loadComicwithMangaDex(SEARCH_QUERY);
+                        } else {
+                            comicAdapter.setMangaList(new ArrayList<>());
+                        }
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            };
 
 
 
@@ -231,6 +256,7 @@ public class ComicListActivity extends BaseActivity {
         @Override
         public void onChanged(List<Genre> genres) {
 
+            chipGroupGenres.removeAllViews();
             if (genres == null) {
                 return;
             }
@@ -241,10 +267,7 @@ public class ComicListActivity extends BaseActivity {
                 chip.setCheckable(true);
                 chip.setTag(genre.getGenreId());
 
-                chip.setOnClickListener(view -> {
-                    String id = (String) view.getTag();
-                    comicViewModel.selectGenre(id);
-                });
+                chip.setOnClickListener(onChipClickListener);
 
                 chipGroupGenres.addView(chip);
             }
@@ -253,6 +276,18 @@ public class ComicListActivity extends BaseActivity {
             if (pendingGenreId != null) {
                 selectGenreChip(pendingGenreId);
             }
+        }
+    };
+
+    private View.OnClickListener onChipClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            String id = (String) view.getTag();
+
+            selectedGenreId = id;
+            pendingGenreId = id;
+
+            comicViewModel.selectGenre(id);
         }
     };
 
@@ -345,7 +380,7 @@ public class ComicListActivity extends BaseActivity {
     private final Observer<List<MangaData>> genreMangaObserver = new Observer<List<MangaData>>() {
         @Override
         public void onChanged(List<MangaData> mangaList) {
-            if (mangaList != null && !isOffline) {
+            if (mangaList != null && !isOffline && isGenreMode) {
                 comicAdapter.setMangaList(mangaList);
                 rcvcomic.scrollToPosition(0);
             }
@@ -355,6 +390,11 @@ public class ComicListActivity extends BaseActivity {
     @Override
     public boolean hideAppBarinLandscape() {
         return true;
+    }
+
+    @Override
+    protected String getActivityName() {
+        return "ComicListActivity";
     }
 
 
@@ -373,6 +413,7 @@ public class ComicListActivity extends BaseActivity {
         chipGroupGenres = findViewById(R.id.chipGroupGenres);
         searchbar = findViewById(R.id.searchBar);
 
+
         etSearch.setOnItemSelectedListener(onSearchHistorySelectedListener);
         btnSearch.setOnClickListener(onSearchClickListener);
         rcvcomic.addOnScrollListener(scrollListener);
@@ -380,31 +421,43 @@ public class ComicListActivity extends BaseActivity {
         chipGroupGenres.setSingleSelection(true);
         chipGroupGenres.setSelectionRequired(false);
 
-        if (savedInstanceState != null) {
-            SEARCH_QUERY = savedInstanceState.getString(
-                    CURRENT_SEARCH_QUERY, ""
-            );
-
-        } else {
-            SEARCH_QUERY = "";
-        }
-
-        etSearch.setText(SEARCH_QUERY);
-        etSearch.setSelection(etSearch.getText().length());
+        restoringState = true;
 
         comicViewModel = new ViewModelProvider(this)
                 .get(ComicViewModel.class);
+
         searchViewModel = new ViewModelProvider(this)
                 .get(SearchViewModel.class);
 
-        Intent intent = getIntent();
-        pendingGenreId = intent.getStringExtra("genre_id");
+        if (savedInstanceState != null) {
+            SEARCH_QUERY = savedInstanceState.getString(
+                    CURRENT_SEARCH_QUERY, "");
 
-        if (pendingGenreId != null && !pendingGenreId.trim().isEmpty()) {
-            isGenreMode = true;
-            spnSearchOpt.setSelection(1);
-            comicViewModel.selectGenre(pendingGenreId);
+            isGenreMode = savedInstanceState.getBoolean(
+                    CURRENT_SEARCH_OPTION, false);
+
+            selectedGenreId = savedInstanceState.getString(
+                    CURRENT_GENRE_ID);
+
+        } else {
+            SEARCH_QUERY = "";
+
+            Intent intent = getIntent();
+            selectedGenreId = intent.getStringExtra("genre_id");
+            isGenreMode = selectedGenreId != null
+                    && !selectedGenreId.trim().isEmpty();
         }
+
+        pendingGenreId = selectedGenreId;
+
+        etSearch.setText(SEARCH_QUERY);
+        etSearch.setSelection(etSearch.length());
+
+        spnSearchOpt.setSelection(isGenreMode ? 1 : 0, false);
+
+        tvSearchResult.setVisibility(isGenreMode ? View.GONE : View.VISIBLE);
+        genreScrollView.setVisibility(isGenreMode ? View.VISIBLE : View.GONE);
+        searchbar.setVisibility(isGenreMode ? View.GONE : View.VISIBLE);
 
         comicAdapter = new ComicAdapter(
                 new ComicAdapter.OnComicClickListener() {
@@ -447,13 +500,23 @@ public class ComicListActivity extends BaseActivity {
             showRoomResults(SEARCH_QUERY);
         }
 
+        spnSearchOpt.post(new Runnable() {
+            @Override
+            public void run() {
+                restoringState = false;
+                spnSearchOpt.setOnItemSelectedListener(onSearchOptionSelectedListener);
+            }
+        });
+
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
         outState.putString(CURRENT_SEARCH_QUERY, SEARCH_QUERY);
+        outState.putBoolean(CURRENT_SEARCH_OPTION, isGenreMode);
+        outState.putString(CURRENT_GENRE_ID, selectedGenreId);
+
+        super.onSaveInstanceState(outState);
     }
 
     public void loadComicwithMangaDex(String searchQuery) {

@@ -63,4 +63,8 @@ public class ComicRepository {
     public LiveData<Comic> getComicbyName(String name) {
         return comicDao.getComicbyName(name);
     }
+    public LiveData<Comic> getComicById(String comicId) {
+        return comicDao.getComicById(comicId);
+    }
+
 }

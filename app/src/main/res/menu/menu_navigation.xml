@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_admin"
         android:fontFamily="@font/jersey25_regular"
-        android:icon="@android:drawable/ic_menu_manage"
+        android:icon="@drawable/ic_admin"
         android:layout_gravity="center"
         android:layout_margin="15dp"
         android:orderInCategory="40"

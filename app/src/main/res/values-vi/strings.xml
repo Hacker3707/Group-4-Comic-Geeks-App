@@ -341,6 +341,7 @@
     <string name="group_member_unknown_name">Người dùng</string>
     <string name="group_member_you">%1$s (Bạn)</string>
     <string name="group_empty_other">Chưa có nội dung</string>
+    <string name="group_post_topic">Bàn luận</string>
     <string name="group_post_say">Nói gì đó... くコ:彡</string>
     <string name="group_cd_back">Quay lại</string>
     <string name="group_cd_search">Tìm kiếm</string>
@@ -378,7 +379,6 @@
     <string-array name="search_comic_options">
         <item>Tên</item>
         <item>Thể loại</item>
-        <item>Đánh giá</item>
     </string-array>
     <string-array name="theme_entries">
         <item>Theo hệ thống</item>
@@ -478,4 +478,5 @@
     <string name="comment_send_cd">Gửi bình luận</string>
     <string name="comment_enter_content">Vui lòng nhập nội dung!</string>
     <string name="back_to_profile">Trở về trang cá nhân</string>
+    <string name="back_to_home">Về trang chủ</string>
 </resources>
