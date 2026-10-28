@@ -57,14 +57,14 @@ public class MangaDexRepository {
         return loading;
     }
 
-    public void searchComics(String query) {
+    public void searchComics(String query, boolean hasAuthor) {
         currentQuery = query;
         currentOffset = 0;
         isLastPage = false;
 
         mangaList.setValue(new ArrayList<MangaData>());
 
-        loadNextPage();
+        loadNextPage(hasAuthor);
     }
 
     public LiveData<MangaData> getMangaById(String mangaId) {
@@ -236,7 +236,7 @@ public class MangaDexRepository {
 
         return mangaLiveData;
     }
-    public void loadNextPage() {
+    public void loadNextPage(boolean hasAuthor) {
         if (isLoading || isLastPage) {
             return;
         }
@@ -244,11 +244,18 @@ public class MangaDexRepository {
         isLoading = true;
         loading.setValue(true);
 
+        List<String> includes = new ArrayList<>();
+        includes.add("cover_art");
+
+        if (hasAuthor) {
+            includes.add("author");
+        }
+
         api.searchManga(
                 currentQuery,
                 PAGE_SIZE,
                 currentOffset,
-                "cover_art"
+                includes
         ).enqueue(new Callback<MangaResponse>() {
             @Override
             public void onResponse(
@@ -321,7 +328,7 @@ public class MangaDexRepository {
             String query,
             int limit,
             int offset,
-            String include
+            List<String> includes
     ) {
         final int requestVersion = ++searchRequestVersion;
 
@@ -342,7 +349,7 @@ public class MangaDexRepository {
                 requestedQuery,
                 limit,
                 offset,
-                include
+                includes
         );
 
         currentSearchCall = call;

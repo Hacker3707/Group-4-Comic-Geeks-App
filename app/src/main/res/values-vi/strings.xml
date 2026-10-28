@@ -477,4 +477,5 @@
     <string name="comment_reply_placeholder">Trả lời @...</string>
     <string name="comment_send_cd">Gửi bình luận</string>
     <string name="comment_enter_content">Vui lòng nhập nội dung!</string>
+    <string name="back_to_profile">Trở về trang cá nhân</string>
 </resources>

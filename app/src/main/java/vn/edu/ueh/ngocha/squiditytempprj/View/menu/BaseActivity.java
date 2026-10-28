@@ -28,6 +28,8 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import vn.edu.ueh.ngocha.squiditytempprj.Monitor.NetworkMonitor;
 import com.google.firebase.auth.FirebaseUser;
 
 import vn.edu.ueh.ngocha.squiditytempprj.R;
@@ -61,6 +63,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected AuthViewModel authViewModel;
     protected UserProfileViewModel profileViewModel;
     private MaterialButton btnAuthAction;
+    private NetworkMonitor networkMonitor;
+    private Snackbar networkSnackbar;
 
     // Mỗi Activity con tự cung cấp layout nội dung
     protected abstract int getContentLayoutId();
@@ -73,7 +77,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         return false;
     }
 
-    protected boolean hideAppBar() { return false; }
+    protected boolean hideAppBarinLandscape() { return false; }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,7 +169,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
         );
 
-        if (hideAppBar()) {
+        if (hideAppBarinLandscape() &&
+                getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             appBar.setVisibility(View.GONE);
         }
 
@@ -193,7 +198,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             imgMainAvatar.setOnClickListener(onProfileClickListener);
 
         ImageButton btnBackHome =
-                    findViewById(R.id.btnBackHome);
+                findViewById(R.id.btnBackHome);
 
         if (btnBackHome != null) {
             if (shouldShowBackHomeButton()) {
@@ -242,6 +247,50 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (profileViewModel != null) {
             profileViewModel.loadCurrentProfile();
         }
+    }
+
+    /** Hook cho Activity con phản ứng khi trạng thái Internet thay đổi. */
+    protected void onNetworkStatusChanged(boolean connected) {
+        if (connected) hideOfflineMessage();
+        else showOfflineMessage();
+    }
+
+    private void showOfflineMessage() {
+        if (activityContent == null || isFinishing() || isDestroyed()) return;
+        if (networkSnackbar == null) {
+            networkSnackbar = Snackbar.make(
+                    activityContent,
+                    "Oops! You are offline. Some features may not work:(",
+                    Snackbar.LENGTH_INDEFINITE
+            );
+        }
+        if (!networkSnackbar.isShown()) networkSnackbar.show();
+    }
+
+    private void hideOfflineMessage() {
+        if (networkSnackbar != null) {
+            networkSnackbar.dismiss();
+            networkSnackbar = null;
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (networkMonitor == null) {
+            networkMonitor = new NetworkMonitor(
+                    getApplicationContext(),
+                    connected -> runOnUiThread(() -> onNetworkStatusChanged(connected))
+            );
+        }
+        networkMonitor.start();
+    }
+
+    @Override
+    protected void onStop() {
+        if (networkMonitor != null) networkMonitor.stop();
+        hideOfflineMessage();
+        super.onStop();
     }
 
     private void setupDrawer() {

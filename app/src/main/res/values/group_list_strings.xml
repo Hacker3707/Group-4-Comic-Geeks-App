@@ -14,7 +14,7 @@
     <string name="create_group_desc_label">Description</string>
     <string name="create_group_desc_hint">About the group...</string>
     <string name="create_group_cover_label">Cover photo (optional)</string>
-    <string name="create_group_cover_hint">https://...</string>
+    <string name="create_group_cover_hint" translatable="false">https://...</string>
     <string name="create_group_submit">Create group</string>
     <string name="group_image_pick_cover">Tap to choose a cover photo from your gallery</string>
     <string name="group_image_pick_avatar">Choose photo</string>

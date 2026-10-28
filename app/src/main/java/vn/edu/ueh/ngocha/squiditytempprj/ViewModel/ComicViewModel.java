@@ -25,6 +25,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Comic;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Genre;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.Review;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.ComicRepository;
+import vn.edu.ueh.ngocha.squiditytempprj.Model.mapper.ComicMapper;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.GenreRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.MangaDexRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.ReviewRepository;
@@ -92,6 +93,14 @@ public class ComicViewModel extends AndroidViewModel {
         comicRepository.insert(comic);
     }
 
+    /** Save a MangaDex result only when the user opens its detail screen. */
+    public void saveMangaToRoom(MangaData mangaData) {
+        Comic comic = ComicMapper.toEntity(mangaData);
+        if (comic != null) {
+            comicRepository.insert(comic);
+        }
+    }
+
     public void deleteAll() {
         comicRepository.deleteAll();
     }
@@ -100,8 +109,8 @@ public class ComicViewModel extends AndroidViewModel {
         comicRepository.getComicbyName(name);
     }
 
-    public void loadNextPage() {
-        mangaRepository.loadNextPage();
+    public void loadNextPage(boolean hasAuthor) {
+        mangaRepository.loadNextPage(hasAuthor);
     }
 
     public LiveData<List<Genre>> getGenresLive() {
@@ -124,8 +133,8 @@ public class ComicViewModel extends AndroidViewModel {
         return mangaRepository.getLoading();
     }
 
-    public void searchComicswithMangaDex(String query) {
-        mangaRepository.searchComics(query);
+    public void searchComicswithMangaDex(String query, boolean hasAuthor) {
+        mangaRepository.searchComics(query, hasAuthor);
     }
 
     public LiveData<List<MangaData>> getSearchResults() {
@@ -136,9 +145,9 @@ public class ComicViewModel extends AndroidViewModel {
             String query,
             int limit,
             int offset,
-            String include
+            List<String> includes
     ) {
-        mangaRepository.searchManga(query, limit, offset, include);
+        mangaRepository.searchManga(query, limit, offset, includes);
     }
 
     public LiveData<List<MangaData>> getComicbyIdList(List<String> comicIds) {
