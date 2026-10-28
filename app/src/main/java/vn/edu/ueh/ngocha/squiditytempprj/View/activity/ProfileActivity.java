@@ -400,7 +400,7 @@ public class ProfileActivity extends BaseActivity {
                         recyclerViewProfilePosts.setVisibility(position == 1 ? View.VISIBLE : View.GONE);
                     }
                     if (recyclerViewProfileComments != null) {
-                        recyclerViewProfileComments.setVisibility(position == 3 ? View.VISIBLE : View.GONE);
+                        recyclerViewProfileComments.setVisibility(position == 2 ? View.VISIBLE : View.GONE);
                     }
                 }
                 @Override public void onTabUnselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
