@@ -25,6 +25,9 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import java.io.File;
+import java.util.Locale;
+
 import vn.edu.ueh.ngocha.squiditytempprj.R;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 
@@ -77,6 +80,7 @@ public class AppSettingActivity extends AppCompatActivity {
             setupTheme();
             setupAccount();
             setupMisc();
+            showCacheSize();
         }
 
         // Giao diện sáng / tối / theo hệ thống, áp dụng ngay
@@ -245,5 +249,75 @@ public class AppSettingActivity extends AppCompatActivity {
                 // Giữ nguyên summary mặc định trong preferences.xml
             }
         }
+
+        private long getDirectorySize(File directory) {
+            if (directory == null || !directory.exists()) {
+                return 0;
+            }
+
+            if (directory.isFile()) {
+                return directory.length();
+            }
+
+            long size = 0;
+            File[] files = directory.listFiles();
+
+            if (files != null) {
+                for (File file : files) {
+                    size += getDirectorySize(file);
+                }
+            }
+
+            return size;
+        }
+
+        private long getCacheSizeBytes() {
+            long size = getDirectorySize(requireContext().getCacheDir());
+
+            File externalCache = requireContext().getExternalCacheDir();
+
+            if (externalCache != null) {
+                size += getDirectorySize(externalCache);
+            }
+
+            return size;
+        }
+
+        private String formatCacheSize(long bytes) {
+            if (bytes < 1024) {
+                return bytes + " B";
+            }
+
+            if (bytes < 1024L * 1024) {
+                return String.format(Locale.getDefault(),
+                        "%.1f KB", bytes / 1024.0);
+            }
+
+            return String.format(Locale.getDefault(),
+                    "%.1f MB", bytes / (1024.0 * 1024));
+        }
+
+        private void showCacheSize() {
+            Preference cache = findPreference("clear_cache");
+
+            if (cache == null) return;
+
+            cache.setSummary("Calculating...");
+
+            new Thread(() -> {
+                long size = getCacheSizeBytes();
+                String summary = "Current cache: " + formatCacheSize(size);
+
+                if (isAdded()) {
+                    requireActivity().runOnUiThread(() -> {
+                        if (isAdded()) {
+                            cache.setSummary(summary);
+                        }
+                    });
+                }
+            }).start();
+        }
     }
+
+
 }

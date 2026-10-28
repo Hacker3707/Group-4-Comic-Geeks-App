@@ -49,6 +49,7 @@ public class ComicDetailActivity extends BaseActivity {
     TextView txtfromActivity_comdetail;
     TextView txtRatings;
     ImageView imgCover;
+    ImageButton btnShareComic;
     ImageButton btnBack;
     CardView cardRatings;
     RatingBar ratingBar;
@@ -81,6 +82,22 @@ public class ComicDetailActivity extends BaseActivity {
             intent.putExtra("comic_name", comic_name);
             intent.putExtra("comic_cover", comic_cover);
             startActivity(intent);
+        }
+    };
+
+    View.OnClickListener onShareClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            String mangaUrl = "https://mangadex.org/title/" + comicId;
+
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(
+                    Intent.EXTRA_TEXT,
+                    "Squidity - Check out this comic on MangaDex: " + mangaUrl
+            );
+
+            startActivity(Intent.createChooser(shareIntent, "Share comic"));
         }
     };
 
@@ -156,9 +173,11 @@ public class ComicDetailActivity extends BaseActivity {
         txtplacehdRatings = findViewById(R.id.txtComicRating);
         txtRatings = findViewById(R.id.txtRatings);
         txtfromActivity_comdetail = findViewById(R.id.txtfromActivity_comdetail);
+        btnShareComic = findViewById(R.id.btnShareComic);
 
         btnBack.setOnClickListener(onBackClickListener);
         cardRatings.setOnClickListener(onReviewClickListener);
+        btnShareComic.setOnClickListener(onShareClickListener);
 
         if ("ProfileActivity".equals(fromActivity)) {
             txtfromActivity_comdetail.setText(R.string.back_to_profile);

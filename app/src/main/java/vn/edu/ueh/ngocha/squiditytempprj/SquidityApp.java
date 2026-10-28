@@ -19,7 +19,7 @@ public class SquidityApp extends Application {
     // Giao diện sáng / tối / theo hệ thống, chọn trong Settings
     private void applySavedTheme() {
         String theme = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
-                .getString("theme", "system");
+                .getString("theme", "light");
         AppCompatDelegate.setDefaultNightMode(themeToMode(theme));
     }
 

@@ -381,7 +381,6 @@
         <item>Thể loại</item>
     </string-array>
     <string-array name="theme_entries">
-        <item>Theo hệ thống</item>
         <item>Sáng</item>
         <item>Tối</item>
     </string-array>
@@ -468,7 +467,7 @@
     <string name="settings_privacy_text">Squidity lưu hồ sơ, bài viết, bình luận và tin nhắn của bạn trên Firebase để bạn bè xem được. Bạn có thể xóa tài khoản bất cứ lúc nào trong Cài đặt. Chúng tôi không bán dữ liệu của bạn.</string>
     <string name="settings_info_text">Squidity là ứng dụng cộng đồng chia sẻ truyện tranh. Chia sẻ đánh giá, tham gia nhóm và trò chuyện với những người cùng mê truyện.\n\nDữ liệu truyện lấy từ MangaDex.</string>
     <string name="settings_license_text">Squidity là đồ án môn học của Nhóm 4 (UEH, Phát triển ứng dụng di động).\n\nDữ liệu và ảnh bìa truyện do MangaDex API cung cấp. Thư viện sử dụng: AndroidX, Material Components, Room, Firebase và Glide theo giấy phép Apache 2.0.</string>
-    <string name="settings_credits_text">Nhóm 4 Comic Geeks\nUEH, môn Phát triển ứng dụng di động.</string>
+    <string name="settings_credits_text">Nhóm 4 Comic Geeks UEH, môn Phát triển ứng dụng di động . Cảm ơn MangaDex, pngtree và lottie vì đã chia sẻ tài nguyên:D Cảm ơn thầy Thành đã chỉ dạy nhóm:3</string>
     <string name="comment_hint_reply">Nhập câu trả lời...</string>
     <string name="comment_hint">Viết bình luận...</string>
     <string name="comment_replying">Đang trả lời bình luận...</string>
