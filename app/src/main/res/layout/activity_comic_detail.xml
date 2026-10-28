@@ -78,14 +78,37 @@
                 android:gravity="top"
                 android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/imgcomic_cover"
+
+                <FrameLayout
                     android:layout_width="140dp"
-                    android:layout_height="200dp"
-                    android:contentDescription="@string/comic_cover_cd"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/bg_comic_small_card"
-                    android:src="@drawable/comic_background" />
+                    android:layout_height="200dp">
+
+                    <ImageView
+                        android:id="@+id/imgcomic_cover"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/comic_cover_cd"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/bg_comic_small_card"
+                        android:src="@drawable/comic_background" />
+
+                    <ImageButton
+                        android:id="@+id/btnShareComic"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="top|end"
+                        android:layout_margin="5dp"
+                        android:background="@color/chat_bubble_sent"
+                        android:clickable="true"
+                        android:contentDescription="Share comic"
+                        android:elevation="4dp"
+                        android:focusable="true"
+                        android:padding="2dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_share" />
+
+                </FrameLayout>
+
 
                 <LinearLayout
                     android:layout_width="0dp"

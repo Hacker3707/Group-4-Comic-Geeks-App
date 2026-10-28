@@ -42,7 +42,7 @@
 
         <ListPreference
             android:key="theme"
-            android:defaultValue="system"
+            android:defaultValue="light"
             android:entries="@array/theme_entries"
             android:entryValues="@array/theme_values"
             android:icon="@drawable/ic_setting_palette"

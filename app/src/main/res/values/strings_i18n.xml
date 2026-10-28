@@ -369,7 +369,7 @@
     <string name="settings_privacy_text">Squidity stores your profile, posts, comments and messages in Firebase so your friends can see them. You can delete your account at any time in Settings. We do not sell your data.</string>
     <string name="settings_info_text">Squidity is a comic sharing community app. Share reviews, join groups and chat with fellow comic fans.\n\nComic data comes from MangaDex.</string>
     <string name="settings_license_text">Squidity is a course project of Group 4 (UEH, Mobile Application Development).\n\nComic data and covers are provided by the MangaDex API. Libraries used: AndroidX, Material Components, Room, Firebase and Glide, under the Apache License 2.0.</string>
-    <string name="settings_credits_text">Group 4 Comic Geeks\nUEH, Mobile Application Development course.</string>
+    <string name="settings_credits_text">Group 4 Comic Geeks UEH, Mobile Application Development course lead by Đặng Ngọc Hoàng Thành sensei!\nSpecial thanks to MangaDex for API, pngtree for app icon and lottie for animation:D\nHeartfully arigato sensei Thành  ≽^•⩊•^≼ ♡</string>
     <string name="comment_hint_reply">Write a reply...</string>
     <string name="comment_hint">Write a comment...</string>
     <string name="comment_replying">Replying to comment...</string>

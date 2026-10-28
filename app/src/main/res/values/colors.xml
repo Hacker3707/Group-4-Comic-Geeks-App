@@ -12,5 +12,6 @@
     <color name="squidity_magenta">#fa055f</color>
     <color name="squidity_transparentwhite">#11FFFFFF</color>
     <color name="squidity_btnfollow">#7A6CFA</color>
+    <color name="nav_drawer_text">#FFFFFF</color>
 
 </resources>
