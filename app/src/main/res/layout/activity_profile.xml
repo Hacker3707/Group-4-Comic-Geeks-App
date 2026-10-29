@@ -6,7 +6,7 @@
     android:id="@+id/profileRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F4FA"
+    android:background="@color/dm_bg_f5f4fa"
     android:fitsSystemWindows="false">
 
     <LinearLayout
@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="#F5F4FA">
+        android:background="@color/dm_bg_f5f4fa">
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/profileScrollView"
@@ -40,7 +40,7 @@
                         android:id="@+id/imgProfileCover"
                         android:layout_width="0dp"
                         android:layout_height="180dp"
-                        android:background="#FFB3C6"
+                        android:background="@color/dm_bg_ffb3c6"
                         android:contentDescription="@string/profile_cover_cd"
                         android:scaleType="centerCrop"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -67,7 +67,7 @@
                         android:layout_width="150dp"
                         android:layout_height="150dp"
                         android:layout_marginTop="140dp"
-                        android:background="#FFFFFF"
+                        android:background="@color/dm_bg_ffffff"
                         android:contentDescription="@string/common_avatar"
                         android:elevation="4dp"
                         android:outlineSpotShadowColor="#035D62"
@@ -78,7 +78,7 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
-                        app:strokeColor="#FFFFFF"
+                        app:strokeColor="@color/dm_stroke_ffffff"
                         app:strokeWidth="3dp" />
 
                     <ImageButton
@@ -92,7 +92,7 @@
                         android:elevation="5dp"
                         app:layout_constraintBottom_toBottomOf="@id/imgProfileAvatar"
                         app:layout_constraintStart_toEndOf="@id/imgProfileAvatar"
-                        app:tint="#493373" />
+                        app:tint="@color/dm_fg_493373" />
 
                     <ImageButton
                         android:id="@+id/btnEditCoverImage"
@@ -108,7 +108,7 @@
                         android:focusable="true"
                         app:layout_constraintEnd_toEndOf="@id/imgProfileCover"
                         app:layout_constraintTop_toTopOf="@id/imgProfileCover"
-                        app:tint="#493373" />
+                        app:tint="@color/dm_fg_493373" />
 
                     <LinearLayout
                         android:id="@+id/profileNameRow"
@@ -163,7 +163,7 @@
                         android:layout_marginTop="7dp"
                         android:fontFamily="@font/jersey25_regular"
                         android:text="email@example.com"
-                        android:textColor="#666666"
+                        android:textColor="@color/dm_fg_666666"
                         android:textSize="19sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -330,9 +330,9 @@
                             android:layout_marginLeft="5dp"
                             android:fontFamily="@font/jersey25_regular"
                             android:text="@string/profile_message"
-                            android:textColor="#493373"
+                            android:textColor="@color/dm_fg_493373"
                             android:textSize="20sp"
-                            app:backgroundTint="#FFFFFF"
+                            app:backgroundTint="@color/dm_bg_ffffff"
                             app:cornerRadius="20dp" />
 
                     </LinearLayout>
@@ -347,7 +347,7 @@
                 android:layout_marginTop="22dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:strokeColor="#E0DCF0"
+                app:strokeColor="@color/dm_stroke_e0dcf0"
                 app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -355,13 +355,13 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp"
-                        android:background="#FFFFFF">
+                        android:background="@color/dm_bg_ffffff">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/profile_signature"
-                            android:textColor="#333333"
+                            android:textColor="@color/dm_fg_333333"
                             android:textStyle="bold" />
 
                         <TextView
@@ -372,7 +372,7 @@
                             android:ellipsize="end"
                             android:maxLines="2"
                             android:text="@string/profile_bio_default"
-                            android:textColor="#666666" />
+                            android:textColor="@color/dm_fg_666666" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -387,7 +387,7 @@
                     android:layout_marginBottom="16dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
-                    app:strokeColor="#E0DCF0"
+                    app:strokeColor="@color/dm_stroke_e0dcf0"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -395,13 +395,13 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp"
-                        android:background="#FFFFFF">
+                        android:background="@color/dm_bg_ffffff">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/profile_fav_genres"
-                            android:textColor="#333333"
+                            android:textColor="@color/dm_fg_333333"
                             android:textStyle="bold" />
 
                         <HorizontalScrollView
@@ -426,9 +426,9 @@
                     android:id="@+id/tabLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#FFFFFF"
-                    app:tabIndicatorColor="#493373"
-                    app:tabSelectedTextColor="#493373"
+                    android:background="@color/dm_bg_ffffff"
+                    app:tabIndicatorColor="@color/dm_fg_493373"
+                    app:tabSelectedTextColor="@color/dm_fg_493373"
                     app:tabTextColor="#999999">
 
                     <com.google.android.material.tabs.TabItem
@@ -454,14 +454,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp"
-                    android:background="#FFFFFF"
+                    android:background="@color/dm_bg_ffffff"
                     android:visibility="gone">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/profile_personal_info"
-                        android:textColor="#493373"
+                        android:textColor="@color/dm_fg_493373"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:paddingBottom="12dp" />
@@ -471,14 +471,14 @@
                         android:layout_height="wrap_content"
                         android:text="@string/profile_display_name"
                         android:textStyle="bold"
-                        android:textColor="#777777" />
+                        android:textColor="@color/dm_fg_777777" />
 
                     <TextView
                         android:id="@+id/tvIntroUsername"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/common_not_updated"
-                        android:textColor="#333333"
+                        android:textColor="@color/dm_fg_333333"
                         android:paddingBottom="12dp" />
 
                     <TextView
@@ -486,14 +486,14 @@
                         android:layout_height="wrap_content"
                         android:text="@string/common_email"
                         android:textStyle="bold"
-                        android:textColor="#777777" />
+                        android:textColor="@color/dm_fg_777777" />
 
                     <TextView
                         android:id="@+id/tvIntroEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/common_not_updated"
-                        android:textColor="#333333"
+                        android:textColor="@color/dm_fg_333333"
                         android:paddingBottom="12dp" />
 
                     <TextView
@@ -501,14 +501,14 @@
                         android:layout_height="wrap_content"
                         android:text="@string/profile_gender"
                         android:textStyle="bold"
-                        android:textColor="#777777" />
+                        android:textColor="@color/dm_fg_777777" />
 
                     <TextView
                         android:id="@+id/tvIntroGender"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/common_not_updated"
-                        android:textColor="#333333"
+                        android:textColor="@color/dm_fg_333333"
                         android:paddingBottom="12dp" />
 
                     <TextView
@@ -516,14 +516,14 @@
                         android:layout_height="wrap_content"
                         android:text="@string/profile_birth_date"
                         android:textStyle="bold"
-                        android:textColor="#777777" />
+                        android:textColor="@color/dm_fg_777777" />
 
                     <TextView
                         android:id="@+id/tvIntroBirthDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/common_not_updated"
-                        android:textColor="#333333"
+                        android:textColor="@color/dm_fg_333333"
                         android:paddingBottom="12dp" />
 
                     <TextView
@@ -531,14 +531,14 @@
                         android:layout_height="wrap_content"
                         android:text="@string/profile_about_me"
                         android:textStyle="bold"
-                        android:textColor="#777777" />
+                        android:textColor="@color/dm_fg_777777" />
 
                     <TextView
                         android:id="@+id/tvIntroBio"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/profile_no_intro"
-                        android:textColor="#333333"
+                        android:textColor="@color/dm_fg_333333"
                         android:paddingTop="6dp"
                         android:paddingBottom="16dp" />
 
@@ -549,7 +549,7 @@
                     android:id="@+id/recyclerViewProfilePosts"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#FFFFFF"
+                    android:background="@color/dm_bg_ffffff"
                     android:nestedScrollingEnabled="false"
                     android:paddingTop="8dp"
                     android:clipToPadding="false"
@@ -561,7 +561,7 @@
                     android:id="@+id/rcvProfileReviews"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#FFFFFF"
+                    android:background="@color/dm_bg_ffffff"
                     android:nestedScrollingEnabled="false"
                     android:paddingTop="8dp"
                     android:clipToPadding="false"

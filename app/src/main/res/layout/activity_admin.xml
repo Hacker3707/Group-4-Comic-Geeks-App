@@ -4,7 +4,7 @@
     android:id="@+id/adminRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F7F4FC"
+    android:background="@color/dm_bg_f7f4fc"
     android:orientation="vertical">
 
     <!-- Thanh tiêu đề -->
@@ -41,11 +41,11 @@
         android:id="@+id/adminTabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
+        android:background="@color/dm_bg_ffffff"
         app:tabIndicatorColor="#6D45D9"
         app:tabMode="scrollable"
-        app:tabSelectedTextColor="#493373"
-        app:tabTextColor="#8A7BA8" />
+        app:tabSelectedTextColor="@color/dm_fg_493373"
+        app:tabTextColor="@color/dm_fg_8a7ba8" />
 
     <!-- Tổng quan -->
     <ScrollView
@@ -99,6 +99,6 @@
         android:gravity="center"
         android:padding="32dp"
         android:text="@string/admin_empty"
-        android:textColor="#8A7BA8"
+        android:textColor="@color/dm_fg_8a7ba8"
         android:visibility="gone" />
 </LinearLayout>

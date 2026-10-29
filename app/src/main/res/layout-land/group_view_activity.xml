@@ -69,7 +69,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/white"
+        android:background="@color/dm_bg_ffffff"
         android:fillViewport="true">
 
         <LinearLayout
@@ -101,7 +101,7 @@
                     android:scaleType="centerCrop"
                     android:visibility="gone"
                     app:shapeAppearanceOverlay="@style/GroupCircleImage"
-                    app:strokeColor="@color/white"
+                    app:strokeColor="@color/dm_stroke_ffffff"
                     app:strokeWidth="4dp" />
 
                 <TextView
@@ -319,7 +319,7 @@
                 android:id="@+id/tabLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
+                android:background="@color/dm_bg_ffffff"
                 app:tabIndicatorColor="@color/group_tab_indicator"
                 app:tabIndicatorFullWidth="false"
                 app:tabIndicatorHeight="3dp"

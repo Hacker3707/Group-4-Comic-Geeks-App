@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.adapter;
 
+import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -99,7 +100,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
         });
 
         if (message.getTimestamp() != null) {
-            holder.tvMessageTime.setText(timeFormat.format(message.getTimestamp()));
+            String time = timeFormat.format(message.getTimestamp());
+            if (sentByMe) {
+                // Tin của mình: hiện trạng thái gửi
+                if (message.getStatus() == Message.STATUS_SENDING) {
+                    time = time + " · " + Str.t(R.string.chat_status_sending);
+                } else if (message.getStatus() == Message.STATUS_FAILED) {
+                    time = time + " · " + Str.t(R.string.chat_status_failed);
+                } else {
+                    time = time + " ✓";
+                }
+            }
+            holder.tvMessageTime.setText(time);
         } else {
             holder.tvMessageTime.setText("");
         }

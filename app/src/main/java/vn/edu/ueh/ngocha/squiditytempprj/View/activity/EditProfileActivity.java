@@ -263,7 +263,10 @@ public class EditProfileActivity extends AppCompatActivity {
     private void styleGenreChip(Chip chip) {
         int purple = Color.parseColor("#493373");
         int white = Color.WHITE;
-        int border = Color.parseColor("#D8CBEA");
+        // Màu chip chưa chọn đổi theo giao diện sáng / tối
+        int idleBg = getColor(R.color.dm_bg_ffffff);
+        int idleText = getColor(R.color.dm_fg_493373);
+        int border = getColor(R.color.dm_stroke_d8cbea);
 
         int[][] states = new int[][] {
                 new int[] { android.R.attr.state_checked },
@@ -286,12 +289,12 @@ public class EditProfileActivity extends AppCompatActivity {
 
         chip.setChipBackgroundColor(new ColorStateList(
                 states,
-                new int[] { purple, white }
+                new int[] { purple, idleBg }
         ));
 
         chip.setTextColor(new ColorStateList(
                 states,
-                new int[] { white, purple }
+                new int[] { white, idleText }
         ));
 
         chip.setCheckedIconVisible(false);

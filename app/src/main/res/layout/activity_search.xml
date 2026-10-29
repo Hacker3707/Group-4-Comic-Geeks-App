@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F4FA">
+    android:background="@color/dm_bg_f5f4fa">
 
     <!-- THANH SEARCH VÀ NÚT BACK -->
     <LinearLayout
@@ -14,7 +14,7 @@
         android:layout_height="60dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:background="#FFFFFF"
+        android:background="@color/dm_bg_ffffff"
         android:paddingHorizontal="12dp"
         android:elevation="4dp">
 
@@ -25,7 +25,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_revert"
             android:contentDescription="@string/common_back"
-            app:tint="#493373"/>
+            app:tint="@color/dm_fg_493373"/>
 
         <EditText
             android:id="@+id/etGlobalSearch"
@@ -47,9 +47,9 @@
         android:id="@+id/searchTabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        app:tabIndicatorColor="#493373"
-        app:tabSelectedTextColor="#493373"
+        android:background="@color/dm_bg_ffffff"
+        app:tabIndicatorColor="@color/dm_fg_493373"
+        app:tabSelectedTextColor="@color/dm_fg_493373"
         app:tabTextColor="#999999"
         app:tabMode="fixed">
 
@@ -88,7 +88,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="48dp"
-            android:textColor="#888888"
+            android:textColor="@color/dm_fg_888888"
             android:textSize="14sp"
             android:visibility="gone"/>
     </FrameLayout>

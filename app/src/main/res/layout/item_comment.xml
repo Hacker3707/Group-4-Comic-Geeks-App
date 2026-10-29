@@ -11,7 +11,7 @@
         android:id="@+id/imgCommentAvatar"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:background="#D1C4E9"
+        android:background="@color/dm_bg_d1c4e9"
         app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:text="@string/comment_user_placeholder"
             android:textStyle="bold"
-            android:textColor="#333333"
+            android:textColor="@color/dm_fg_333333"
             android:textSize="13sp" />
 
         <!-- 👉 Nhãn hiển thị thông tin đang trả lời ai (Ví dụ: Trả lời @username) -->
@@ -57,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/comment_content_placeholder"
-            android:textColor="#444444"
+            android:textColor="@color/dm_fg_444444"
             android:layout_marginTop="4dp"
             android:textSize="14sp" />
 

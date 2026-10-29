@@ -34,6 +34,22 @@ public class Message {
     @ColumnInfo(name = "chat_room_id")
     private String chatRoomId;
 
+    // Trạng thái gửi tin của mình: 0 = đã gửi, 1 = đang gửi (chờ mạng), 2 = gửi lỗi
+    public static final int STATUS_SENT = 0;
+    public static final int STATUS_SENDING = 1;
+    public static final int STATUS_FAILED = 2;
+
+    @ColumnInfo(name = "status", defaultValue = "0")
+    private int status;
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     public Message() {
     }
 

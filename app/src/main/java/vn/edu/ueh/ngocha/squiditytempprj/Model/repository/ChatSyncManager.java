@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.Model.repository;
 
+import com.google.firebase.firestore.MetadataChanges;
 import android.content.Context;
 import android.util.Log;
 
@@ -279,10 +280,19 @@ public class ChatSyncManager {
                 }));
     }
 
+    public void updateStatus(final String messageId, final int status) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                db.messageDao().updateStatus(messageId, status);
+            }
+        });
+    }
+
     private void listenMessages(final String uid) {
         registrations.add(firestore.collection(MESSAGES)
                 .whereArrayContains("participants", uid)
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                .addSnapshotListener(MetadataChanges.INCLUDE, new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot snapshots,
                                         @Nullable FirebaseFirestoreException error) {
@@ -303,6 +313,11 @@ public class ChatSyncManager {
                                     }
                                 });
                                 continue;
+                            }
+                            // Tin của mình đã lên tới server (kể cả gửi lúc mất mạng rồi có mạng lại)
+                            if (uid.equals(change.getDocument().getString("senderId"))
+                                    && !change.getDocument().getMetadata().hasPendingWrites()) {
+                                updateStatus(change.getDocument().getId(), Message.STATUS_SENT);
                             }
                             if (change.getType() != DocumentChange.Type.ADDED) {
                                 continue;
@@ -430,9 +445,23 @@ public class ChatSyncManager {
         messageData.put("content", message.getContent());
         messageData.put("timestamp", message.getTimestamp() != null ? message.getTimestamp() : new Date());
         messageData.put("participants", participants);
-        firestore.collection(MESSAGES).document(message.getMessageId())
+        final String sentId = message.getMessageId();
+        // Mất mạng: Firestore giữ tin lại và tự gửi khi có mạng, lúc đó mới báo thành công
+        firestore.collection(MESSAGES).document(sentId)
                 .set(messageData)
-                .addOnFailureListener(logFailure("Gửi tin nhắn thất bại"));
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        updateStatus(sentId, Message.STATUS_SENT);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Gửi tin nhắn thất bại: " + e.getMessage());
+                        updateStatus(sentId, Message.STATUS_FAILED);
+                    }
+                });
 
         boolean senderFirst = senderId.compareTo(recipientId) <= 0;
         Map<String, Object> roomData = new HashMap<>();
