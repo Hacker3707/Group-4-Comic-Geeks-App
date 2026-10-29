@@ -10,7 +10,7 @@
         android:id="@+id/imgFollowAvatar"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:background="#D1C4E9"
+        android:background="@color/dm_bg_d1c4e9"
         android:scaleType="centerCrop"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -37,7 +37,7 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="#333333"
+            android:textColor="@color/dm_fg_333333"
             android:textSize="14sp"
             android:textStyle="bold" />
 

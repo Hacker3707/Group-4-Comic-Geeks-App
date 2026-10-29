@@ -51,6 +51,22 @@
             app:tint="@color/white" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tvChatOffline"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/dm_bg_fff3cd"
+        android:gravity="center"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:text="@string/chat_offline_banner"
+        android:textColor="@color/dm_fg_7a5b00"
+        android:textSize="13sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layoutChatHeader" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcvMessages"
         android:layout_width="0dp"
@@ -61,14 +77,14 @@
         app:layout_constraintBottom_toTopOf="@id/layoutChatInput"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layoutChatHeader" />
+        app:layout_constraintTop_toBottomOf="@id/tvChatOffline" />
 
     <LinearLayout
         android:id="@+id/layoutChatInput"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:paddingHorizontal="64dp"
-        android:background="@color/white"
+        android:background="@color/dm_bg_ffffff"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="8dp"

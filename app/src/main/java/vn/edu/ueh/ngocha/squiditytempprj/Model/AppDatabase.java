@@ -61,7 +61,7 @@ import vn.edu.ueh.ngocha.squiditytempprj.Model.entity.User;
                 Notification.class,
                 UserFavoriteGenre.class
         },
-        version = 9,
+        version = 10,
         exportSchema = false
 )
 @TypeConverters({Converters.class})
@@ -153,6 +153,16 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    // Migration từ version 9 lên 10: trạng thái gửi tin nhắn (đang gửi / đã gửi / lỗi)
+    static final Migration MIGRATION_9_10 = new Migration(9, 10) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            if (!hasColumn(db, "messages", "status")) {
+                db.execSQL("ALTER TABLE messages ADD COLUMN status INTEGER NOT NULL DEFAULT 0");
+            }
+        }
+    };
+
     // Kiểm tra cột đã tồn tại trong bảng hay chưa.
     private static boolean hasColumn(
             @NonNull SupportSQLiteDatabase db,
@@ -191,7 +201,8 @@ public abstract class AppDatabase extends RoomDatabase {
                             .addMigrations(
                                     MIGRATION_6_7,
                                     MIGRATION_7_8,
-                                    MIGRATION_8_9
+                                    MIGRATION_8_9,
+                                    MIGRATION_9_10
                             )
                             .addCallback(oncreateCallback)
                             .fallbackToDestructiveMigration()

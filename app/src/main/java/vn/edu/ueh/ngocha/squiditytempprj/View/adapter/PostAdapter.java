@@ -515,7 +515,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         boolean isAlreadyStamped = post.getPostId() != null && stampedPostIds.contains(post.getPostId());
 
         if (isAlreadyStamped) {
-            holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#493373"));
+            holder.btnStamp.setColorFilter(androidx.core.content.ContextCompat.getColor(holder.itemView.getContext(), R.color.dm_fg_493373));
             holder.btnStamp.setImageResource(R.drawable.post_ink_splat);
             holder.btnStamp.setTag(true);
         } else {
@@ -534,7 +534,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     stampedPostIds.remove(post.getPostId());
                 }
             } else {
-                holder.btnStamp.setColorFilter(android.graphics.Color.parseColor("#493373"));
+                holder.btnStamp.setColorFilter(androidx.core.content.ContextCompat.getColor(holder.itemView.getContext(), R.color.dm_fg_493373));
                 holder.btnStamp.setImageResource(R.drawable.post_ink_splat);
                 holder.btnStamp.setTag(true);
                 if (post.getPostId() != null) {

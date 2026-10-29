@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="180dp"
     android:scaleType="centerCrop"
-    android:background="#EEEEEE"
+    android:background="@color/dm_bg_eeeeee"
     android:layout_margin="4dp"
     android:contentDescription="@string/post_image_cd"
     app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />

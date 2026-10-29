@@ -66,7 +66,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#B1ADFD"
+            android:background="@color/dm_bg_b1adfd"
             android:paddingHorizontal="20dp"
             android:paddingVertical="10dp">
 
@@ -83,11 +83,11 @@
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_marginEnd="12dp"
-                    android:background="#FFFFFF"
+                    android:background="@color/dm_bg_ffffff"
                     android:contentDescription="@string/comic_reviewer_avatar_cd"
                     android:scaleType="centerCrop"
                     app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
-                    app:strokeColor="#FFFFFF"
+                    app:strokeColor="@color/dm_stroke_ffffff"
                     app:strokeWidth="2dp" />
 
                 <!-- Tên, sao và ngày đánh giá -->
@@ -103,7 +103,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/jersey25_regular"
                         android:text="Username"
-                        android:textColor="#49316B"
+                        android:textColor="@color/dm_fg_49316b"
                         android:textSize="20sp" />
 
                 </LinearLayout>

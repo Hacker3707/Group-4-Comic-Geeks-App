@@ -4,7 +4,7 @@
     android:id="@+id/adminPostDetailRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F7F4FC"
+    android:background="@color/dm_bg_f7f4fc"
     android:orientation="vertical">
 
     <!-- Thanh tiêu đề -->
@@ -53,7 +53,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/dm_bg_ffffff"
                 app:cardCornerRadius="14dp"
                 app:cardElevation="2dp">
 
@@ -73,7 +73,7 @@
                             android:id="@+id/imgPostAuthor"
                             android:layout_width="44dp"
                             android:layout_height="44dp"
-                            android:background="#D1C4E9"
+                            android:background="@color/dm_bg_d1c4e9"
                             android:scaleType="centerCrop"
                             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
 
@@ -90,7 +90,7 @@
                                 android:layout_height="wrap_content"
                                 android:ellipsize="end"
                                 android:maxLines="1"
-                                android:textColor="#2E2879"
+                                android:textColor="@color/dm_fg_2e2879"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
 
@@ -99,7 +99,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:textColor="#6B6585"
+                                android:textColor="@color/dm_fg_6b6585"
                                 android:textSize="12sp" />
                         </LinearLayout>
                     </LinearLayout>
@@ -109,7 +109,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:textColor="#222222"
+                        android:textColor="@color/dm_fg_222222"
                         android:textIsSelectable="true"
                         android:textSize="15sp" />
 
@@ -139,7 +139,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:textColor="#2E2879"
+                android:textColor="@color/dm_fg_2e2879"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 

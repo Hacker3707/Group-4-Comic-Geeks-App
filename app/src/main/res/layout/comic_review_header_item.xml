@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
-        android:background="@color/white"
+        android:background="@color/dm_bg_ffffff"
         android:gravity="top"
         android:orientation="horizontal"
         android:padding="12dp">
@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/jersey25_regular"
                 android:text="@string/comic_title_label"
-                android:textColor="#49316B"
+                android:textColor="@color/dm_fg_49316b"
                 android:textSize="20sp" />
 
             <TextView
@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Comic name"
-                android:textColor="#29212F"
+                android:textColor="@color/dm_fg_29212f"
                 android:textSize="17sp" />
 
             <TextView
@@ -57,7 +57,7 @@
                 android:layout_marginTop="16dp"
                 android:fontFamily="@font/jersey25_regular"
                 android:text="@string/comic_ratings_colon"
-                android:textColor="#49316B"
+                android:textColor="@color/dm_fg_49316b"
                 android:textSize="20sp" />
 
             <LinearLayout
@@ -83,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="@string/comic_not_rated"
-                android:textColor="#49316B"
+                android:textColor="@color/dm_fg_49316b"
                 android:textSize="14sp" />
 
             <Button
@@ -100,7 +100,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#C1A5F8"
+        android:background="@color/dm_bg_c1a5f8"
         android:padding="10dp">
 
         <!-- Bộ lọc review -->
@@ -108,7 +108,7 @@
             android:id="@+id/spinnerReviewFilter"
             android:layout_width="match_parent"
             android:layout_height="35dp"
-            android:background="#FFFFFF" />
+            android:background="@color/dm_bg_ffffff" />
 
     </LinearLayout>
 

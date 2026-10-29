@@ -45,6 +45,9 @@ public class ChatViewModel extends AndroidViewModel {
     // Lưu ở máy, đẩy lên Firestore cho người nhận, và báo thông báo lên chuông của người nhận.
     // preview là nội dung ngắn hiện trong thông báo
     public void sendMessage(Message message, String recipientId, String preview) {
+        if (recipientId != null && !recipientId.isEmpty()) {
+            message.setStatus(Message.STATUS_SENDING);
+        }
         sendMessage(message);
 
         if (recipientId == null || recipientId.isEmpty()) {
@@ -63,6 +66,15 @@ public class ChatViewModel extends AndroidViewModel {
         }
         notificationRepository.sendNotification(recipientId, senderId, actorName,
                 NotificationType.MESSAGE, null, Str.t(R.string.notif_messaged, actorName, snippet));
+    }
+
+    // Gửi lại tin bị lỗi
+    public void resendMessage(Message message, String recipientId) {
+        if (recipientId == null || recipientId.isEmpty()) {
+            return;
+        }
+        chatSyncManager.updateStatus(message.getMessageId(), Message.STATUS_SENDING);
+        chatSyncManager.pushMessage(message, recipientId);
     }
 
     public void markMessageAsRead(String messageId) {

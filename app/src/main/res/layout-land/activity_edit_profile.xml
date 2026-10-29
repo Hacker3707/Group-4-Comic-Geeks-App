@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/editProfile"
-    android:background="#F5F4FA">
+    android:background="@color/dm_bg_f5f4fa">
 
     <!-- Thanh tiêu đề -->
     <LinearLayout
@@ -69,7 +69,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/profile_display_name"
                 android:textStyle="bold"
-                android:textColor="#493373" />
+                android:textColor="@color/dm_fg_493373" />
 
             <EditText
                 android:id="@+id/etEditUsername"
@@ -86,15 +86,15 @@
                 android:layout_marginTop="16dp"
                 android:text="@string/common_email"
                 android:textStyle="bold"
-                android:textColor="#493373" />
+                android:textColor="@color/dm_fg_493373" />
 
             <TextView
                 android:id="@+id/tvEditEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="12dp"
-                android:background="#EAE6F4"
-                android:textColor="#555555"
+                android:background="@color/dm_bg_eae6f4"
+                android:textColor="@color/dm_fg_555555"
                 android:text="email@example.com" />
 
             <TextView
@@ -103,7 +103,7 @@
                 android:layout_marginTop="16dp"
                 android:text="@string/profile_gender"
                 android:textStyle="bold"
-                android:textColor="#493373" />
+                android:textColor="@color/dm_fg_493373" />
 
             <Spinner
                 android:id="@+id/spEditGender"
@@ -117,7 +117,7 @@
                 android:layout_marginTop="16dp"
                 android:text="@string/profile_birth_date"
                 android:textStyle="bold"
-                android:textColor="#493373" />
+                android:textColor="@color/dm_fg_493373" />
 
             <EditText
                 android:id="@+id/etEditBirthDate"
@@ -168,7 +168,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:text="@string/profile_fav_genre_label"
-                android:textColor="#493373"
+                android:textColor="@color/dm_fg_493373"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -177,7 +177,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="@string/profile_fav_genre_hint"
-                android:textColor="#777080"
+                android:textColor="@color/dm_fg_777080"
                 android:textSize="13sp" />
 
             <com.google.android.material.chip.ChipGroup

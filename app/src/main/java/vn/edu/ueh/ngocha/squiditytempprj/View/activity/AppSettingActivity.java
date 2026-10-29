@@ -137,9 +137,37 @@ public class AppSettingActivity extends AppCompatActivity {
                 return;
             }
             final String email = user.getEmail();
-            FirebaseAuth.getInstance().sendPasswordResetEmail(email)
-                    .addOnSuccessListener(v -> toast(Str.t(R.string.settings_reset_sent, email)))
-                    .addOnFailureListener(e -> toast(Str.t(R.string.settings_reset_failed, e.getMessage())));
+            // Tài khoản đăng nhập bằng Google không có mật khẩu riêng trong app
+            boolean hasPassword = false;
+            for (com.google.firebase.auth.UserInfo info : user.getProviderData()) {
+                if ("password".equals(info.getProviderId())) {
+                    hasPassword = true;
+                }
+            }
+            if (!hasPassword) {
+                new AlertDialog.Builder(requireContext())
+                        .setTitle(Str.t(R.string.pref_reset_password))
+                        .setMessage(Str.t(R.string.settings_reset_google, email))
+                        .setPositiveButton(Str.t(R.string.common_close), null)
+                        .show();
+                return;
+            }
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(Str.t(R.string.pref_reset_password))
+                    .setMessage(Str.t(R.string.settings_reset_confirm, email))
+                    .setNegativeButton(Str.t(R.string.common_cancel), null)
+                    .setPositiveButton(Str.t(R.string.settings_reset_send), (d, w) -> {
+                        // Email gửi đúng ngôn ngữ đang dùng trong app
+                        FirebaseAuth.getInstance().setLanguageCode(Str.getLanguage());
+                        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                                .addOnSuccessListener(v -> new AlertDialog.Builder(requireContext())
+                                        .setTitle(Str.t(R.string.pref_reset_password))
+                                        .setMessage(Str.t(R.string.settings_reset_sent, email))
+                                        .setPositiveButton(Str.t(R.string.common_close), null)
+                                        .show())
+                                .addOnFailureListener(e -> toast(Str.t(R.string.settings_reset_failed, e.getMessage())));
+                    })
+                    .show();
         }
 
         private void goHome() {

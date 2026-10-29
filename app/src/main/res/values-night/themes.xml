@@ -7,7 +7,7 @@
 
         <item name="colorSecondary">@color/squidity_btnfollow</item>
 
-        <item name="android:windowBackground">#121212</item>
+        <item name="android:windowBackground">#121018</item>
         <item name="colorSurface">#1E1E1E</item>
         <item name="colorOnSurface">@color/white</item>
 

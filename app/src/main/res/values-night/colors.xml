@@ -1,3 +1,4 @@
 <resources>
     <color name="nav_drawer_text">#FFFFFF</color>
+    <color name="nav_item_text">#F3EDFF</color>
 </resources>
