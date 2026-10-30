@@ -176,81 +176,135 @@ public class ReviewRepository {
         reviewDao.deleteAll();
     }
 
-    public LiveData<List<Review>> getReviewsByComicIdLive(String comicId) {
+
+    public LiveData<List<Review>> getReviewsByComicIdLive(
+            String comicId, String filter) {
+
+        Query query = firestore.collection("reviews")
+                .whereEqualTo("comicId", comicId);
+
+        switch (filter.toLowerCase().trim()) {
+
+            case "newest":
+                // Đánh giá mới nhất trước
+                query = query.orderBy(
+                        "reviewDate",
+                        Query.Direction.DESCENDING
+                );
+                break;
+
+            case "oldest":
+                // Đánh giá cũ nhất trước
+                query = query.orderBy(
+                        "reviewDate",
+                        Query.Direction.ASCENDING
+                );
+                break;
+
+            case "lowest rating":
+                // Điểm đánh giá thấp nhất trước
+                query = query.orderBy(
+                        "reviewRating",
+                        Query.Direction.ASCENDING
+                );
+                break;
+
+            case "highest rating":
+                // Điểm đánh giá cao nhất trước
+                query = query.orderBy(
+                        "reviewRating",
+                        Query.Direction.DESCENDING
+                );
+                break;
+
+            default:
+                query = query.orderBy(
+                        "reviewDate",
+                        Query.Direction.DESCENDING
+                );
+                break;
+        }
+
+        Query finalQuery = query;
         return new LiveData<List<Review>>() {
+
             private ListenerRegistration reviewListener;
 
             @Override
             protected void onActive() {
                 super.onActive();
 
-                if (reviewListener == null) {
-                    reviewListener = firestore.collection("reviews")
-                            .whereEqualTo("comicId", comicId)
-                            .addSnapshotListener(
-                                    new EventListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onEvent(
-                                                @Nullable QuerySnapshot snapshots,
-                                                @Nullable FirebaseFirestoreException error) {
+                if (reviewListener != null) return;
 
-                                            if (error != null) {
-                                                Log.e("ReviewRepository",
-                                                        "Error getting reviews",
-                                                        error);
-                                                return;
-                                            }
+                reviewListener = finalQuery.addSnapshotListener(
+                        (snapshots, error) -> {
 
-                                            if (snapshots == null) {
-                                                return;
-                                            }
+                            if (error != null) {
+                                Log.e("ReviewRepository",
+                                        "Error getting reviews", error);
+                                return;
+                            }
 
-                                            List<Review> reviews = new ArrayList<>();
+                            if (snapshots == null) return;
 
-                                            for (QueryDocumentSnapshot document : snapshots) {
-                                                Map<String, Object> data = document.getData();
+                            List<Review> reviews = new ArrayList<>();
 
-                                                Review review = new Review(
-                                                        data.get("comicId").toString(),
-                                                        data.get("userId").toString(),
-                                                        data.get("reviewText").toString()
-                                                );
+                            for (QueryDocumentSnapshot document : snapshots) {
 
-                                                float rating = 0F;
-                                                if (data.get("reviewRating") != null) {
-                                                    rating = Float.parseFloat(
-                                                            data.get("reviewRating").toString()
-                                                    );
-                                                }
+                                String comicIdValue =
+                                        document.getString("comicId");
 
-                                                review.setReviewRating(rating);
-                                                review.setReviewText(document.getString("reviewText"));
-                                                review.setReviewId(document.getId());
+                                String userId =
+                                        document.getString("userId");
 
-                                                Object reviewDate = data.get("reviewDate");
-                                                if (reviewDate instanceof com.google.firebase.Timestamp) {
-                                                    review.setReviewDate(
-                                                            ((com.google.firebase.Timestamp) reviewDate).toDate()
-                                                    );
-                                                }
+                                String reviewText =
+                                        document.getString("reviewText");
 
-                                                reviews.add(review);
-                                            }
+                                if (comicIdValue == null || userId == null) {
+                                    continue;
+                                }
 
-                                            postValue(reviews);
+                                Review review = new Review(
+                                        comicIdValue,
+                                        userId,
+                                        reviewText == null ? "" : reviewText
+                                );
 
-                                            executorService.execute(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    for (Review review : reviews) {
-                                                        reviewDao.insertorUpdateReview(review);
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    }
-                            );
-                }
+                                review.setReviewId(document.getId());
+
+                                Object ratingValue =
+                                        document.get("reviewRating");
+
+                                if (ratingValue instanceof Number) {
+                                    review.setReviewRating(
+                                            ((Number) ratingValue).floatValue()
+                                    );
+                                }
+
+                                Object dateValue =
+                                        document.get("reviewDate");
+
+                                if (dateValue instanceof
+                                        com.google.firebase.Timestamp) {
+
+                                    review.setReviewDate(
+                                            ((com.google.firebase.Timestamp)
+                                                    dateValue).toDate()
+                                    );
+                                }
+
+                                reviews.add(review);
+                            }
+
+                            postValue(reviews);
+
+                            executorService.execute(() -> {
+                                for (Review review : reviews) {
+                                    reviewDao.insertorUpdateReview(review);
+                                }
+                            });
+                        }
+                );
             }
 
             @Override
@@ -262,9 +316,9 @@ public class ReviewRepository {
                     reviewListener = null;
                 }
             }
-
         };
     }
+
 
 
     public LiveData<Float> getAverageRatingLive(String comicId) {

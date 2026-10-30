@@ -50,6 +50,7 @@ public class Review {
 
     @Ignore
     public Review(String comicId, String userId, String reviewText) {
+        this.reviewId = comicId + "_" + userId;
         this.comicId = comicId;
         this.userId = userId;
         this.reviewText = reviewText;

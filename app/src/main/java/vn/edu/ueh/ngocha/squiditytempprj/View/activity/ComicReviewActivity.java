@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -90,6 +91,26 @@ public class ComicReviewActivity extends BaseActivity {
 
     };
 
+    public AdapterView.OnItemSelectedListener onReviewFilterSelectedListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(
+                AdapterView<?> parent,
+                View view,
+                int position,
+                long id) {
+
+            String filter =
+                    parent.getItemAtPosition(position).toString();
+
+            reviewViewModel.loadReviews(comicId, filter);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+
+        }
+    };
+
 
     public View.OnClickListener onExitClickListener = new View.OnClickListener() {
         @Override
@@ -97,6 +118,8 @@ public class ComicReviewActivity extends BaseActivity {
             finish();
         }
     };
+
+    // ----------------- Observer -------------------
 
     private ReviewViewModel reviewViewModel;
     private AuthViewModel authViewModel;
@@ -183,7 +206,7 @@ public class ComicReviewActivity extends BaseActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         reviewAdapter = new ComicReviewAdapter(reviewInteractionListener);
-        headerAdapter = new ComicReviewHeaderAdapter(onReviewClickListener);
+        headerAdapter = new ComicReviewHeaderAdapter(onReviewClickListener, onReviewFilterSelectedListener);
         headerAdapter.setComicInfo(comicName, comicCover);
 
         ConcatAdapter concatAdapter = new ConcatAdapter(headerAdapter, reviewAdapter);
@@ -193,8 +216,8 @@ public class ComicReviewActivity extends BaseActivity {
         // ------------ Set up reviewViewModel ------------
 
         reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
-        reviewViewModel.getReviewsByComicId(comicId)
-                .observe(this, reviewsObserver);
+
+        reviewViewModel.getReview().observe(this, reviewsObserver);
 
         reviewViewModel.getUsersForComic(comicId)
                 .observe(this, usersObserver);
@@ -208,7 +231,6 @@ public class ComicReviewActivity extends BaseActivity {
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
         authViewModel.getRegistered().observe(this, registeredObserver);
     }
-
 
     public void showReviewDialog() {
         String userId = authViewModel.getCurrentUserId();

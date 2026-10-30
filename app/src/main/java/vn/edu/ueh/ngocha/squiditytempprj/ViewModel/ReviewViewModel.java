@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,10 +28,17 @@ public class ReviewViewModel extends AndroidViewModel {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final AuthRepository authRepository;
-    public final LiveData<List<Review>> allReviews;
     public final LiveData<List<User>> allUsers;
     public final LiveData<Float> averageRating;
     public final MediatorLiveData<Boolean> isSameUser;
+
+    private final MutableLiveData<List<Review>> reviews =
+            new MutableLiveData<>();
+
+    private LiveData<List<Review>> currentReviews;
+
+    private String currentComicId;
+    private String currentFilter;
 
     public ReviewViewModel(@NonNull Application application) {
         super(application);
@@ -38,26 +46,18 @@ public class ReviewViewModel extends AndroidViewModel {
         this.reviewRepository = new ReviewRepository(application);
         this.userRepository = new UserRepository(application);
         this.authRepository = new AuthRepository();
-        this.allReviews = reviewRepository.getAllReviews();
         this.allUsers = userRepository.getAllUsers();
         this.averageRating = reviewRepository.getAverageRatingLive(null);
         this.isSameUser = new MediatorLiveData<>();
     }
 
-    public LiveData<List<Review>> getAllReviews() {
-        return allReviews;
-    }
 
     public LiveData<List<User>> getAllUsers() {
         return allUsers;
     }
 
-    public LiveData<List<Review>> getReviewsByComicId(String comicId) {
-        return reviewRepository.getReviewsByComicIdLive(comicId);
-    }
-
-    public LiveData<List<User>> getUsersByIds(List<String> userIds) {
-        return userRepository.getUsersByIds(userIds);
+    public LiveData<List<Review>> getReviewsByComicId(String comicId, String filter) {
+        return reviewRepository.getReviewsByComicIdLive(comicId, filter);
     }
 
     public LiveData<List<User>> getUsersForComic(String comicId) {
@@ -65,7 +65,7 @@ public class ReviewViewModel extends AndroidViewModel {
                 new MediatorLiveData<>();
 
         LiveData<List<Review>> reviewsLiveData =
-                reviewRepository.getReviewsByComicIdLive(comicId);
+                reviewRepository.getReviewsByComicIdLive(comicId, "newest");
 
         result.addSource(reviewsLiveData, new Observer<List<Review>>() {
             private LiveData<List<User>> currentUsersLiveData;
@@ -149,6 +149,49 @@ public class ReviewViewModel extends AndroidViewModel {
 
     public LiveData<List<Review>> getAllReviewsforUserId(String userId) {
         return reviewRepository.getReviewsByUserId(userId);
+    }
+
+    public void loadReviews(String comicId, String filter) {
+
+        if (comicId.equals(currentComicId)
+                && filter.equals(currentFilter)) {
+            return;
+        }
+
+        currentComicId = comicId;
+        currentFilter = filter;
+
+        if (currentReviews != null) {
+            currentReviews.removeObserver(reviewObserver);
+        }
+
+        currentReviews =
+                reviewRepository.getReviewsByComicIdLive(
+                        comicId, filter
+                );
+
+        currentReviews.observeForever(reviewObserver);
+    }
+
+    private final Observer<List<Review>> reviewObserver =
+            new Observer<List<Review>>() {
+                @Override
+                public void onChanged(List<Review> reviewList) {
+                    reviews.setValue(reviewList);
+                }
+            };
+
+    public LiveData<List<Review>> getReview() {
+        return reviews;
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+
+        if (currentReviews != null) {
+            currentReviews.removeObserver(reviewObserver);
+        }
     }
 
 }
