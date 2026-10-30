@@ -91,25 +91,30 @@ public class ComicReviewActivity extends BaseActivity {
 
     };
 
-    public AdapterView.OnItemSelectedListener onReviewFilterSelectedListener = new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(
-                AdapterView<?> parent,
-                View view,
-                int position,
-                long id) {
+    public AdapterView.OnItemSelectedListener onReviewFilterSelectedListener =
+            new AdapterView.OnItemSelectedListener() {
 
-            String filter =
-                    parent.getItemAtPosition(position).toString();
+                @Override
+                public void onItemSelected(
+                        AdapterView<?> parent,
+                        View view,
+                        int position,
+                        long id) {
 
-            reviewViewModel.loadReviews(comicId, filter);
-        }
+                    String[] filterKeys = {
+                            "newest",
+                            "oldest",
+                            "highest",
+                            "lowest"
+                    };
 
-        @Override
-        public void onNothingSelected(AdapterView<?> adapterView) {
+                    reviewViewModel.loadReviews(comicId, filterKeys[position]);
+                }
 
-        }
-    };
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            };
 
 
     public View.OnClickListener onExitClickListener = new View.OnClickListener() {
@@ -149,6 +154,14 @@ public class ComicReviewActivity extends BaseActivity {
             );
         }
     };
+
+    private final Observer<Review> myReviewObserver =
+            new Observer<Review>() {
+                @Override
+                public void onChanged(Review review) {
+                    headerAdapter.setIsSameUser(review != null);
+                }
+            };
 
     private final Observer<Float> averageRatingObserver = new Observer<Float>() {
         @Override
@@ -219,6 +232,8 @@ public class ComicReviewActivity extends BaseActivity {
 
         reviewViewModel.getReview().observe(this, reviewsObserver);
 
+        reviewViewModel.loadReviews(comicId, "newest");
+
         reviewViewModel.getUsersForComic(comicId)
                 .observe(this, usersObserver);
 
@@ -230,6 +245,12 @@ public class ComicReviewActivity extends BaseActivity {
 
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
         authViewModel.getRegistered().observe(this, registeredObserver);
+        String userId = authViewModel.getCurrentUserId();
+
+        if (userId != null && !userId.isEmpty()) {
+            reviewViewModel.getReview(comicId, userId)
+                    .observe(this, myReviewObserver);
+        }
     }
 
     public void showReviewDialog() {

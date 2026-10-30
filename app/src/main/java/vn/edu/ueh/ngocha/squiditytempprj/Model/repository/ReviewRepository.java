@@ -54,13 +54,18 @@ public class ReviewRepository {
     }
 
 
-    public void insert(Review review) {
-        Map<String, Object> reviewData = new HashMap<>();
+    public interface ReviewCallback {
+        void onSuccess();
+        void onFailure(Exception e);
+    }
+
+    public void insert(Review review, ReviewCallback callback) {
 
         String comicId = review.getComicId();
         String userId = review.getUserId();
         String reviewId = comicId + "_" + userId;
 
+        Map<String, Object> reviewData = new HashMap<>();
         reviewData.put("comicId", comicId);
         reviewData.put("userId", userId);
         reviewData.put("reviewText", review.getReviewText());
@@ -71,12 +76,14 @@ public class ReviewRepository {
                 .document(reviewId)
                 .set(reviewData)
                 .addOnSuccessListener(unused -> {
-                    Log.d("ReviewRepository",
-                            "Review saved: " + reviewId);
+                    Log.d("ReviewRepository", "Review saved: " + reviewId);
+
+                    callback.onSuccess();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("ReviewRepository",
-                            "Error saving review", e);
+                    Log.e("ReviewRepository", "Error saving review", e);
+
+                    callback.onFailure(e);
                 });
     }
 
@@ -141,17 +148,22 @@ public class ReviewRepository {
 
                             Review review = document.toObject(Review.class);
 
+                            if (review == null) {
+                                postValue(null);
+                                return;
+                            }
+
                             Object reviewDate = document.get("reviewDate");
+
                             if (reviewDate instanceof com.google.firebase.Timestamp) {
                                 review.setReviewDate(
                                         ((com.google.firebase.Timestamp) reviewDate).toDate()
                                 );
                             }
 
-                            if (review != null) {
-                                review.setReviewId(document.getId());
-                                postValue(review);
-                            }
+                            review.setReviewId(document.getId());
+
+                            postValue(review);
 
                         });
             }

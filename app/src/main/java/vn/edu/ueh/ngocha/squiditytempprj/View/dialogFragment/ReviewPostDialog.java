@@ -1,5 +1,6 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.dialogFragment;
 
+import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.ReviewRepository;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -117,16 +118,44 @@ public class ReviewPostDialog extends DialogFragment {
                 return;
             }
 
-            Review review = new Review(comicId, userId, content, rating);
-            reviewViewModel.insert(review);
+            Review review = new Review(
+                    comicId,
+                    userId,
+                    content,
+                    rating
+            );
 
-            Toast.makeText(
-                    requireContext(),
-                    Str.t(R.string.review_ready),
-                    Toast.LENGTH_SHORT
-            ).show();
+            btnConfirm.setEnabled(false);
 
-            dismiss();
+            reviewViewModel.insert(review,
+                    new ReviewRepository.ReviewCallback() {
+
+                        @Override
+                        public void onSuccess() {
+                            if (!isAdded()) return;
+
+                            Toast.makeText(
+                                    requireContext(),
+                                    Str.t(R.string.review_ready),
+                                    Toast.LENGTH_SHORT
+                            ).show();
+
+                            dismiss();
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            if (!isAdded()) return;
+
+                            btnConfirm.setEnabled(true);
+
+                            Toast.makeText(
+                                    requireContext(),
+                                    "Không thể đăng Review. Vui lòng thử lại.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    });
         }
     };
 
