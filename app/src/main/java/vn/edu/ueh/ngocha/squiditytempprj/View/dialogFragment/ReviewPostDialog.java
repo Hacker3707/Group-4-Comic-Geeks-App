@@ -135,7 +135,7 @@ public class ReviewPostDialog extends DialogFragment {
         public void onClick(View v) {
             if (!isEditing) {
                 Toast.makeText(v.getContext(), Str.t(R.string.review_edit_mode), Toast.LENGTH_SHORT).show();
-                ratingBar.setIsIndicator(true);
+                ratingBar.setIsIndicator(false);
                 etReviewContent.setEnabled(true);
                 txtReviewDate.setVisibility(View.GONE);
                 btnEdit.setText(Str.t(R.string.common_cancel));
@@ -192,7 +192,7 @@ public class ReviewPostDialog extends DialogFragment {
                 txtReviewDate.setVisibility(View.GONE);
 
             } else {
-                // Đã có review -> chế độ xem/edit
+                // Đã có review -> chế độ xem, chưa cho phép chỉnh sửa
                 btnConfirm.setVisibility(View.GONE);
                 lnEditSaveReview.setVisibility(View.VISIBLE);
 
@@ -203,7 +203,7 @@ public class ReviewPostDialog extends DialogFragment {
                 btnSave.setEnabled(false);
 
                 ratingBar.setRating(review.getReviewRating());
-                ratingBar.setIsIndicator(false);
+                ratingBar.setIsIndicator(true); // Khóa tương tác với số sao
 
                 etReviewContent.setText(review.getReviewText());
                 etReviewContent.setEnabled(false);
@@ -308,9 +308,12 @@ public class ReviewPostDialog extends DialogFragment {
             int screenWidth = getResources()
                     .getDisplayMetrics().widthPixels;
 
+            int screenHeight = getResources()
+                    .getDisplayMetrics().heightPixels;
+
             window.setLayout(
                     (int) (screenWidth * 0.9),
-                    WindowManager.LayoutParams.WRAP_CONTENT
+                    (int) (screenHeight * 0.85)
             );
         }
     }

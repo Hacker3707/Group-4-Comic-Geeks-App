@@ -478,4 +478,5 @@
     <string name="comment_enter_content">Vui lòng nhập nội dung!</string>
     <string name="back_to_profile">Trở về trang cá nhân</string>
     <string name="back_to_home">Về trang chủ</string>
+    <string name="review_filter_oldest">Cũ nhất</string>
 </resources>

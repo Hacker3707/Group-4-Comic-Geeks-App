@@ -5,6 +5,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.RatingBar;
 import android.widget.Spinner;
@@ -31,9 +32,14 @@ public class ComicReviewHeaderAdapter
     private boolean isSameUser;
 
     private final View.OnClickListener onReviewClickListener;
+    private final AdapterView.OnItemSelectedListener onReviewFilterSelectedListener;
 
-    public ComicReviewHeaderAdapter(View.OnClickListener onReviewClickListener) {
+    private int selectedFilterPosition = 0;
+    private boolean isBindingSpinner = false;
+
+    public ComicReviewHeaderAdapter(View.OnClickListener onReviewClickListener, AdapterView.OnItemSelectedListener onReviewFilterSelectedListener) {
         this.onReviewClickListener = onReviewClickListener;
+        this.onReviewFilterSelectedListener = onReviewFilterSelectedListener;
     }
 
     public void setComicInfo(
@@ -118,8 +124,10 @@ public class ComicReviewHeaderAdapter
             );
         }
 
+
         String[] filters = {
                 Str.t(R.string.review_filter_newest),
+                Str.t(R.string.review_filter_oldest),
                 Str.t(R.string.review_filter_highest),
                 Str.t(R.string.review_filter_lowest)
         };
@@ -136,6 +144,39 @@ public class ComicReviewHeaderAdapter
         );
 
         holder.spinnerReviewFilter.setAdapter(spinnerAdapter);
+
+        // Khôi phục filter đang chọn
+        holder.spinnerReviewFilter.setSelection(
+                selectedFilterPosition,
+                false
+        );
+
+        // Gắn listener
+        holder.spinnerReviewFilter.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+
+                    @Override
+                    public void onItemSelected(
+                            AdapterView<?> parent,
+                            View view,
+                            int position,
+                            long id) {
+
+                        selectedFilterPosition = position;
+
+                        if (onReviewFilterSelectedListener != null) {
+                            onReviewFilterSelectedListener.onItemSelected(
+                                    parent, view, position, id
+                            );
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                    }
+                }
+        );
+
     }
 
     @Override
