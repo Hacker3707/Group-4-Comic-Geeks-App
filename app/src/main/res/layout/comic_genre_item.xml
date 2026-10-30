@@ -7,5 +7,5 @@
     android:background="@drawable/bg_comic_chip"
     android:paddingHorizontal="12dp"
     android:paddingVertical="7dp"
-    android:textColor="#49316B"
+    android:textColor="@color/dm_fg_49316b"
     android:textSize="13sp" />

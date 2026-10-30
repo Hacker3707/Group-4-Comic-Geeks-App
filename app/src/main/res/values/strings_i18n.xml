@@ -354,7 +354,7 @@
     <string name="chat_block_msg">You won\'t receive messages or notifications from this person, and this conversation will be deleted.</string>
     <string name="chat_blocked">User blocked</string>
     <string name="chat_unblocked">User unblocked</string>
-    <string name="settings_reset_sent">Password reset link sent to %1$s</string>
+    <string name="settings_reset_sent">We sent a password reset email to %1$s. If you don\'t see it, check your Spam folder.</string>
     <string name="settings_reset_failed">Couldn\'t send the reset email: %1$s</string>
     <string name="settings_cache_cleared">Cache cleared</string>
     <string name="settings_blocked_empty">You haven\'t blocked anyone.</string>
@@ -378,4 +378,11 @@
     <string name="comment_reply_placeholder">Reply to @...</string>
     <string name="comment_send_cd">Send comment</string>
     <string name="comment_enter_content">Please enter some content!</string>
+    <string name="chat_status_sending">Sending…</string>
+    <string name="chat_status_failed">Not sent, long-press to retry</string>
+    <string name="chat_resend">Resend</string>
+    <string name="chat_offline_banner">No internet connection. Your messages will be sent when you\'re back online.</string>
+    <string name="settings_reset_confirm">We will send a password reset link to:\n%1$s</string>
+    <string name="settings_reset_send">Send</string>
+    <string name="settings_reset_google">You signed in with Google (%1$s), so this account has no Squidity password. Manage your password in your Google account.</string>
 </resources>

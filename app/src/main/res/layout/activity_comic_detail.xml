@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFF7FF"
+    android:background="@color/dm_bg_fff7ff"
     tools:context=".View.activity.ComicDetailActivity">
 
     <!-- Thanh quay lại cố định -->
@@ -14,7 +14,7 @@
         android:id="@+id/constraintLayout"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:background="#DCC4F5"
+        android:background="@color/dm_bg_dcc4f5"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -41,7 +41,7 @@
             android:layout_marginEnd="12dp"
             android:fontFamily="@font/jersey25_regular"
             android:text="@string/comic_back_zone"
-            android:textColor="#49316B"
+            android:textColor="@color/dm_fg_49316b"
             android:textSize="25sp"
             app:layout_constraintStart_toEndOf="@id/imgbtnBack"
             app:layout_constraintEnd_toEndOf="parent"
@@ -122,7 +122,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/jersey25_regular"
                         android:text="@string/comic_title_label"
-                        android:textColor="#49316B"
+                        android:textColor="@color/dm_fg_49316b"
                         android:textSize="20sp" />
 
                     <TextView
@@ -131,7 +131,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Comic name"
-                        android:textColor="#29212F"
+                        android:textColor="@color/dm_fg_29212f"
                         android:textSize="15sp" />
 
                     <TextView
@@ -140,7 +140,7 @@
                         android:layout_marginTop="16dp"
                         android:fontFamily="@font/jersey25_regular"
                         android:text="@string/comic_author_label"
-                        android:textColor="#49316B"
+                        android:textColor="@color/dm_fg_49316b"
                         android:textSize="20sp" />
 
                     <TextView
@@ -149,7 +149,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Comic author"
-                        android:textColor="#29212F"
+                        android:textColor="@color/dm_fg_29212f"
                         android:textSize="15sp" />
 
                     <TextView
@@ -158,7 +158,7 @@
                         android:layout_marginTop="16dp"
                         android:fontFamily="@font/jersey25_regular"
                         android:text="@string/comic_status_label"
-                        android:textColor="#49316B"
+                        android:textColor="@color/dm_fg_49316b"
                         android:textSize="20sp" />
 
                     <TextView
@@ -170,7 +170,7 @@
                         android:paddingHorizontal="10dp"
                         android:paddingVertical="6dp"
                         android:text="@string/comic_status_ongoing"
-                        android:textColor="#49316B"
+                        android:textColor="@color/dm_fg_49316b"
                         android:textSize="12sp" />
 
                 </LinearLayout>
@@ -181,7 +181,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/dm_bg_ffffff"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="3dp"
                 app:contentPadding="16dp">
@@ -196,7 +196,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/jersey25_regular"
                         android:text="@string/comic_genres_label"
-                        android:textColor="#49316B"
+                        android:textColor="@color/dm_fg_49316b"
                         android:textSize="22sp" />
 
                     <!-- Thay bằng các genre thực tế từ Comic -->
@@ -221,7 +221,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:id="@+id/cardRatings"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/dm_bg_ffffff"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="3dp"
                 app:contentPadding="16dp">
@@ -236,7 +236,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/jersey25_regular"
                         android:text="@string/comic_ratings_label"
-                        android:textColor="#49316B"
+                        android:textColor="@color/dm_fg_49316b"
                         android:textSize="22sp" />
 
                     <LinearLayout
@@ -260,7 +260,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:text="@string/comic_not_rated"
-                            android:textColor="#49316B"
+                            android:textColor="@color/dm_fg_49316b"
                             android:textSize="17sp"
                             android:textStyle="bold" />
 
@@ -291,7 +291,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="@string/comic_community_rating"
-                        android:textColor="#82778D"
+                        android:textColor="@color/dm_fg_82778d"
                         android:textSize="13sp" />
 
                 </LinearLayout>
@@ -302,7 +302,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/dm_bg_ffffff"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="3dp"
                 app:contentPadding="16dp">
@@ -317,7 +317,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/jersey25_regular"
                         android:text="@string/comic_description_label"
-                        android:textColor="#49316B"
+                        android:textColor="@color/dm_fg_49316b"
                         android:textSize="22sp" />
 
                     <TextView
@@ -327,7 +327,7 @@
                         android:layout_marginTop="12dp"
                         android:lineSpacingExtra="4dp"
                         android:text="Comic description goes here..."
-                        android:textColor="#403747"
+                        android:textColor="@color/dm_fg_403747"
                         android:textSize="15sp" />
 
                 </LinearLayout>
@@ -338,7 +338,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/dm_bg_ffffff"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="3dp"
                 app:contentPadding="16dp">
@@ -353,7 +353,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/jersey25_regular"
                         android:text="@string/comic_more_info"
-                        android:textColor="#49316B"
+                        android:textColor="@color/dm_fg_49316b"
                         android:textSize="22sp" />
 
                     <TextView
@@ -362,7 +362,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:text="@string/comic_content_rating_empty"
-                        android:textColor="#403747"
+                        android:textColor="@color/dm_fg_403747"
                         android:textSize="15sp" />
 
                     <TextView
@@ -371,7 +371,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:text="@string/comic_original_language_empty"
-                        android:textColor="#403747"
+                        android:textColor="@color/dm_fg_403747"
                         android:textSize="15sp" />
 
                     <TextView
@@ -380,7 +380,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:text="@string/comic_release_year_empty"
-                        android:textColor="#403747"
+                        android:textColor="@color/dm_fg_403747"
                         android:textSize="15sp" />
 
                     <TextView
@@ -389,7 +389,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:text="@string/comic_last_volume_empty"
-                        android:textColor="#403747"
+                        android:textColor="@color/dm_fg_403747"
                         android:textSize="15sp" />
 
                     <TextView
@@ -398,7 +398,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:text="@string/comic_last_chapter_empty"
-                        android:textColor="#403747"
+                        android:textColor="@color/dm_fg_403747"
                         android:textSize="15sp" />
 
                 </LinearLayout>

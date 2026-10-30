@@ -30,6 +30,8 @@
                 app:headerLayout="@layout/nav_header"
                 app:menu="@menu/menu_navigation"
                 app:itemVerticalPadding="12dp"
+                app:itemTextColor="@color/nav_item_text"
+                app:itemIconTint="@color/nav_item_text"
                 app:itemTextAppearance="@style/NavDrawerText" />
 
             <com.google.android.material.button.MaterialButton

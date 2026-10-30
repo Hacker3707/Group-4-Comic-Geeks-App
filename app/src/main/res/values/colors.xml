@@ -14,4 +14,6 @@
     <color name="squidity_btnfollow">#7A6CFA</color>
     <color name="nav_drawer_text">#FFFFFF</color>
 
+    <!-- Chữ và icon trong thanh menu bên (bản tối ở values-night) -->
+    <color name="nav_item_text">#3B2466</color>
 </resources>

@@ -35,7 +35,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
 
-            app:strokeColor="#FFFFFF"
+            app:strokeColor="@color/dm_stroke_ffffff"
             app:strokeWidth="2dp" />
 
         <TextView

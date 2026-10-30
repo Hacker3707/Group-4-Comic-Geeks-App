@@ -452,7 +452,7 @@
     <string name="chat_block_msg">Bạn sẽ không nhận tin nhắn và thông báo từ người này, và cuộc trò chuyện sẽ bị xóa.</string>
     <string name="chat_blocked">Đã chặn người dùng</string>
     <string name="chat_unblocked">Đã bỏ chặn người dùng</string>
-    <string name="settings_reset_sent">Đã gửi liên kết đặt lại mật khẩu tới %1$s</string>
+    <string name="settings_reset_sent">Đã gửi email đặt lại mật khẩu tới %1$s. Nếu không thấy, hãy kiểm tra thư mục Spam (Thư rác).</string>
     <string name="settings_reset_failed">Không gửi được email đặt lại: %1$s</string>
     <string name="settings_cache_cleared">Đã xóa bộ nhớ đệm</string>
     <string name="settings_blocked_empty">Bạn chưa chặn ai.</string>
@@ -479,4 +479,11 @@
     <string name="back_to_profile">Trở về trang cá nhân</string>
     <string name="back_to_home">Về trang chủ</string>
     <string name="review_filter_oldest">Cũ nhất</string>
+    <string name="chat_status_sending">Đang gửi…</string>
+    <string name="chat_status_failed">Chưa gửi được, giữ lâu để gửi lại</string>
+    <string name="chat_resend">Gửi lại</string>
+    <string name="chat_offline_banner">Mất kết nối mạng. Tin nhắn sẽ tự gửi khi có mạng lại.</string>
+    <string name="settings_reset_confirm">Chúng tôi sẽ gửi liên kết đặt lại mật khẩu tới:\n%1$s</string>
+    <string name="settings_reset_send">Gửi</string>
+    <string name="settings_reset_google">Bạn đăng nhập bằng Google (%1$s) nên tài khoản không có mật khẩu riêng trong Squidity. Hãy đổi mật khẩu trong tài khoản Google.</string>
 </resources>

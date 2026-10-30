@@ -25,7 +25,7 @@
             android:contentDescription="User avatar"
             android:scaleType="centerCrop"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
-            app:strokeColor="#FFFFFF"
+            app:strokeColor="@color/dm_stroke_ffffff"
             app:strokeWidth="3dp" />
 
         <TextView

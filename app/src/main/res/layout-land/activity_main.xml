@@ -23,6 +23,8 @@
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
                     app:headerLayout="@layout/nav_header"
+                    app:itemTextColor="@color/nav_item_text"
+                    app:itemIconTint="@color/nav_item_text"
                     app:itemTextAppearance="@style/NavDrawerText"
                     app:itemVerticalPadding="13dp"
                     app:menu="@menu/menu_navigation" />

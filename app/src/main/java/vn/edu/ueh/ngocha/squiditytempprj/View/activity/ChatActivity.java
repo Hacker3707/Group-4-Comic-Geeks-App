@@ -1,5 +1,8 @@
 package vn.edu.ueh.ngocha.squiditytempprj.View.activity;
 
+import android.net.NetworkCapabilities;
+import android.net.Network;
+import android.net.ConnectivityManager;
 import vn.edu.ueh.ngocha.squiditytempprj.Model.repository.BlockList;
 import vn.edu.ueh.ngocha.squiditytempprj.View.util.Str;
 import android.net.Uri;
@@ -133,6 +136,7 @@ public class ChatActivity extends AppCompatActivity {
                 showDeleteMessageDialog(message, sentByMe);
             }
         });
+        watchNetwork();
         findViewById(R.id.btnChatMenu).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -182,6 +186,52 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    // Báo mất mạng ngay trong khung chat
+    private ConnectivityManager.NetworkCallback networkCallback;
+
+    private void watchNetwork() {
+        final TextView banner = findViewById(R.id.tvChatOffline);
+        final ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        if (banner == null || cm == null) {
+            return;
+        }
+        banner.setVisibility(isOnline(cm) ? View.GONE : View.VISIBLE);
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(@NonNull Network network) {
+                runOnUiThread(() -> banner.setVisibility(View.GONE));
+            }
+
+            @Override
+            public void onLost(@NonNull Network network) {
+                runOnUiThread(() -> banner.setVisibility(View.VISIBLE));
+            }
+        };
+        cm.registerDefaultNetworkCallback(networkCallback);
+    }
+
+    private boolean isOnline(ConnectivityManager cm) {
+        Network network = cm.getActiveNetwork();
+        if (network == null) {
+            return false;
+        }
+        NetworkCapabilities caps = cm.getNetworkCapabilities(network);
+        return caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        if (cm != null && networkCallback != null) {
+            try {
+                cm.unregisterNetworkCallback(networkCallback);
+            } catch (IllegalArgumentException ignored) {
+                // đã gỡ rồi
+            }
+        }
+    }
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -192,15 +242,26 @@ public class ChatActivity extends AppCompatActivity {
 
     // Giữ lâu một tin nhắn: xóa ở phía mình, hoặc xóa với mọi người nếu là tin của mình
     private void showDeleteMessageDialog(final Message message, boolean sentByMe) {
-        final String[] options = sentByMe
-                ? new String[]{Str.t(R.string.chat_msg_delete_for_me), Str.t(R.string.chat_msg_delete_everyone)}
-                : new String[]{Str.t(R.string.chat_msg_delete_for_me)};
+        final boolean canResend = sentByMe && message.getStatus() == Message.STATUS_FAILED;
+        final String[] options;
+        if (canResend) {
+            options = new String[]{Str.t(R.string.chat_resend), Str.t(R.string.chat_msg_delete_for_me), Str.t(R.string.chat_msg_delete_everyone)};
+        } else if (sentByMe) {
+            options = new String[]{Str.t(R.string.chat_msg_delete_for_me), Str.t(R.string.chat_msg_delete_everyone)};
+        } else {
+            options = new String[]{Str.t(R.string.chat_msg_delete_for_me)};
+        }
         new AlertDialog.Builder(this)
                 .setTitle(Str.t(R.string.chat_msg_delete_title))
                 .setItems(options, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (which == 0) {
+                        int choice = canResend ? which - 1 : which;
+                        if (choice < 0) {
+                            chatViewModel.resendMessage(message, otherUserId);
+                            return;
+                        }
+                        if (choice == 0) {
                             chatViewModel.deleteMessageForMe(message);
                         } else {
                             chatViewModel.deleteMessageForEveryone(message);

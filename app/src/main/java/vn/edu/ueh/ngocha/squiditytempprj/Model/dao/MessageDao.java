@@ -26,6 +26,9 @@ public interface MessageDao {
     @Query("UPDATE messages SET is_read = 1 WHERE message_id = :messageId")
     void markAsRead(String messageId);
 
+    @Query("UPDATE messages SET status = :status WHERE message_id = :messageId")
+    void updateStatus(String messageId, int status);
+
     @Query("DELETE FROM messages WHERE message_id = :messageId")
     void deleteById(String messageId);
 
