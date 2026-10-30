@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.android.material.chip.Chip;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -246,6 +247,8 @@ public class MangaDexRepository {
         loading.setValue(true);
 
         List<String> includes = new ArrayList<>();
+        List<String> contentRatings =
+                Collections.singletonList("safe");
         includes.add("cover_art");
 
         if (hasAuthor) {
@@ -256,7 +259,9 @@ public class MangaDexRepository {
                 currentQuery,
                 PAGE_SIZE,
                 currentOffset,
-                includes
+                includes,
+                contentRatings
+
         ).enqueue(new Callback<MangaResponse>() {
             @Override
             public void onResponse(
@@ -329,7 +334,8 @@ public class MangaDexRepository {
             String query,
             int limit,
             int offset,
-            List<String> includes
+            List<String> includes,
+            List<String> contentRatings
     ) {
         final int requestVersion = ++searchRequestVersion;
 
@@ -350,7 +356,8 @@ public class MangaDexRepository {
                 requestedQuery,
                 limit,
                 offset,
-                includes
+                includes,
+                contentRatings
         );
 
         currentSearchCall = call;

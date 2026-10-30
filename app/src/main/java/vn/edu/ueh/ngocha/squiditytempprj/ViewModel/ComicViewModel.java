@@ -140,9 +140,10 @@ public class ComicViewModel extends AndroidViewModel {
             String query,
             int limit,
             int offset,
-            List<String> includes
+            List<String> includes,
+            List<String> contentRatings
     ) {
-        mangaRepository.searchManga(query, limit, offset, includes);
+        mangaRepository.searchManga(query, limit, offset, includes, contentRatings);
     }
 
     public LiveData<List<MangaData>> getComicbyIdList(List<String> comicIds) {

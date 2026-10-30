@@ -31,6 +31,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -376,8 +377,10 @@ public class CreatePostActivity extends AppCompatActivity {
     ) {
         List<String> includes = new ArrayList<>();
         includes.add("cover_art");
+        List<String> contentRatings =
+                Collections.singletonList("safe");
         if (query == null || query.trim().isEmpty()) {
-            comicViewModel.searchManga("", 5, 0, includes);
+            comicViewModel.searchManga("", 5, 0, includes, contentRatings);
             return;
         }
 
@@ -385,7 +388,8 @@ public class CreatePostActivity extends AppCompatActivity {
                 query.trim(),
                 5,
                 0,
-                includes
+                includes,
+                contentRatings
         );
     }
 
