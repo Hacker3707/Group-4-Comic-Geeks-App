@@ -192,6 +192,11 @@ public class ComicReviewActivity extends BaseActivity {
     }
 
     @Override
+    protected boolean shouldShowBackHomeButton() {
+        return false;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
