@@ -196,7 +196,6 @@ public abstract class BaseActivity extends AppCompatActivity {
             txtLogo.setOnClickListener(onLogoClickListener);
         }
 
-
         if (imgMainAvatar != null)
             imgMainAvatar.setOnClickListener(onProfileClickListener);
 

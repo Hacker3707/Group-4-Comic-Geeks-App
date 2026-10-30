@@ -32,8 +32,8 @@ public class ReviewViewModel extends AndroidViewModel {
     public final LiveData<Float> averageRating;
     public final MediatorLiveData<Boolean> isSameUser;
 
-    private final MutableLiveData<List<Review>> reviews =
-            new MutableLiveData<>();
+    private final MediatorLiveData<List<Review>> reviews =
+            new MediatorLiveData<>();
 
     private LiveData<List<Review>> currentReviews;
 
@@ -143,8 +143,9 @@ public class ReviewViewModel extends AndroidViewModel {
         userRepository.insert(user);
     }
 
-    public void insert(Review review) {
-        reviewRepository.insert(review);
+    public void insert(Review review,
+                       ReviewRepository.ReviewCallback callback) {
+        reviewRepository.insert(review, callback);
     }
 
     public LiveData<List<Review>> getAllReviewsforUserId(String userId) {
@@ -152,6 +153,10 @@ public class ReviewViewModel extends AndroidViewModel {
     }
 
     public void loadReviews(String comicId, String filter) {
+
+        if (comicId == null || filter == null) {
+            return;
+        }
 
         if (comicId.equals(currentComicId)
                 && filter.equals(currentFilter)) {
@@ -162,7 +167,7 @@ public class ReviewViewModel extends AndroidViewModel {
         currentFilter = filter;
 
         if (currentReviews != null) {
-            currentReviews.removeObserver(reviewObserver);
+            reviews.removeSource(currentReviews);
         }
 
         currentReviews =
@@ -170,28 +175,19 @@ public class ReviewViewModel extends AndroidViewModel {
                         comicId, filter
                 );
 
-        currentReviews.observeForever(reviewObserver);
+        reviews.addSource(currentReviews, observerReviews);
     }
 
-    private final Observer<List<Review>> reviewObserver =
-            new Observer<List<Review>>() {
-                @Override
-                public void onChanged(List<Review> reviewList) {
-                    reviews.setValue(reviewList);
-                }
-            };
+    public Observer<List<Review>> observerReviews = new Observer<List<Review>>() {
+        @Override
+        public void onChanged(List<Review> reviewList) {
+            reviews.setValue(reviewList);
+        }
+    };
+
 
     public LiveData<List<Review>> getReview() {
         return reviews;
-    }
-
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-
-        if (currentReviews != null) {
-            currentReviews.removeObserver(reviewObserver);
-        }
     }
 
 }

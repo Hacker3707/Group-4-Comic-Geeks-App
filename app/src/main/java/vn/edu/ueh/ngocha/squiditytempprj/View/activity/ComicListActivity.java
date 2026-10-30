@@ -508,6 +508,18 @@ public class ComicListActivity extends BaseActivity {
             }
         });
 
+        comicViewModel.getMangaByGenreResults()
+                .observe(this, genreMangaObserver);
+
+        comicViewModel.getLoading().observe(this, loadingObserver);
+
+        searchViewModel.getcomicHistory()
+                .observe(this, historyObserver);
+
+        // Load truyện theo Genre khi mở Activity từ Profile
+        if (isGenreMode && selectedGenreId != null) {
+            comicViewModel.selectGenre(selectedGenreId);
+        }
     }
 
     @Override
